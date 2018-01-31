@@ -1,0 +1,140 @@
+body{
+	height: 100%;
+	overflow: hidden;
+	margin: 0;
+	display: flex;
+	flex-direction: row;
+}
+
+.map {
+	height: calc(100vh - 19px);
+	border: 10px solid gray;
+	flex: 4;
+	overflow: hidden;
+	background-color: black;
+}
+
+.hex-row {
+	height: 132px;
+	overflow: visible;
+	white-space: nowrap;
+	margin-left: -100px;
+}
+
+.hex-row:nth-child(even) {
+	padding-left: 78.5px;
+}
+
+.hex {
+  position: relative;
+  display: inline-block;
+  width: 150px; 
+  height: 86.60px;
+  background-color: #111111;
+  margin: 43.30px 0;
+  border-left: solid 2px;
+  border-right: solid 2px;
+}
+
+.hex:before,
+.hex:after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  width: 106.07px;
+  height: 106.07px;
+  -webkit-transform: scaleY(0.5774) rotate(-45deg);
+  -ms-transform: scaleY(0.5774) rotate(-45deg);
+  transform: scaleY(0.5774) rotate(-45deg);
+  background-color: inherit;
+  left: 19.9670px;
+}
+
+.hex:before {
+  top: -53.0330px;
+  border-top: solid 2.8284px;
+  border-right: solid 2.8284px;
+}
+
+.hex:after {
+  bottom: -53.0330px;
+  border-bottom: solid 2.8284px;
+  border-left: solid 2.8284px;
+}
+
+.hex:before,
+.hex:after,
+.hex {
+	border-color: #AAAAAA;
+}
+
+.hex.red:before,
+.hex.red:after,
+.hex.red {
+	border-color: #FF0000;
+}
+
+.hex.blue:before,
+.hex.blue:after,
+.hex.blue {
+	border-color: #0000FF;
+}
+
+.sidebar {
+	height: 100vh;
+	flex: 1;
+}
+
+.accordion-bar {
+	height: 22px;
+	width: 100%;
+	background: linear-gradient(-85deg, #888888, #777777);
+	font-family: Impact, Charcoal, sans-serif;
+	text-align: center;
+	border: 2px solid #666666;
+	cursor: pointer;
+}
+
+.accordion {
+	overflow: hidden;
+	transition: max-height 0.25s;
+}
+
+#ship-info {
+	display: flex;
+	flex-direction: row;
+	flex: 2;
+}
+
+.ship-list {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+}
+
+.friendly {
+	background-color: blue;
+}
+
+.enemy {
+	background-color: red;
+}
+
+.ship-detail {
+	width: 100%;
+	border: 1px solid gray;
+	height: 30px;
+}
+
+.image {
+	width: 20px;
+	height: 20px;
+	background-color: white;
+	border: 1px solid black;
+	position: relative;
+	margin: 4px 5px;
+}
+
+.fleet-info {
+	flex: 5;
+}

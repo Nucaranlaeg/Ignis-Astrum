@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Ignis Astrum</title>
+		<script src="sidebar.js"></script>
+	</head>
+	<body>
+		<link rel="stylesheet" type="text/css" href="map.css">
+		<div class="map">
+			<div class="hex-row">
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex blue"></div>
+				<div class="hex"></div>
+				<div class="hex red">
+				</div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+			</div>
+			<div class="hex-row">
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex red"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+			</div>
+			<div class="hex-row">
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+			</div>
+			<div class="hex-row">
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+			</div>
+			<div class="hex-row">
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+			</div>
+			<div class="hex-row">
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+			</div>
+			<div class="hex-row">
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+				<div class="hex"></div>
+			</div>
+		</div>
+		<div class="sidebar">
+			<div class="accordion-bar" onclick="toggle('ship-info')">
+				SHIPS BUILT
+			</div>
+			<div id="ship-info" class="accordion">
+				<div class="friendly ship-list">
+					<span class="ship-detail">
+						<div class="image"></div>
+					</span>
+					<span class="ship-detail">
+						<div class="image"></div>
+					</span>
+					<span class="ship-detail">
+						<div class="image"></div>
+					</span>
+					<span class="ship-detail">
+						<div class="image"></div>
+					</span>
+					<span class="ship-detail">
+						<div class="image"></div>
+					</span>
+					<span class="ship-detail">
+						<div class="image"></div>
+					</span>
+				</div>
+				<div class="enemy ship-list">
+					<span class="ship-detail">
+						<div class="image"></div>
+					</span>
+					<span class="ship-detail">
+						<div class="image"></div>
+					</span>
+					<span class="ship-detail">
+						<div class="image"></div>
+					</span>
+					<span class="ship-detail">
+						<div class="image"></div>
+					</span>
+					<span class="ship-detail">
+						<div class="image"></div>
+					</span>
+					<span class="ship-detail">
+						<div class="image"></div>
+					</span>
+				</div>
+			</div>
+			<div class="accordion-bar" onclick="toggle('ship-list')">
+				SHIPS AVAILABLE
+			</div>
+			<div id="ships-available" class="accordion">
+			</div>
+			<div class="accordion-bar" onclick="toggle('target-priority')">
+				TARGET PRIORITIES
+			</div>
+			<div class="accordion-bar" onclick="toggle('battle-results')">
+				BATTLE RESULTS
+			</div>
+		</div>
+	</body>
+</html>
