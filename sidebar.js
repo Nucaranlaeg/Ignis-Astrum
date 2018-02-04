@@ -1,7 +1,7 @@
 function toggle(section) {
 	var target = document.getElementById(section);
 	if (!target.style.height) {
-		throw ("Initialization error for " + section);
+		throw ("Initialization error " + section);
 	}
 	target.style.maxHeight = target.style.maxHeight == '0px' ? target.style.height : '0px';
 }
