@@ -3,17 +3,28 @@
 	<head>
 		<title>Ignis Astrum</title>
 		<script src="sidebar.js"></script>
+		<script src="map.js"></script>
 	</head>
 	<body>
 		<link rel="stylesheet" type="text/css" href="map.css">
-		<div class="map">
+		<div class="hex-row" id="row-template">
+			<div class="hex"></div>
+			<div class="hex"></div>
+			<div class="hex"></div>
+			<div class="hex"></div>
+			<div class="hex"></div>
+			<div class="hex"></div>
+			<div class="hex"></div>
+			<div class="hex"></div>
+			<div class="hex"></div>
+		</div>
+		<div id="map" onmousedown="beginDrag(event)">
 			<div class="hex-row">
 				<div class="hex"></div>
 				<div class="hex"></div>
 				<div class="hex blue"></div>
 				<div class="hex"></div>
-				<div class="hex red">
-				</div>
+				<div class="hex red"></div>
 				<div class="hex"></div>
 				<div class="hex"></div>
 				<div class="hex"></div>

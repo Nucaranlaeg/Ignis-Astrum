@@ -6,7 +6,7 @@ body{
 	flex-direction: row;
 }
 
-.map {
+#map {
 	height: calc(100vh - 19px);
 	border: 10px solid gray;
 	flex: 4;
@@ -14,15 +14,27 @@ body{
 	background-color: black;
 }
 
+#map * {
+	-webkit-touch-callout: none; /* iOS Safari */
+	-webkit-user-select: none; /* Safari */
+	-khtml-user-select: none; /* Konqueror HTML */
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* Internet Explorer/Edge */
+	user-select: none;
+}
+
 .hex-row {
 	height: 132px;
 	overflow: visible;
 	white-space: nowrap;
-	margin-left: -100px;
 }
 
 .hex-row:nth-child(even) {
 	padding-left: 78.5px;
+}
+
+#row-template {
+	display: none;
 }
 
 .hex {
@@ -98,6 +110,7 @@ body{
 .accordion {
 	overflow: hidden;
 	transition: max-height 0.25s;
+	max-height: 0px;
 }
 
 #ship-info {
