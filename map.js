@@ -4,10 +4,8 @@ var map = null,
 	row = null;
 var dragging = false;
 var initialCoords = {};
-var homeCoords = {
-	x: HEX_WIDTH,
-	y: HEX_HEIGHT
-};
+// DOM elements we don't want to keep searching for.
+var map, row, hex, friendlyCapital;
 
 function initializeMap() {
 	map = document.getElementById("map"),
@@ -15,17 +13,18 @@ function initializeMap() {
 	hex = document.getElementById("hex-template");
 	row.removeAttribute("id");
 	hex.removeAttribute("id");
-	for (var i = 0; i < 10; i++){
+	for (let i = 0; i < 10; i++){
 		map.append(row.cloneNode(true));
 	}
 	[...document.getElementsByClassName("hex-row")].forEach((hexRow, index) => {
-		for (var i = 0; i < 10; i++) {
+		for (let i = 0; i < 12; i++) {
 			if (index === 5) {
 				let newHex = hex.cloneNode(true);
-				if (i === 3) {
+				if (i === 5) {
 					newHex.id = "friendly-capital";
 					newHex.classList.add("blue");
-				} else if (i === 7) {
+					friendlyCapital = newHex;
+				} else if (i === 9) {
 					newHex.id = "enemy-capital";
 					newHex.classList.add("red");
 				}
@@ -35,13 +34,13 @@ function initializeMap() {
 			hexRow.append(hex.cloneNode(true));
 		}
 	});
-	map.scrollTop = HEX_HEIGHT;
-	map.scrollLeft = HEX_WIDTH;
+	recentre();
 }
 
 document.addEventListener("DOMContentLoaded", initializeMap, {once: true});
 
 function beginDrag(event) {
+	if (event.which !== 1) return;
 	window.addEventListener("mouseup", endDrag, {capture: true, once: true});
 	map.addEventListener("mousemove", continueDrag);
 	initialCoords = {
@@ -83,7 +82,6 @@ function addHexToRowStart() {
 		row.prepend(hex.cloneNode(true));
 	});
 	map.scrollLeft += HEX_WIDTH;
-	homeCoords.x += HEX_WIDTH;
 	if (dragging) initialCoords.mapX += HEX_WIDTH;
 }
 
@@ -94,19 +92,16 @@ function addHexToRowEnd() {
 }
 
 function addRowToTop() {
-	var newRow = row.cloneNode(true);
-	map.prepend(newRow, newRow.cloneNode(true));
+	map.prepend(row.cloneNode(true), row.cloneNode(true));
 	map.scrollTop += HEX_HEIGHT;
-	homeCoords.y += HEX_HEIGHT;
 	if (dragging) initialCoords.mapY += HEX_HEIGHT;
 }
 
 function addRowToBottom() {
-	var newRow = row.cloneNode(true);
-	map.append(newRow, newRow.cloneNode(true));
+	map.append(row.cloneNode(true), row.cloneNode(true));
 }
 
 function recentre() {
-	map.scrollTop = homeCoords.y;
-	map.scrollLeft = homeCoords.x;
+	map.scrollTop = friendlyCapital.offsetTop + (friendlyCapital.clientHeight / 2) - (map.clientHeight / 2);
+	map.scrollLeft = friendlyCapital.offsetLeft + (friendlyCapital.clientWidth / 2) - (map.clientWidth / 2);
 }

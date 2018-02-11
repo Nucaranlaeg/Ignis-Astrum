@@ -6,12 +6,16 @@ body{
 	flex-direction: row;
 }
 
+* {
+	box-sizing: border-box;
+}
+
 #templates {
 	display: none;
 }
 
 #map {
-	height: calc(100vh - 19px);
+	height: 100vh;
 	border: 10px solid gray;
 	flex: 4;
 	overflow: hidden;
@@ -65,13 +69,36 @@ body{
 	color: #0000FF;
 }
 
+#context-menu {
+	display: none;
+	position:absolute;
+	z-index: 100;
+	padding: 2px;
+	background-color: #AAAAAA;
+	border: 2px ridge #999999;
+}
+
+#context-menu > * {
+	display: none;
+}
+
+#context-menu.active,
+#context-menu .active {
+	display: block;
+}
+
+.context-menu-label {
+	font-weight: bold;
+	text-align: center;
+}
+
 .sidebar {
 	height: 100vh;
 	flex: 1;
 }
 
 .accordion-bar {
-	height: 22px;
+	height: 25px;
 	width: 100%;
 	background: linear-gradient(-85deg, #888888, #777777);
 	font-family: Impact, Charcoal, sans-serif;
