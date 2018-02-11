@@ -6,12 +6,16 @@ body{
 	flex-direction: row;
 }
 
+#templates {
+	display: none;
+}
+
 #map {
 	height: calc(100vh - 19px);
 	border: 10px solid gray;
 	flex: 4;
 	overflow: hidden;
-	background-color: black;
+	background-color: white;
 }
 
 #map * {
@@ -33,72 +37,32 @@ body{
 }
 
 .hex-row {
-	height: 132px;
+	height: 120px;
 	overflow: visible;
 	white-space: nowrap;
 }
 
 .hex-row:nth-child(even) {
-	padding-left: 78.5px;
-}
-
-#templates {
-	display: none;
+	padding-left: 66px;
 }
 
 .hex {
   position: relative;
   display: inline-block;
-  width: 150px; 
-  height: 86.60px;
-  background-color: #111111;
-  margin: 43.30px 0;
-  border-left: solid 2px;
-  border-right: solid 2px;
+  width: 131px;
+  font-size: 208px;
 }
 
-.hex:before,
-.hex:after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  width: 106.07px;
-  height: 106.07px;
-  -webkit-transform: scaleY(0.5774) rotate(-45deg);
-  -ms-transform: scaleY(0.5774) rotate(-45deg);
-  transform: scaleY(0.5774) rotate(-45deg);
-  background-color: inherit;
-  left: 19.9670px;
-}
-
-.hex:before {
-  top: -53.0330px;
-  border-top: solid 2.8284px;
-  border-right: solid 2.8284px;
-}
-
-.hex:after {
-  bottom: -53.0330px;
-  border-bottom: solid 2.8284px;
-  border-left: solid 2.8284px;
-}
-
-.hex:before,
-.hex:after,
 .hex {
-	border-color: #AAAAAA;
+	color: #000000;
 }
 
-.hex.red:before,
-.hex.red:after,
 .hex.red {
-	border-color: #FF0000;
+	color: #FF0000;
 }
 
-.hex.blue:before,
-.hex.blue:after,
 .hex.blue {
-	border-color: #0000FF;
+	color: #0000FF;
 }
 
 .sidebar {
