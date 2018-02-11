@@ -11,7 +11,7 @@ function initializeSidebar() {
 document.addEventListener("DOMContentLoaded", initializeSidebar, {once: true});
 
 function toggle(section) {
-	var target = document.getElementById(section);
+	let target = document.getElementById(section);
 	if (target.style.maxHeight === "0px" || !target.style.maxHeight) {
 		target.style.maxHeight = target.scrollHeight + "px";
 	} else {
@@ -19,14 +19,21 @@ function toggle(section) {
 	}
 }
 
-function addShip(ship, allied){
+function addShip(ship, allied) {
 	section = allied ? document.getElementById("friendly-ships-seen") : document.getElementById("enemy-ships-seen");
 	newShip = detail.cloneNode(true);
 	newShip.getElementsByClassName("power")[0].innerHTML = ship.power;
 	newShip.getElementsByClassName("current-hull")[0].innerHTML = ship.currentHull;
 	newShip.getElementsByClassName("max-hull")[0].innerHTML = ship.maxHull;
-	for (var i in ship.abilities) {
+	for (let i in ship.abilities) {
 		newShip.getElementsByClassName("ability-bar")[0].append(abilities[i]);
 	}
 	section.append(newShip);
+}
+
+function readPriority(inputId) {
+	let value = document.getElementById(inputId).value;
+	// Scale value from 0.5 to 2
+	value = Math.pow(2, value / 50 - 1);
+	console.log(value);
 }

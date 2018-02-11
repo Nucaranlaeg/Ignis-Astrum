@@ -3,6 +3,7 @@
 	<head>
 		<title>Ignis Astrum</title>
 		<script src="sidebar.js"></script>
+		<script src="context-menu.js"></script>
 		<script src="map.js"></script>
 	</head>
 	<body>
@@ -37,5 +38,11 @@
 			<div id="selected-unit" class="accordion">
 			</div>
 		</div>
+		<nav id="context-menu" onclick="preventClose(event)">
+			<div id="context-target-priority">
+				<div class="context-menu-label">Target Priority:</div>
+				0.5<input type="range" id="context-priority-slider" onmouseup="readPriority('context-priority-slider')"/>2
+			</div>
+		</nav>
 	</body>
 </html>
