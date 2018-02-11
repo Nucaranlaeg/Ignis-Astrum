@@ -7,152 +7,34 @@
 	</head>
 	<body>
 		<link rel="stylesheet" type="text/css" href="map.css">
-		<div class="hex-row" id="row-template">
-			<div class="hex"></div>
-			<div class="hex"></div>
-			<div class="hex"></div>
-			<div class="hex"></div>
-			<div class="hex"></div>
-			<div class="hex"></div>
-			<div class="hex"></div>
-			<div class="hex"></div>
-			<div class="hex"></div>
+		<div id="templates">
+			<div class="hex-row" id="row-template"></div>
+			<span class="ship-detail" id="ship-detail-template">
+				<span class="image"></span>
+				<span class="ship-stats-bar">
+					<span class="power"></span>
+					<span class="current-hull"></span> /
+					<span class="max-hull"></span>
+				</span>
+				<span class="abilities-bar"></span>
+			</span>
+			<div class="hex" id="hex-template"></div>
 		</div>
-		<div id="map" onmousedown="beginDrag(event)">
-			<div class="hex-row">
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex blue"></div>
-				<div class="hex"></div>
-				<div class="hex red"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-			</div>
-			<div class="hex-row">
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex red"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-			</div>
-			<div class="hex-row">
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-			</div>
-			<div class="hex-row">
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-			</div>
-			<div class="hex-row">
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-			</div>
-			<div class="hex-row">
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-			</div>
-			<div class="hex-row">
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-				<div class="hex"></div>
-			</div>
-		</div>
+		<button id="home-button" onclick="recentre()"></button>
+		<div id="map" onmousedown="beginDrag(event)"></div>
 		<div class="sidebar">
-			<div class="accordion-bar" onclick="toggle('ship-info')">
-				SHIPS BUILT
-			</div>
+			<div class="accordion-bar" onclick="toggle('ship-info')">SHIPS BUILT</div>
 			<div id="ship-info" class="accordion">
-				<div class="friendly ship-list">
-					<span class="ship-detail">
-						<div class="image"></div>
-					</span>
-					<span class="ship-detail">
-						<div class="image"></div>
-					</span>
-					<span class="ship-detail">
-						<div class="image"></div>
-					</span>
-					<span class="ship-detail">
-						<div class="image"></div>
-					</span>
-					<span class="ship-detail">
-						<div class="image"></div>
-					</span>
-					<span class="ship-detail">
-						<div class="image"></div>
-					</span>
-				</div>
-				<div class="enemy ship-list">
-					<span class="ship-detail">
-						<div class="image"></div>
-					</span>
-					<span class="ship-detail">
-						<div class="image"></div>
-					</span>
-					<span class="ship-detail">
-						<div class="image"></div>
-					</span>
-					<span class="ship-detail">
-						<div class="image"></div>
-					</span>
-					<span class="ship-detail">
-						<div class="image"></div>
-					</span>
-					<span class="ship-detail">
-						<div class="image"></div>
-					</span>
-				</div>
+				<div class="friendly ship-list" id="friendly-ships-seen"></div>
+				<div class="enemy ship-list" id="enemy-ships-seen"></div>
 			</div>
-			<div class="accordion-bar" onclick="toggle('ships-available')">
-				SHIPS AVAILABLE
-			</div>
+			<div class="accordion-bar" onclick="toggle('ships-available')">SHIPS AVAILABLE</div>
 			<div id="ships-available" class="accordion">
 			</div>
-			<div class="accordion-bar" onclick="toggle('target-priority')">
-				TARGET PRIORITIES
-			</div>
-			<div class="accordion-bar" onclick="toggle('battle-results')">
-				BATTLE RESULTS
+			<div class="accordion-bar" onclick="toggle('target-priority')">TARGET PRIORITIES</div>
+			<div class="accordion-bar" onclick="toggle('battle-results')">BATTLE RESULTS</div>
+			<div class="accordion-bar" onclick="toggle('selected-unit')">SELECTED UNIT</div>
+			<div id="selected-unit" class="accordion">
 			</div>
 		</div>
 	</body>

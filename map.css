@@ -23,6 +23,15 @@ body{
 	user-select: none;
 }
 
+#home-button {
+	height: 40px;
+	width: 40px;
+	position: fixed;
+	top: 20px;
+	left: 20px;
+	z-index: 10;
+}
+
 .hex-row {
 	height: 132px;
 	overflow: visible;
@@ -33,7 +42,6 @@ body{
 	padding-left: 78.5px;
 }
 
-#row-template {
 	display: none;
 }
 
@@ -105,6 +113,7 @@ body{
 	text-align: center;
 	border: 2px outset #666666;
 	cursor: pointer;
+	white-space: nowrap;
 }
 
 .accordion {
@@ -137,9 +146,19 @@ body{
 	width: 100%;
 	border: 1px solid gray;
 	height: 30px;
+	position: relative;
+}
+
+.ship-stats-bar {
+	height: 50%;
+	top: 0;
+	position: absolute;
+	font-weight: bold;
+	line-height: 15px;
 }
 
 .image {
+	display: inline-block;
 	width: 20px;
 	height: 20px;
 	background-color: white;

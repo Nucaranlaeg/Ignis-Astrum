@@ -1,18 +1,46 @@
-var map = null;
-var row = null;
+const HEX_WIDTH = 150,
+	HEX_HEIGHT = 264;
+var map = null,
+	row = null;
 var dragging = false;
 var initialCoords = {};
-const hex = "<div class='hex'></div>",
-	HEX_WIDTH = 150,
-	HEX_HEIGHT = 264;
+var homeCoords = {
+	x: HEX_WIDTH,
+	y: HEX_HEIGHT
+};
 
-function initialize() {
-	map = document.getElementById("map");
-	row = document.getElementById("row-template");
-	addRowToTop();
+function initializeMap() {
+	map = document.getElementById("map"),
+	row = document.getElementById("row-template"),
+	hex = document.getElementById("hex-template");
+	row.removeAttribute("id");
+	hex.removeAttribute("id");
+	for (var i = 0; i < 10; i++){
+		map.append(row.cloneNode(true));
+	}
+	map.scrollTop = HEX_HEIGHT;
+	map.scrollLeft = HEX_WIDTH;
+	[...document.getElementsByClassName("hex-row")].forEach((hexRow, index) => {
+		for (var i = 0; i < 10; i++) {
+			if (index === 5) {
+				let newHex = hex.cloneNode(true);
+				if (i === 3) {
+					newHex.id = "friendly-capital";
+					newHex.classList.add("blue");
+				} else if (i === 7) {
+					newHex.id = "enemy-capital";
+					newHex.classList.add("red");
+				}
+				hexRow.append(newHex);
+				continue;
+			}
+			hexRow.append(hex.cloneNode(true));
+		}
+	});
+	
 }
 
-document.addEventListener("DOMContentLoaded", initialize);
+document.addEventListener("DOMContentLoaded", initializeMap, {once: true});
 
 function beginDrag(event) {
 	window.addEventListener("mouseup", endDrag, {capture: true, once: true});
@@ -53,28 +81,33 @@ function continueDrag(event) {
 
 function addHexToRowStart() {
 	[...document.getElementsByClassName("hex-row")].forEach(row => {
-		row.insertAdjacentHTML('afterbegin', hex);
+		row.prepend(hex.cloneNode(true));
 	});
 	map.scrollLeft += HEX_WIDTH;
+	homeCoords.x += HEX_WIDTH;
 	if (dragging) initialCoords.mapX += HEX_WIDTH;
 }
 
 function addHexToRowEnd() {
 	[...document.getElementsByClassName("hex-row")].forEach(row => {
-		row.insertAdjacentHTML('beforeend', hex);
+		row.append(hex.cloneNode(true));
 	});
 }
 
 function addRowToTop() {
 	var newRow = row.cloneNode(true);
-	newRow.id = null;
 	map.prepend(newRow, newRow.cloneNode(true));
 	map.scrollTop += HEX_HEIGHT;
+	homeCoords.y += HEX_HEIGHT;
 	if (dragging) initialCoords.mapY += HEX_HEIGHT;
 }
 
 function addRowToBottom() {
 	var newRow = row.cloneNode(true);
-	newRow.id = null;
 	map.append(newRow, newRow.cloneNode(true));
+}
+
+function recentre() {
+	map.scrollTop = homeCoords.y;
+	map.scrollLeft = homeCoords.x;
 }
