@@ -1,5 +1,5 @@
-const HEX_WIDTH = 150,
-	HEX_HEIGHT = 264;
+const HEX_WIDTH = 131,
+	HEX_HEIGHT = 240;
 var map = null,
 	row = null;
 var dragging = false;
@@ -18,8 +18,6 @@ function initializeMap() {
 	for (var i = 0; i < 10; i++){
 		map.append(row.cloneNode(true));
 	}
-	map.scrollTop = HEX_HEIGHT;
-	map.scrollLeft = HEX_WIDTH;
 	[...document.getElementsByClassName("hex-row")].forEach((hexRow, index) => {
 		for (var i = 0; i < 10; i++) {
 			if (index === 5) {
@@ -37,7 +35,8 @@ function initializeMap() {
 			hexRow.append(hex.cloneNode(true));
 		}
 	});
-	
+	map.scrollTop = HEX_HEIGHT;
+	map.scrollLeft = HEX_WIDTH;
 }
 
 document.addEventListener("DOMContentLoaded", initializeMap, {once: true});
