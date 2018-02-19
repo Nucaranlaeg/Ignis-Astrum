@@ -69,6 +69,15 @@ body{
 	color: #0000FF;
 }
 
+.base {
+	fill: #999999;
+	stroke: #999999;
+	position: absolute;
+	top: 129px;
+	left: 62.5px;
+	stroke-width: 2;
+}
+
 #context-menu {
 	display: none;
 	position:absolute;
@@ -80,6 +89,10 @@ body{
 
 #context-menu > * {
 	display: none;
+}
+
+#context-menu > *:not(:first-child) {
+	border-top: 1px solid #999999;
 }
 
 #context-menu.active,

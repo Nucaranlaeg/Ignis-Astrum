@@ -1,15 +1,17 @@
 var contextMenu;
 const menuItems = [];
 const contextMenuMask = {
-	ship: [true],
-	fleet: [false],
-	hex: [false],
-	all: [true]
+	ship: [true, true, true],
+	fleet: [false, true, true],
+	hex: [false, true, false],
+	all: [true, true, true]
 }
 
 function initializeContextMenu() {
 	contextMenu = document.getElementById("context-menu");
 	menuItems[0] = document.getElementById("context-target-priority");
+	menuItems[1] = document.getElementById("context-supply-grid");
+	menuItems[2] = document.getElementById("context-repair");
 }
 
 document.addEventListener("DOMContentLoaded", initializeContextMenu, {once: true});
@@ -20,6 +22,7 @@ window.oncontextmenu = function (event) {
 	contextMenu.style.top = event.clientY + "px";
 	contextMenu.style.left = event.clientX + "px";
 	menuItems.forEach((item, index) => {
+		if (!item) return;
 		if (target[index]) {
 			item.classList.add("active");
 		} else {
