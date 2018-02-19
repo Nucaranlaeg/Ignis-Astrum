@@ -1,16 +1,23 @@
 const HEX_WIDTH = 131,
 	HEX_HEIGHT = 240;
-var map = null,
-	row = null;
 var dragging = false;
 var initialCoords = {};
+// Lists of pairs of ids.  First is the map id, second is the database id.
+// An element is removed from this list if it is not displayed.
+var bases = [], ships = [], hexes = [];
+// Count of each element so we can always assign new IDs.
+var baseCount = 0, shipCount = 0, hexCount = 0;
 // DOM elements we don't want to keep searching for.
-var map, row, hex, friendlyCapital;
+var map, row, hex, friendlyCapital, enemyCapital, base = [];
 
 function initializeMap() {
-	map = document.getElementById("map"),
-	row = document.getElementById("row-template"),
+	map = document.getElementById("map");
+	row = document.getElementById("row-template");
 	hex = document.getElementById("hex-template");
+	for (let i = 0; i < 4; i++) {
+		base[i] = document.getElementById("base" + i + "-template");
+		base[i].removeAttribute("id");
+	}
 	row.removeAttribute("id");
 	hex.removeAttribute("id");
 	for (let i = 0; i < 10; i++){
@@ -20,13 +27,19 @@ function initializeMap() {
 		for (let i = 0; i < 12; i++) {
 			if (index === 5) {
 				let newHex = hex.cloneNode(true);
+				newHex.id = getNewHexId();
 				if (i === 5) {
-					newHex.id = "friendly-capital";
 					newHex.classList.add("blue");
 					friendlyCapital = newHex;
+					newBase = base[0].cloneNode(true);
+					newBase.id = getNewBaseId();
+					newHex.append(newBase);
 				} else if (i === 9) {
-					newHex.id = "enemy-capital";
 					newHex.classList.add("red");
+					enemyCapital = newHex;
+					newBase = base[0].cloneNode(true);
+					newBase.id = getNewBaseId();
+					newHex.append(newBase);
 				}
 				hexRow.append(newHex);
 				continue;
@@ -104,4 +117,16 @@ function addRowToBottom() {
 function recentre() {
 	map.scrollTop = friendlyCapital.offsetTop + (friendlyCapital.clientHeight / 2) - (map.clientHeight / 2);
 	map.scrollLeft = friendlyCapital.offsetLeft + (friendlyCapital.clientWidth / 2) - (map.clientWidth / 2);
+}
+
+function getNewBaseId() {
+	return "base" + baseCount++;
+}
+
+function getNewHexId() {
+	return "hex" + hexCount++;
+}
+
+function getNewShipId() {
+	return "ship" + shipCount++;
 }
