@@ -19,7 +19,7 @@ body{
 	border: 10px solid gray;
 	flex: 4;
 	overflow: hidden;
-	background-color: white;
+	background-color: #CCCCCC;
 }
 
 #map * {
