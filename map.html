@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta charset="UTF-8" http-equiv="Content-Type">
 <html>
 	<head>
 		<title>Ignis Astrum</title>
@@ -127,33 +127,37 @@
 				</g>
 			</svg>
 		</div>
-		<button id="home-button" onclick="recentre()"></button>
-		<div id="map" onmousedown="beginDrag(event)"></div>
+		<button id="home-button" onclick="Map.recentre()"></button>
+		<div id="map" onmousedown="Map.beginDrag(event)"></div>
 		<div class="sidebar">
-			<div class="accordion-bar" onclick="toggle('ship-info')">SHIPS BUILT</div>
+			<div class="accordion-bar" onclick="Sidebar.toggle('ship-info')">SHIPS BUILT</div>
 			<div id="ship-info" class="accordion">
 				<div class="friendly ship-list" id="friendly-ships-seen"></div>
 				<div class="enemy ship-list" id="enemy-ships-seen"></div>
 			</div>
-			<div class="accordion-bar" onclick="toggle('ships-available')">SHIPS AVAILABLE</div>
+			<div class="accordion-bar" onclick="Sidebar.toggle('ships-available')">SHIPS AVAILABLE</div>
 			<div id="ships-available" class="accordion">
 			</div>
-			<div class="accordion-bar" onclick="toggle('target-priority')">TARGET PRIORITIES</div>
-			<div class="accordion-bar" onclick="toggle('battle-results')">BATTLE RESULTS</div>
-			<div class="accordion-bar" onclick="toggle('selected-unit')">SELECTED UNIT</div>
+			<div class="accordion-bar" onclick="Sidebar.toggle('target-priority')">TARGET PRIORITIES</div>
+			<div id="target-priority" class="accordion">
+			</div>
+			<div class="accordion-bar" onclick="Sidebar.toggle('battle-results')">BATTLE RESULTS</div>
+			<div id="battle-results" class="accordion">
+			</div>
+			<div class="accordion-bar" onclick="Sidebar.toggle('selected-unit')">SELECTED UNIT</div>
 			<div id="selected-unit" class="accordion">
 			</div>
 		</div>
-		<nav id="context-menu" onclick="preventClose(event)">
+		<nav id="context-menu" onclick="ContextMenu.preventClose(event)">
 			<div id="context-target-priority">
 				<div class="context-menu-label">Target Priority:</div>
-				0.5<input type="range" id="context-priority-slider" onmouseup="readPriority('context-priority-slider')"/>2
+				0.5<input type="range" id="context-priority-slider" onmouseup="ContextMenu.readPriority('context-priority-slider')"/>2
 			</div>
 			<div id="context-supply-grid">
 				<div class="context-menu-label">IPCs Available</div>
 			</div>
-			<div id="repair">
-				<div class="context-repair">Repair</div>
+			<div id="context-repair">
+				<div class="context-menu-label">Repair</div>
 			</div>
 		</nav>
 	</body>
