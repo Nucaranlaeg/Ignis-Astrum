@@ -66,6 +66,7 @@ var Map = {};
 		if (event.which !== 1) return;
 		let target = Utils.findItem(Utils.findHex(event.clientX, event.clientY), event.clientX, event.clientY);
 		window.foo = target;
+		ContextMenu.closeContextMenu();
 		if (target){
 			if (target.classList.contains("base")) {
 				let id = target.id.slice(4);
@@ -81,7 +82,6 @@ var Map = {};
 				return;
 			}
 		}
-		ContextMenu.closeContextMenu();
 		window.addEventListener("mouseup", endDrag, {capture: true, once: true});
 		map.addEventListener("mousemove", continueDrag);
 		initialCoords = {
