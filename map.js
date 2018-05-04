@@ -15,6 +15,7 @@ var Map = {};
 	var map, row, hex, friendlyCapital, enemyCapital, base = [];
 
 	function initializeMap() {
+		// Load references to DOM elements from the HTML.
 		map = document.getElementById("map");
 		row = document.getElementById("row-template");
 		hex = document.getElementById("hex-template");
@@ -24,21 +25,26 @@ var Map = {};
 		}
 		row.removeAttribute("id");
 		hex.removeAttribute("id");
-		for (let i = 0; i < 10; i++){
+		
+		// Build the map.
+		var numrows = Math.max(10, 2 * map.offsetHeight / HEX_HEIGHT + 3);
+		var numcols = Math.max(12, map.offsetWidth / HEX_WIDTH + 2);
+		for (let i = 0; i < numrows; i++){
 			map.append(row.cloneNode(true));
 		}
+		console.log(numcols);
 		[...document.getElementsByClassName("hex-row")].forEach((hexRow, index) => {
-			for (let i = 0; i < 12; i++) {
+			for (let i = 0; i < numcols; i++) {
 				let newHex = hex.cloneNode(true);
 				newHex.id = getNewHexId();
-				if (index === 5) {
-					if (i === 5) {
+				if (index === Math.floor(numrows / 2)) {
+					if (i === Math.floor(numcols / 2)) {
 						newHex.classList.add("blue");
 						friendlyCapital = newHex;
 						let newBase = base[0].cloneNode(true);
 						newBase.id = getNewBaseId();
 						newHex.append(newBase);
-					} else if (i === 9) {
+					} else if (i === Math.floor(numcols / 2) + 4) {
 						newHex.classList.add("red");
 						enemyCapital = newHex;
 						let newBase = base[0].cloneNode(true);
