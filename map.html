@@ -3,6 +3,8 @@
 <html>
 	<head>
 		<title>Ignis Astrum</title>
+		<script src="utils.js"></script>
+		<script src="ship.js"></script>
 		<script src="sidebar.js"></script>
 		<script src="context-menu.js"></script>
 		<script src="map.js"></script>
@@ -138,6 +140,8 @@
 			</div>
 			<div class="accordion-bar" onclick="Sidebar.toggle('ships-available')">SHIPS AVAILABLE</div>
 			<div id="ships-available" class="accordion">
+				<div class="friendly ship-list" id="friendly-ships-available"></div>
+				<div class="enemy ship-list" id="enemy-ships-available"></div>
 			</div>
 			<div class="accordion-bar" onclick="Sidebar.toggle('target-priority')">TARGET PRIORITIES</div>
 			<div id="target-priority" class="accordion">
@@ -145,17 +149,17 @@
 			<div class="accordion-bar" onclick="Sidebar.toggle('battle-results')">BATTLE RESULTS</div>
 			<div id="battle-results" class="accordion">
 			</div>
-			<div class="accordion-bar" onclick="Sidebar.toggle('selected-unit')">SELECTED UNIT</div>
+			<div class="accordion-bar" onclick="Sidebar.toggle('selected-unit')">SELECTED FLEET</div>
 			<div id="selected-unit" class="accordion">
 			</div>
 		</div>
 		<nav id="context-menu" onclick="ContextMenu.preventClose(event)">
+			<div id="context-supply-grid">
+				<div class="context-menu-label">IPCs Available</div>
+			</div>
 			<div id="context-target-priority">
 				<div class="context-menu-label">Target Priority:</div>
 				0.5<input type="range" id="context-priority-slider" onmouseup="ContextMenu.readPriority('context-priority-slider')"/>2
-			</div>
-			<div id="context-supply-grid">
-				<div class="context-menu-label">IPCs Available</div>
 			</div>
 			<div id="context-repair">
 				<div class="context-menu-label">Repair</div>

@@ -127,7 +127,8 @@ body{
 	max-height: 0px;
 }
 
-#ship-info {
+#ship-info,
+#ships-available {
 	display: flex;
 	flex-direction: row;
 	flex: 2;
@@ -160,6 +161,14 @@ body{
 	position: absolute;
 	font-weight: bold;
 	line-height: 30px;
+}
+
+.ship-ability-icon {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	margin-top: 4px;
+	margin-bottom: -4px;
 }
 
 .image {
