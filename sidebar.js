@@ -4,13 +4,14 @@ var Sidebar = {};
 (function() {
 	var abilities = {};
 	var detail;
+	var shipList = [];
 
 	function initializeSidebar() {
 		detail = document.getElementById("ship-detail-template");
 		detail.removeAttribute("id");
 		
-		addShip({power: 3, currentHull: 4, maxHull: 5}, true);
-		addShip({power: 2, currentHull: 6, maxHull: 7}, false);
+		addShip({shipClass: 1, power: 3, currentHull: 3, maxHull: 5, shield: 1, repair: 1, id: "ship0", allied: true});
+		addShip({shipClass: 1, power: 2, currentHull: 4, maxHull: 7, shield: 0, repair: 1, id: "ship1", allied: false});
 	}
 
 	document.addEventListener("DOMContentLoaded", initializeSidebar, {once: true});
@@ -23,17 +24,48 @@ var Sidebar = {};
 			target.style.maxHeight = "0px";
 		}
 	};
+	
+	function silentAddShip(ship) {
+		shipList.push(ship);
+	};
 
-	function addShip(ship, allied) {
-		let section = allied ? document.getElementById("friendly-ships-seen") : document.getElementById("enemy-ships-seen");
+	function addShip(ship) {
+		let section = ship.allied ? document.getElementById("friendly-ships-seen") : document.getElementById("enemy-ships-seen");
 		let newShip = detail.cloneNode(true);
 		newShip.getElementsByClassName("power")[0].innerHTML = ship.power;
 		newShip.getElementsByClassName("current-hull")[0].innerHTML = ship.currentHull;
 		newShip.getElementsByClassName("max-hull")[0].innerHTML = ship.maxHull;
+		newShip.getElementsByClassName("shield")[0].innerHTML = ship.shield;
+		newShip.getElementsByClassName("repair")[0].innerHTML = ship.repair;
+		newShip.id = ship.id;
 		for (let i in ship.abilities) {
 			newShip.getElementsByClassName("ability-bar")[0].append(abilities[i]);
 		}
+		shipList.push(ship);
 		section.append(newShip);
+	}
+	
+	function removeShip(id) {
+		let node = document.getElementById(id);
+		if (node) node.remove();
+		let index = shipList.indexOf(ship => ship.id === id);
+		if (index > -1) shipList.splice(index, 1);
+	}
+	
+	function sortList() {
+		let section = document.getElementById("friendly-ships-seen")
+		while (section.firstChild) {
+			section.firstChild.remove();
+		}
+		section = document.getElementById("enemy-ships-seen");
+		while (section.firstChild) {
+			section.firstChild.remove();
+		}
+		shipList.sort((shipA, shipB) => {
+			if (shipA.shipClass - shipB.shipClass !== 0) return shipA.shipClass - shipB.shipClass;
+			return shipA.currentHull - shipB.currentHull;
+		});
+		shipList.forEach(ship => addShip);
 	}
 
 	function readPriority(inputId) {

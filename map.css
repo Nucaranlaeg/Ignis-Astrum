@@ -155,11 +155,11 @@ body{
 }
 
 .ship-stats-bar {
-	height: 50%;
+	height: 100%;
 	top: 0;
 	position: absolute;
 	font-weight: bold;
-	line-height: 15px;
+	line-height: 30px;
 }
 
 .image {
