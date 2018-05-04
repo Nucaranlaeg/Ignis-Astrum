@@ -15,8 +15,9 @@
 				<span class="image"></span>
 				<span class="ship-stats-bar">
 					<span class="power"></span>
-					<span class="current-hull"></span> /
-					<span class="max-hull"></span>
+					<span class="current-hull"></span>/<span class="max-hull"></span>
+					<span class="shield"></span>
+					<span class="repair"></span>
 				</span>
 				<span class="abilities-bar"></span>
 			</span>
@@ -130,7 +131,7 @@
 		<button id="home-button" onclick="Map.recentre()"></button>
 		<div id="map" onmousedown="Map.beginDrag(event)"></div>
 		<div class="sidebar">
-			<div class="accordion-bar" onclick="Sidebar.toggle('ship-info')">SHIPS BUILT</div>
+			<div class="accordion-bar" onclick="Sidebar.toggle('ship-info')">SHIPS VISIBLE</div>
 			<div id="ship-info" class="accordion">
 				<div class="friendly ship-list" id="friendly-ships-seen"></div>
 				<div class="enemy ship-list" id="enemy-ships-seen"></div>
