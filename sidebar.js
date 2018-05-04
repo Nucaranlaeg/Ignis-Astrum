@@ -2,13 +2,29 @@
 
 var Sidebar = {};
 (function() {
-	var abilities = {};
-	var detail;
-	var shipList = [];
+	let abilities = {};
+	let detail;
+	let shipList = [];
+	const SHIP_CLASSES = 10;
 
 	function initializeSidebar() {
 		detail = document.getElementById("ship-detail-template");
 		detail.removeAttribute("id");
+		
+		// Build the ships available list
+		let friendlySection = document.getElementById("friendly-ships-available");
+		let enemySection = document.getElementById("enemy-ships-available");
+		let newShip;
+		for (let i = 0; i < SHIP_CLASSES; i++){
+			newShip = detail.cloneNode(true);
+			newShip.id = "friendly-ship-class" + i;
+			friendlySection.append(newShip);
+			
+			newShip = detail.cloneNode(true);
+			newShip.id = "enemy-ship-class" + i;
+			newShip.style.display = "none";
+			enemySection.append(newShip);
+		}
 		
 		addShip({shipClass: 1, power: 3, currentHull: 3, maxHull: 5, shield: 1, repair: 1, id: "ship0", allied: true});
 		addShip({shipClass: 1, power: 2, currentHull: 4, maxHull: 7, shield: 0, repair: 1, id: "ship1", allied: false});
@@ -46,10 +62,20 @@ var Sidebar = {};
 	}
 	
 	function removeShip(id) {
-		let node = document.getElementById(id);
-		if (node) node.remove();
+		let shipDetails = document.getElementById(id);
+		if (shipDetails) shipDetails.remove();
 		let index = shipList.indexOf(ship => ship.id === id);
 		if (index > -1) shipList.splice(index, 1);
+	}
+	
+	function identifyShip(ship){
+		shipClass = document.getElementById("enemy-ship-class" + ship.shipClass);
+		shipClass.getElementsByClassName("power")[0].innerHTML = ship.power;
+		shipClass.getElementsByClassName("current-hull")[0].innerHTML = ship.maxHull;
+		shipClass.getElementsByClassName("max-hull")[0].innerHTML = ship.maxHull;
+		shipClass.getElementsByClassName("shield")[0].innerHTML = ship.shield;
+		shipClass.getElementsByClassName("repair")[0].innerHTML = ship.repair;
+		shipClass.style.display = "block";
 	}
 	
 	function sortList() {
@@ -72,6 +98,6 @@ var Sidebar = {};
 		let value = document.getElementById(inputId).value;
 		// Scale value from 0.5 to 2
 		value = Math.pow(2, value / 50 - 1);
-		console.log(value);
+		console.log("readPriority: value", value);
 	}
 }).apply(Sidebar);
