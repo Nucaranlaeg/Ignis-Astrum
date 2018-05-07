@@ -6,10 +6,11 @@ var Ship = {};
 	
 	this.dragBase = function (event, base) {
 		// For now, just pretend it's a ship.
-		this.dragShip(event, base);
+		return this.dragShip(event, base);
 	};
 	
 	this.dragShip = function (event, ship) {
+		if (!ship.classList.contains("controlled")) return false;
 		map.addEventListener("mousemove", continueDrag);
 		window.addEventListener("mouseup", endDrag, {capture: true, once: true});
 		window.addEventListener("keypress", escDrag);
@@ -20,6 +21,7 @@ var Ship = {};
 		map.append(dragElement);
 		dragElement.top = event.clientY;
 		dragElement.left = event.clientX;
+		return true;
 	};
 	
 	function attemptMove(hex) {

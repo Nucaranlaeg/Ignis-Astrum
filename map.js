@@ -10,7 +10,7 @@ var Map = {};
 	// An element is removed from this list if it is not displayed.
 	let bases = [], ships = [], hexes = [];
 	// Count of each element so we can always assign new IDs.
-	let baseCount = 0, shipCount = 0, hexCount = 0;
+	let baseCount = 0, shipCount = 0;
 	// DOM elements we don't want to keep searching for.
 	let map, row, hex, friendlyCapital, enemyCapital, base = [];
 
@@ -30,21 +30,26 @@ var Map = {};
 		let numrows = Math.max(10, 2 * map.offsetHeight / HEX_HEIGHT + 3);
 		let numcols = Math.max(12, map.offsetWidth / HEX_WIDTH + 2);
 		for (let i = 0; i < numrows; i++){
-			map.append(row.cloneNode(true));
+			let newRow = row.cloneNode(true);
+			// Number the rows; Row 0 has the capitals.
+			newRow.id = (i - Math.floor(numrows / 2) + 1);
+			map.append(newRow);
 		}
 		[...document.getElementsByClassName("hex-row")].forEach((hexRow, index) => {
 			for (let i = 0; i < numcols; i++) {
 				let newHex = hex.cloneNode(true);
-				newHex.id = getNewHexId();
+				// Number the hexes: hex "0.0" is the friendly capital.
+				newHex.id = hexRow.id + "." + (i - Math.floor(numcols / 2));
 				if (index === Math.floor(numrows / 2)) {
 					if (i === Math.floor(numcols / 2)) {
 						newHex.classList.add("blue");
 						friendlyCapital = newHex;
 						let newBase = base[0].cloneNode(true);
 						newBase.id = getNewBaseId();
-						newBase.draggable = true;
+						newBase.classList.add("controlled");
 						newHex.append(newBase);
 					} else if (i === Math.floor(numcols / 2) + 4) {
+						// Hex "0.4" is the enemy capital
 						newHex.classList.add("red");
 						enemyCapital = newHex;
 						let newBase = base[0].cloneNode(true);
@@ -55,6 +60,7 @@ var Map = {};
 					continue;
 				}
 				hexRow.append(newHex);
+				createHex(newHex.id);
 			}
 		});
 		this.recentre();
@@ -73,13 +79,11 @@ var Map = {};
 				// Get base data from wasm.
 				//if (base.level === 0) {
 				if (true) {
-					Ship.dragBase(event, target);
-					return;
+					if (Ship.dragBase(event, target)) return;
 				}
 			}
 			if (target.classList.contains("ship")) {
-				Ship.dragShip(event, target);
-				return;
+				if (!Ship.dragShip(event, target)) return;
 			}
 		}
 		window.addEventListener("mouseup", endDrag, {capture: true, once: true});
@@ -121,8 +125,9 @@ var Map = {};
 	function addHexToRowStart() {
 		[...document.getElementsByClassName("hex-row")].forEach(row => {
 			let newHex = hex.cloneNode(true);
-			newHex.id = getNewHexId();
+			newHex.id = row.id + "." + (parseInt(row.firstChild.id.slice(row.firstChild.id.indexOf(".") + 1)) - 1);
 			row.prepend(newHex);
+			createHex(newHex.id);
 		});
 		map.scrollLeft += HEX_WIDTH;
 		if (dragging) initialCoords.mapX += HEX_WIDTH;
@@ -131,21 +136,39 @@ var Map = {};
 	function addHexToRowEnd() {
 		[...document.getElementsByClassName("hex-row")].forEach(row => {
 			let newHex = hex.cloneNode(true);
-			newHex.id = getNewHexId();
+			newHex.id = row.id + "." + (parseInt(row.lastChild.id.slice(row.lastChild.id.indexOf(".") + 1)) + 1);
 			row.append(newHex);
+			createHex(newHex.id);
 		});
 	}
 
 	function addRowToTop() {
 		// Add IDs to new hexes added when scrolling.
-		map.prepend(row.cloneNode(true), row.cloneNode(true));
+		let firstRowNum = parseInt(map.firstChild.id);
+		let newRow = row.cloneNode(true);
+		newRow.id = firstRowNum - 1;
+		map.prepend(newRow);
+		newRow = row.cloneNode(true);
+		newRow.id = firstRowNum - 2;
+		map.prepend(newRow);
 		map.scrollTop += HEX_HEIGHT;
 		if (dragging) initialCoords.mapY += HEX_HEIGHT;
 	}
 
 	function addRowToBottom() {
 		// Add IDs to new hexes added when scrolling.
-		map.append(row.cloneNode(true), row.cloneNode(true));
+		let lastRowNum = parseInt(map.lastChild.id);
+		let newRow = row.cloneNode(true);
+		newRow.id = lastRowNum + 1;
+		map.append(newRow);
+		newRow = row.cloneNode(true);
+		newRow.id = lastRowNum + 2;
+		map.append(newRow);
+	}
+	
+	function createHex(id) {
+		if (id.substring(0,1) == ".") return;
+		hexes.push({id: id, DBid: Wasm.addHex(id)});
 	}
 
 	this.recentre = function() {
@@ -154,14 +177,28 @@ var Map = {};
 	};
 
 	function getNewBaseId() {
+		let baseId = Wasm.addBase();
+		let index = bases.findIndex(base => {
+			return base.DBid === baseId;
+		});
+		if (index === -1){
+			bases.push({id: baseCount, DBid: baseId});
+		} else {
+			bases[index].id = baseCount;
+		}
 		return "base" + baseCount++;
 	}
 
-	function getNewHexId() {
-		return "hex" + hexCount++;
-	}
-
 	function getNewShipId() {
+		let shipId = Wasm.addShip();
+		let index = ships.findIndex(ship => {
+			return ship.DBid === shipId;
+		});
+		if (index === -1){
+			ships.push({id: shipCount, DBid: shipId});
+		} else {
+			ships[index].id = shipCount;
+		}
 		return "ship" + shipCount++;
 	}
 }).apply(Map);
