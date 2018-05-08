@@ -16,7 +16,7 @@ var Ship = {};
 		window.addEventListener("keypress", escDrag);
 		movingUnit = ship;
 		dragElement = movingUnit.cloneNode(true);
-		dragElement.style.visibility = "hidden";
+		dragElement.classList.add("moving");
 		dragElement.removeAttribute("id");
 		map.append(dragElement);
 		dragElement.top = event.clientY;
@@ -25,12 +25,29 @@ var Ship = {};
 	};
 	
 	function attemptMove(hex) {
+		let source = movingUnit.name ? movingUnit.name.split(".") : movingUnit.parentNode.id.split(".");
+		let target = hex.id.split(".");
+		if (movingUnit.id.slice(0,4) === "ship") {
+			
+		} else {
+			// It's a base.
+			if (Utils.calculateDistance(source, target) <= 1) {
+				if (!movingUnit.name){
+					movingUnit.name = movingUnit.parentNode.id;
+					let sourceBase = movingUnit.cloneNode(true);
+					sourceBase.classList.add("source");
+					sourceBase.classList.remove("controlled");
+					movingUnit.parentNode.appendChild(sourceBase);
+				}
+				hex.appendChild(movingUnit);
+			}
+		}
 		// Attempt to move to said hex.
 	}
 	
 	function continueDrag(event) {
-		movingUnit.style.visibility = "hidden";
-		dragElement.style.visibility = "visible";
+		movingUnit.classList.add("moving");
+		dragElement.classList.remove("moving");
 		if (!movingUnit) {
 			map.removeEventListener("mousemove", continueDrag);
 			if (dragElement) {
@@ -48,7 +65,7 @@ var Ship = {};
 			window.removeEventListener("mouseup", endDrag, {capture: true, once: true});
 			window.removeEventListener("keypress", escDrag);
 			map.removeEventListener("mousemove", continueDrag);
-			movingUnit.style.visibility = "visible";
+			movingUnit.classList.remove("moving");
 			movingUnit = null;
 			dragElement.remove();
 			dragElement = null;
@@ -59,7 +76,7 @@ var Ship = {};
 		window.removeEventListener("keypress", escDrag);
 		map.removeEventListener("mousemove", continueDrag);
 		attemptMove(Utils.findHex(event.clientX, event.clientY));
-		movingUnit.style.visibility = "visible";
+		movingUnit.classList.remove("moving");
 		movingUnit = null;
 		dragElement.remove();
 		dragElement = null;

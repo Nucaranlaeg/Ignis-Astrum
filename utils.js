@@ -38,10 +38,28 @@ var Utils = {};
 		return hexes[Math.floor((x - rowOffset) / 131)];
 	};
 	
+	// Returns the first element clicked on.
 	this.findItem = function(targetHex, x, y) {
-		return [...targetHex.children].find(item => {
+		return this.findItems(targetHex, x, y)[0];
+	};
+	
+	// Returns all elements clicked on.
+	this.findItems = function(targetHex, x, y) {
+		return [...targetHex.children].filter(item => {
+			// Ignore whatever has moved away.
+			if (item.classList.contains("source")) return false;
 			let target = item.getBoundingClientRect();
 			return (x >= target.left && x <= target.right && y >= target.top && y <= target.bottom);
 		});
+	};
+	
+	this.calculateDistance = function(source, target) {
+		let dx = (source[1] - Math.floor(source[0] / 2)) - (target[1] - Math.floor(target[0] / 2));
+		let dy = source[0] - target[0];
+		if (dx * dy > 0) {
+			return Math.abs(dx + dy);
+		} else {
+			return Math.max(Math.abs(dx), Math.abs(dy));
+		}
 	};
 }).apply(Utils);

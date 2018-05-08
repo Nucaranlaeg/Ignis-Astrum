@@ -78,6 +78,16 @@ body{
 	stroke-width: 2;
 }
 
+.base.source {
+	fill: transparent;
+	stroke-width: 4;
+	visibility: visible;
+}
+
+.moving {
+	visibility: hidden;
+}
+
 #context-menu {
 	display: none;
 	position:absolute;
