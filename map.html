@@ -9,6 +9,7 @@
 		<script src="sidebar.js"></script>
 		<script src="context-menu.js"></script>
 		<script src="map.js"></script>
+		<script src="timer.js"></script>
 	</head>
 	<body>
 		<link rel="stylesheet" type="text/css" href="map.css">
@@ -132,7 +133,12 @@
 			</svg>
 		</div>
 		<button id="home-button" onclick="Map.recentre()"></button>
-		<div id="map" onmousedown="Map.beginDrag(event)" onclick="Sidebar.selectHex(event)"></div>
+		<div id="timer" onclick="Timer.signalTurnEnd()">
+			<svg id="timer-clock" width="54" height="54" xmlns="http://www.w3.org/2000/svg">
+				<circle id="timer-circle" class="circle_animation" r="19" cy="26" cx="26" stroke-width="8" stroke="#6fdb6f" fill="none"/>
+			</svg>
+		</div>
+		<div id="map" onmousedown="Map.beginDrag(event)" onclick="Map.selectHex(event)"></div>
 		<div class="sidebar">
 			<div class="accordion-bar" onclick="Sidebar.toggle('ship-info')">SHIPS VISIBLE</div>
 			<div id="ship-info" class="accordion">

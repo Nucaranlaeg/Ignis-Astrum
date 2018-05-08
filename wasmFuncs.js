@@ -17,7 +17,9 @@ var Wasm = {};
 		return Math.floor(Math.random() * 1000000);
 	}
 	this.getBase = function(id){
-		return {level: 1, power: 5, currentHull: 4, maxHull: 5, shield: 1, repair: 3, id: id, allied: true};
+		if (id == 0)
+			return {level: 1, power: 5, currentHull: 4, maxHull: 5, shield: 1, repair: 3, id: id, allied: true};
+		return {level: 2, power: 10, currentHull: 10, maxHull: 10, shield: 2, repair: 6, id: id, allied: false};
 	}
 	this.getShip = function(){
 		return {shipClass: 1, power: 3, currentHull: 3, maxHull: 5, shield: 1, repair: 1, id: "ship0", allied: true};
