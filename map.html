@@ -132,7 +132,7 @@
 			</svg>
 		</div>
 		<button id="home-button" onclick="Map.recentre()"></button>
-		<div id="map" onmousedown="Map.beginDrag(event)"></div>
+		<div id="map" onmousedown="Map.beginDrag(event)" onclick="Sidebar.selectHex(event)"></div>
 		<div class="sidebar">
 			<div class="accordion-bar" onclick="Sidebar.toggle('ship-info')">SHIPS VISIBLE</div>
 			<div id="ship-info" class="accordion">
@@ -150,8 +150,16 @@
 			<div class="accordion-bar" onclick="Sidebar.toggle('battle-results')">BATTLE RESULTS</div>
 			<div id="battle-results" class="accordion">
 			</div>
-			<div class="accordion-bar" onclick="Sidebar.toggle('selected-unit')">SELECTED FLEET</div>
-			<div id="selected-unit" class="accordion">
+			<div class="accordion-bar" onclick="Sidebar.toggle('selected-fleet')">SELECTED FLEET</div>
+			<div id="selected-fleet" class="accordion">
+				<div id="selected-ships">
+					<div id="friendly-selected-ships" class="friendly ship-list"></div>
+					<div id="enemy-selected-ships" class="enemy ship-list"></div>
+				</div>
+				<div id="selected-bases">
+					<div id="friendly-selected-bases" class="friendly ship-list"></div>
+					<div id="enemy-selected-bases" class="enemy ship-list"></div>
+				</div>
 			</div>
 		</div>
 		<nav id="context-menu" onclick="ContextMenu.preventClose(event)">

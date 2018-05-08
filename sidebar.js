@@ -5,6 +5,7 @@ var Sidebar = {};
 	let abilities = {};
 	let detail;
 	let shipList = [];
+	let selectedHex;
 	const SHIP_CLASSES = 10;
 
 	function initializeSidebar() {
@@ -26,8 +27,8 @@ var Sidebar = {};
 			enemySection.append(newShip);
 		}
 		
-		addShip({shipClass: 1, power: 3, currentHull: 3, maxHull: 5, shield: 1, repair: 1, id: "ship0", allied: true});
-		addShip({shipClass: 1, power: 2, currentHull: 4, maxHull: 7, shield: 0, repair: 1, id: "ship1", allied: false});
+		//addShip({shipClass: 1, power: 3, currentHull: 3, maxHull: 5, shield: 1, repair: 1, id: "ship0", allied: true});
+		//addShip({shipClass: 1, power: 2, currentHull: 4, maxHull: 7, shield: 0, repair: 1, id: "ship1", allied: false});
 	}
 
 	document.addEventListener("DOMContentLoaded", initializeSidebar, {once: true});
@@ -41,12 +42,60 @@ var Sidebar = {};
 		}
 	};
 	
-	function silentAddShip(ship) {
+	this.selectHex = function(event) {
+		let friendlyShips = document.getElementById("friendly-selected-ships");
+		let enemyShips = document.getElementById("enemy-selected-ships");
+		let friendlyBases = document.getElementById("friendly-selected-bases");
+		let enemyBases = document.getElementById("enemy-selected-bases");
+		
+		// Clear previous selection
+		if (selectedHex){
+			selectedHex.classList.remove("selected");
+			friendlyShips.innerHTML = "";
+			enemyShips.innerHTML = "";
+			friendlyBases.innerHTML = "";
+			enemyBases.innerHTML = "";
+		}
+		
+		let target = Utils.findHex(event.clientX, event.clientY);
+		if (selectedHex === target){
+			selectedHex = null;
+			return;
+		}
+		selectedHex = target;
+		selectedHex.classList.add("selected");
+		selectedHex.childNodes.forEach(e => {
+			if (e.nodeName == "#text") return; // Ignore the text node
+			let type = e.id.slice(0,4);
+			switch (type) {
+				case "ship":
+					let ship = Wasm.getShip(e.id.slice(4));
+					if (ship.allied) {
+						friendlyShips.append(createShipNode(ship));
+					} else {
+						enemyShips.append(createShipNode(ship));
+					}
+					break;
+				case "base":
+					let base = Wasm.getBase(e.id.slice(4));
+					if (base.allied) {
+						friendlyBases.append(createBaseNode(base));
+					} else {
+						enemyBases.append(createBaseNode(base));
+					}
+					break;
+			}
+		});
+		// Keep the Selected Fleet tab in the same state as it was, but adjust the height for the new content.
+		toggle("selected-fleet");
+		toggle("selected-fleet");
+	}
+	
+	function addShip(ship) {
 		shipList.push(ship);
 	};
 
-	function addShip(ship) {
-		let section = ship.allied ? document.getElementById("friendly-ships-seen") : document.getElementById("enemy-ships-seen");
+	function createShipNode(ship) {
 		let newShip = detail.cloneNode(true);
 		newShip.getElementsByClassName("power")[0].innerHTML = ship.power;
 		newShip.getElementsByClassName("current-hull")[0].innerHTML = ship.currentHull;
@@ -57,8 +106,21 @@ var Sidebar = {};
 		for (let i in ship.abilities) {
 			newShip.getElementsByClassName("ability-bar")[0].append(abilities[i]);
 		}
-		shipList.push(ship);
-		section.append(newShip);
+		return newShip;
+	}
+
+	function createBaseNode(base) {
+		let newBase = detail.cloneNode(true);
+		newBase.getElementsByClassName("power")[0].innerHTML = base.power;
+		newBase.getElementsByClassName("current-hull")[0].innerHTML = base.currentHull;
+		newBase.getElementsByClassName("max-hull")[0].innerHTML = base.maxHull;
+		newBase.getElementsByClassName("shield")[0].innerHTML = base.shield;
+		newBase.getElementsByClassName("repair")[0].innerHTML = base.repair;
+		newBase.id = base.id;
+		for (let i in base.abilities) {
+			newBase.getElementsByClassName("ability-bar")[0].append(abilities[i]);
+		}
+		return newBase;
 	}
 	
 	function removeShip(id) {
@@ -91,7 +153,10 @@ var Sidebar = {};
 			if (shipA.shipClass - shipB.shipClass !== 0) return shipA.shipClass - shipB.shipClass;
 			return shipA.currentHull - shipB.currentHull;
 		});
-		shipList.forEach(ship => addShip);
+		shipList.forEach(ship => {
+			let section = ship.allied ? document.getElementById("friendly-ships-seen") : document.getElementById("enemy-ships-seen");
+			section.append(createShipNode(ship));
+		});
 	}
 
 	function readPriority(inputId) {
