@@ -65,7 +65,8 @@ var Sidebar = {};
 		selectedHex = target;
 		selectedHex.classList.add("selected");
 		selectedHex.childNodes.forEach(e => {
-			if (e.nodeName == "#text") return; // Ignore the text node
+			if (e.nodeName == "#text") return; // Ignore the text node.
+			if (e.classList.contains("source")) return; // Ignore ship's initial positions.
 			let type = e.id.slice(0,4);
 			switch (type) {
 				case "ship":
@@ -86,9 +87,9 @@ var Sidebar = {};
 					break;
 			}
 		});
-		// Keep the Selected Fleet tab in the same state as it was, but adjust the height for the new content.
-		toggle("selected-fleet");
-		toggle("selected-fleet");
+		// Open the Selected Fleet tab.
+		document.getElementById("selected-fleet").style.maxHeight = "0px";
+		this.toggle("selected-fleet");
 	}
 	
 	function addShip(ship) {

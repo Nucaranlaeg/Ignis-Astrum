@@ -67,6 +67,12 @@ var Map = {};
 	}
 
 	document.addEventListener("DOMContentLoaded", initializeMap.bind(this), {once: true});
+	
+	this.selectHex = function(event) {
+		// Don't click after a drag.
+		if (dragging) return;
+		Sidebar.selectHex(event);
+	}
 
 	this.beginDrag = function(event) {
 		if (event.which !== 1) return;
@@ -101,7 +107,7 @@ var Map = {};
 	function endDrag(event) {
 		event.preventDefault(); // Prevent scrolling from also activating click events
 		map.removeEventListener("mousemove", continueDrag);
-		dragging = false;
+		window.setTimeout(() =>	{dragging = false}, 0);
 	}
 
 	function continueDrag(event) {

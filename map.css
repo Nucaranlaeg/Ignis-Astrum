@@ -198,3 +198,21 @@ body{
 .fleet-info {
 	flex: 5;
 }
+
+#timer {
+	height: 54px;
+	width: 54px;
+	position: fixed;
+	bottom: 20px;
+	right: calc(20px + 20%);
+	z-index: 10;
+	border-radius: 50%;
+}
+
+#timer-clock {
+	transform: rotate(-90deg);
+}
+
+.circle_animation {
+  transition: all .25s linear;
+}
