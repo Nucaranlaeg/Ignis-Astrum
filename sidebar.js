@@ -58,31 +58,31 @@ var Sidebar = {};
 		}
 		
 		let target = Utils.findHex(event.clientX, event.clientY);
-		if (selectedHex === target){
+		if (selectedHex === target || !target){
 			selectedHex = null;
 			return;
 		}
 		selectedHex = target;
 		selectedHex.classList.add("selected");
-		selectedHex.childNodes.forEach(e => {
-			if (e.nodeName == "#text") return; // Ignore the text node.
-			if (e.classList.contains("source")) return; // Ignore ship's initial positions.
-			let type = e.id.slice(0,4);
+		selectedHex.childNodes.forEach(unit => {
+			if (unit.nodeName == "#text") return; // Ignore the text node.
+			if (unit.classList.contains("source")) return; // Ignore ship's initial positions.
+			let type = unit.id.slice(0,4);
 			switch (type) {
 				case "ship":
-					let ship = Wasm.getShip(e.id.slice(4));
+					let ship = Wasm.getShip(unit.id.slice(4));
 					if (ship.allied) {
-						friendlyShips.append(createShipNode(ship));
+						friendlyShips.append(this.createShipNode(ship, "sflt"));
 					} else {
-						enemyShips.append(createShipNode(ship));
+						enemyShips.append(this.createShipNode(ship, "sflt"));
 					}
 					break;
 				case "base":
-					let base = Wasm.getBase(e.id.slice(4));
+					let base = Wasm.getBase(unit.id.slice(4));
 					if (base.allied) {
-						friendlyBases.append(createBaseNode(base));
+						friendlyBases.append(this.createBaseNode(base, "bflt"));
 					} else {
-						enemyBases.append(createBaseNode(base));
+						enemyBases.append(this.createBaseNode(base, "bflt"));
 					}
 					break;
 			}
@@ -96,28 +96,28 @@ var Sidebar = {};
 		shipList.push(ship);
 	};
 
-	function createShipNode(ship) {
+	this.createShipNode = function(ship, idPrefix) {
 		let newShip = detail.cloneNode(true);
 		newShip.getElementsByClassName("power")[0].innerHTML = ship.power;
 		newShip.getElementsByClassName("current-hull")[0].innerHTML = ship.currentHull;
 		newShip.getElementsByClassName("max-hull")[0].innerHTML = ship.maxHull;
 		newShip.getElementsByClassName("shield")[0].innerHTML = ship.shield;
 		newShip.getElementsByClassName("repair")[0].innerHTML = ship.repair;
-		newShip.id = ship.id;
+		newShip.id = idPrefix + ship.id;
 		for (let i in ship.abilities) {
 			newShip.getElementsByClassName("ability-bar")[0].append(abilities[i]);
 		}
 		return newShip;
 	}
 
-	function createBaseNode(base) {
+	this.createBaseNode = function(base, idPrefix) {
 		let newBase = detail.cloneNode(true);
 		newBase.getElementsByClassName("power")[0].innerHTML = base.power;
 		newBase.getElementsByClassName("current-hull")[0].innerHTML = base.currentHull;
 		newBase.getElementsByClassName("max-hull")[0].innerHTML = base.maxHull;
 		newBase.getElementsByClassName("shield")[0].innerHTML = base.shield;
 		newBase.getElementsByClassName("repair")[0].innerHTML = base.repair;
-		newBase.id = base.id;
+		newBase.id = idPrefix + base.id;
 		for (let i in base.abilities) {
 			newBase.getElementsByClassName("ability-bar")[0].append(abilities[i]);
 		}
@@ -156,7 +156,7 @@ var Sidebar = {};
 		});
 		shipList.forEach(ship => {
 			let section = ship.allied ? document.getElementById("friendly-ships-seen") : document.getElementById("enemy-ships-seen");
-			section.append(createShipNode(ship));
+			section.append(this.createShipNode(ship, "list"));
 		});
 	}
 

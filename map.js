@@ -48,6 +48,10 @@ var Map = {};
 						newBase.id = getNewBaseId();
 						newBase.classList.add("controlled");
 						newHex.append(newBase);
+						newBase = base[0].cloneNode(true);
+						newBase.id = getNewBaseId();
+						newBase.classList.add("controlled");
+						newHex.append(newBase);
 					} else if (i === Math.floor(numcols / 2) + 4) {
 						// Hex "0.4" is the enemy capital
 						newHex.classList.add("red");
