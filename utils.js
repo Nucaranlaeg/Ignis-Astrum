@@ -45,6 +45,7 @@ var Utils = {};
 	
 	// Returns all elements clicked on.
 	this.findItems = function(targetHex, x, y) {
+		if (!targetHex) return [];
 		return [...targetHex.children].filter(item => {
 			// Ignore whatever has moved away.
 			if (item.classList.contains("source")) return false;

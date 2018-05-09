@@ -92,7 +92,7 @@ body{
 	visibility: hidden;
 }
 
-#context-menu {
+.floating-menu {
 	display: none;
 	position:absolute;
 	z-index: 100;
@@ -105,11 +105,11 @@ body{
 	display: none;
 }
 
-#context-menu > *:not(:first-child) {
+.floating-menu > .active ~ * {
 	border-top: 1px solid #999999;
 }
 
-#context-menu.active,
+.floating-menu.active,
 #context-menu .active {
 	display: block;
 }
@@ -167,6 +167,8 @@ body{
 	border: 1px solid gray;
 	height: 30px;
 	position: relative;
+	min-width: 100px;
+	display: inline-block;
 }
 
 .ship-stats-bar {
