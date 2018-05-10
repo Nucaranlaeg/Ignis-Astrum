@@ -66,7 +66,7 @@ var Sidebar = {};
 		selectedHex.classList.add("selected");
 		selectedHex.childNodes.forEach(unit => {
 			if (unit.nodeName == "#text") return; // Ignore the text node.
-			if (unit.classList.contains("source")) return; // Ignore ship's initial positions.
+			if (unit.classList.contains("trace")) return; // Ignore ship's initial positions.
 			let type = unit.id.slice(0,4);
 			switch (type) {
 				case "ship":
@@ -98,6 +98,7 @@ var Sidebar = {};
 
 	this.createShipNode = function(ship, idPrefix) {
 		let newShip = detail.cloneNode(true);
+		newShip.getElementsByClassName("image")[0].appendChild(Map.getShipNode(0));
 		newShip.getElementsByClassName("power")[0].innerHTML = ship.power;
 		newShip.getElementsByClassName("current-hull")[0].innerHTML = ship.currentHull;
 		newShip.getElementsByClassName("max-hull")[0].innerHTML = ship.maxHull;
@@ -112,6 +113,7 @@ var Sidebar = {};
 
 	this.createBaseNode = function(base, idPrefix) {
 		let newBase = detail.cloneNode(true);
+		newBase.getElementsByClassName("image")[0].appendChild(Map.getBaseNode(base.level));
 		newBase.getElementsByClassName("power")[0].innerHTML = base.power;
 		newBase.getElementsByClassName("current-hull")[0].innerHTML = base.currentHull;
 		newBase.getElementsByClassName("max-hull")[0].innerHTML = base.maxHull;

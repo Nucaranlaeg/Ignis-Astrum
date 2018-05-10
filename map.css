@@ -82,7 +82,7 @@ body{
 	stroke-width: 2;
 }
 
-.base.source {
+.base.trace {
 	fill: transparent;
 	stroke-width: 4;
 	visibility: visible;
@@ -96,7 +96,7 @@ body{
 	display: none;
 	position:absolute;
 	z-index: 100;
-	padding: 2px;
+	padding: 2px 2px 0 2px;
 	background-color: #AAAAAA;
 	border: 2px ridge #999999;
 }
@@ -171,6 +171,13 @@ body{
 	display: inline-block;
 }
 
+.ship-detail svg {
+	top: 0;
+	left: 0;
+	width: 20px;
+	height: 20px;
+}
+
 .ship-stats-bar {
 	height: 100%;
 	top: 0;
@@ -191,14 +198,23 @@ body{
 	display: inline-block;
 	width: 20px;
 	height: 20px;
-	background-color: white;
-	border: 1px solid black;
 	position: relative;
 	margin: 4px 5px;
 }
 
 .fleet-info {
 	flex: 5;
+}
+
+#empire-income {
+	padding: 10px;
+    background: #add8e6;
+}
+
+.income {
+	width: 50%;
+	text-align: center;
+	float: right;
 }
 
 #timer {

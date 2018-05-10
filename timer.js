@@ -4,18 +4,19 @@ var Timer = {};
 (function() {
 	var circumference = 120;
 	var turnTime = 0;
-	var maxTurnTime = 60;
+	var maxTurnTime = 10;
 	var timerUpdater;
 	
 	function initializeTimer() {
 		document.getElementById("timer-circle").setAttribute('stroke-dasharray', "0, 120");
 		
-		var timerUpdater = setInterval(updateTimer, 250);
+		timerUpdater = setInterval(updateTimer.bind(Timer), 250);
 	}
 	
 	function updateTimer() {
 		if (turnTime >= maxTurnTime) {
-			// End the turn.
+			this.signalTurnEnd();
+			timerUpdater.clearInterval;
 			turnTime = 0;
 			return;
 		}
@@ -24,4 +25,16 @@ var Timer = {};
 	}
 	
 	document.addEventListener("DOMContentLoaded", initializeTimer.bind(this), {once: true});
+	
+	this.signalTurnEnd = function() {
+		Wasm.signalTurnEnd();
+	}
+	
+	this.beginNewTurn = function() {
+		clearInterval(timerUpdater);
+		timerUpdater = setInterval(updateTimer, 250);
+		turnTime = 0;
+		Empire.updateEmpireSidebar();
+		Map.clearTraces();
+	}
 }).apply(Timer);

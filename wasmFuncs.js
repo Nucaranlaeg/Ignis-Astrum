@@ -17,11 +17,20 @@ var Wasm = {};
 		return Math.floor(Math.random() * 1000000);
 	}
 	this.getBase = function(id){
-		if (id <= 1)
-			return {level: 1, power: 5, currentHull: 5, maxHull: 5, shield: 1, repair: 3, id: id, allied: true};
-		return {level: 2, power: 10, currentHull: 10, maxHull: 10, shield: 2, repair: 6, id: id, allied: false};
+		let base = {level: Math.floor(Math.random() * 4), power: 5, currentHull: 5, maxHull: 5, shield: 1, repair: 3, id: id, allied: false};
+		if (id <= 1) base.allied = true;
+		return base;
 	}
-	this.getShip = function(){
+	this.getShip = function(id){
 		return {shipClass: 1, power: 3, currentHull: 3, maxHull: 5, shield: 1, repair: 1, id: "ship0", allied: true};
+	}
+	this.getEmpireIncome = function() {
+		return {total: 7, capital: 6, territory: 1, majorPlanets: 0, minorPlanets: 0};
+	}
+	this.getEmpireTreasury = function() {
+		return 7;
+	}
+	this.signalTurnEnd = function() {
+		Timer.beginNewTurn();
 	}
 }).apply(Wasm);
