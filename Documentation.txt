@@ -1,0 +1,11 @@
+All generated elements which have ids and are not rows or hexes have a 4 letter code preceeding the id number.
+	ship - on map ship
+	base - on map base
+	flet - on map fleet
+	sflt - ship in the selected fleet
+	bflt - base in the selected fleet
+	list - ship in the "ships visible" sidebar section
+	scxm - ship in the context menu
+	bcxm - base in the context menu
+	shp- - ship svg
+	bse- - base svg

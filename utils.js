@@ -48,7 +48,7 @@ var Utils = {};
 		if (!targetHex) return [];
 		return [...targetHex.children].filter(item => {
 			// Ignore whatever has moved away.
-			if (item.classList.contains("source")) return false;
+			if (item.classList.contains("trace")) return false;
 			let target = item.getBoundingClientRect();
 			return (x >= target.left && x <= target.right && y >= target.top && y <= target.bottom);
 		});

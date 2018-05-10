@@ -12,16 +12,28 @@ var Map = {};
 	// Count of each element so we can always assign new IDs.
 	let baseCount = 0, shipCount = 0;
 	// DOM elements we don't want to keep searching for.
-	let map, row, hex, friendlyCapital, enemyCapital, base = [];
+	let map, row, hex, friendlyCapital, enemyCapital, base = [], ship = [];
 
 	function initializeMap() {
 		// Load references to DOM elements from the HTML.
 		map = document.getElementById("map");
 		row = document.getElementById("row-template");
 		hex = document.getElementById("hex-template");
-		for (let i = 0; i < 4; i++) {
-			base[i] = document.getElementById("base" + i + "-template");
+		for (let i = 0; true; i++) {
+			let b = document.getElementById("base" + i + "-template");
+			if (!b) break;
+			base[i] = b;
 			base[i].removeAttribute("id");
+			base[i].removeChild(base[i].firstChild);
+			base[i].removeChild(base[i].lastChild);
+		}
+		for (let i = 0; true; i++) {
+			let s = document.getElementById("ship" + i + "-template");
+			if (!s) break;
+			ship[i] = s;
+			ship[i].removeAttribute("id");
+			ship[i].removeChild(ship[i].firstChild);
+			ship[i].removeChild(ship[i].lastChild);
 		}
 		row.removeAttribute("id");
 		hex.removeAttribute("id");
@@ -44,11 +56,11 @@ var Map = {};
 					if (i === Math.floor(numcols / 2)) {
 						newHex.classList.add("blue");
 						friendlyCapital = newHex;
-						let newBase = base[0].cloneNode(true);
+						let newBase = this.getBaseNode(0);
 						newBase.id = getNewBaseId();
 						newBase.classList.add("controlled");
 						newHex.append(newBase);
-						newBase = base[0].cloneNode(true);
+						newBase = this.getBaseNode(0);
 						newBase.id = getNewBaseId();
 						newBase.classList.add("controlled");
 						newHex.append(newBase);
@@ -56,7 +68,7 @@ var Map = {};
 						// Hex "0.4" is the enemy capital
 						newHex.classList.add("red");
 						enemyCapital = newHex;
-						let newBase = base[0].cloneNode(true);
+						let newBase = this.getBaseNode(0);
 						newBase.id = getNewBaseId();
 						newHex.append(newBase);
 					}
@@ -211,4 +223,18 @@ var Map = {};
 		}
 		return "ship" + shipCount++;
 	}
+	
+	this.getBaseNode = function(type) {
+		if (type > base.length) type = 0;
+		return base[type].cloneNode(true);
+	};
+	
+	this.getShipNode = function(type) {
+		if (type > ship.length) type = 0;
+		return ship[type].cloneNode(true);
+	};
+	
+	this.clearTraces = function() {
+		[...map.getElementsByClassName("trace")].forEach(trace => trace.remove());
+	};
 }).apply(Map);

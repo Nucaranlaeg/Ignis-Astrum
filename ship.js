@@ -35,7 +35,7 @@ var Ship = {};
 				if (!movingUnit.name){
 					movingUnit.name = movingUnit.parentNode.id;
 					let sourceBase = movingUnit.cloneNode(true);
-					sourceBase.classList.add("source");
+					sourceBase.classList.add("trace");
 					sourceBase.classList.remove("controlled");
 					movingUnit.parentNode.appendChild(sourceBase);
 				}

@@ -16,7 +16,8 @@ var ContextMenu = {};
 		enemyBase: [true, false, false],
 		hex: [false, true, false],
 		all: [true, true, true]
-	}
+	};
+	const loadContextMenuEntry = [() => {return true}, () => {return true}, repairPossible];
 
 	function initializeContextMenu() {
 		contextMenu = document.getElementById("context-menu");
@@ -82,17 +83,21 @@ var ContextMenu = {};
 					return true;
 			}
 		}
-		contextMenu.classList.add("active");
 		contextMenu.style.top = event.clientY + "px";
 		contextMenu.style.left = event.clientX + "px";
+		let someEntry = false;
 		menuItems.forEach((item, index) => {
 			if (!item) return;
 			if (targetMenu[index]) {
-				item.classList.add("active");
+				if (loadContextMenuEntry[index](target)){
+					item.classList.add("active");
+					someEntry = true;
+				}
 			} else {
 				item.classList.remove("active");
 			}
 		});
+		if (someEntry) contextMenu.classList.add("active");
 		return false;
 	}
 	
@@ -102,7 +107,7 @@ var ContextMenu = {};
 		shipMenu.innerHTML = "";
 		units.forEach(unit => {
 			let node;
-			let type = unit.id.slice(0,4);
+			let type = unit.id.slice(0, 4);
 			switch (type) {
 				case "ship":
 					let ship = Wasm.getShip(unit.id.slice(4));
@@ -145,4 +150,21 @@ var ContextMenu = {};
 	this.preventClose = function(event) {
 		event.stopPropagation();
 	};
+	
+	function repairPossible(target) {
+		let type = target.id.slice(0, 4);
+		switch (type) {
+			case "ship":
+				let targetShip = Wasm.getShip(target.id.slice(4));
+				if (targetShip.currentHull === targetShip.maxHull) return false;
+				break;
+			case "base":
+				let targetBase = Wasm.getBase(target.id.slice(4));
+				if (targetBase.currentHull === targetBase.maxHull) return false;
+				break;
+			default:
+				return false;
+		}
+		return true;
+	}
 }).apply(ContextMenu);
