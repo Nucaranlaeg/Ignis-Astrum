@@ -60,10 +60,6 @@ var Map = {};
 						newBase.id = getNewBaseId();
 						newBase.classList.add("controlled");
 						newHex.append(newBase);
-						newBase = this.getBaseNode(0);
-						newBase.id = getNewBaseId();
-						newBase.classList.add("controlled");
-						newHex.append(newBase);
 					} else if (i === Math.floor(numcols / 2) + 4) {
 						// Hex "0.4" is the enemy capital
 						newHex.classList.add("red");
@@ -105,7 +101,7 @@ var Map = {};
 				}
 			}
 			if (target.classList.contains("ship")) {
-				if (!Ship.dragShip(event, target)) return;
+				if (Ship.dragShip(event, target)) return;
 			}
 		}
 		window.addEventListener("mouseup", endDrag, {capture: true, once: true});
@@ -211,7 +207,7 @@ var Map = {};
 		return "base" + baseCount++;
 	}
 
-	function getNewShipId() {
+	this.getNewShipId = function() {
 		let shipId = Wasm.addShip();
 		let index = ships.findIndex(ship => {
 			return ship.DBid === shipId;
@@ -225,16 +221,63 @@ var Map = {};
 	}
 	
 	this.getBaseNode = function(type) {
-		if (type > base.length) type = 0;
+		if (type > base.length - 1 || type < 0) type = 0;
 		return base[type].cloneNode(true);
 	};
 	
 	this.getShipNode = function(type) {
-		if (type > ship.length) type = 0;
+		if (type > ship.length - 1 || type < 0) type = 0;
 		return ship[type].cloneNode(true);
 	};
 	
 	this.clearTraces = function() {
 		[...map.getElementsByClassName("trace")].forEach(trace => trace.remove());
+		[...map.getElementsByClassName("ship")].forEach(ship => ship.name = "");
+		[...map.getElementsByClassName("base")].forEach(base => base.name = "");
+	};
+	
+	this.createShip = function(type, id, allied, location) {
+		let targetHex;
+		if (!location) {
+			targetHex = friendlyCapital;
+		} else {
+			targetHex = document.getElementById(location);
+		}
+		let newShip = this.getShipNode(type);
+		newShip.id = id;
+		if (allied) newShip.classList.add("controlled");
+		this.placeShip(newShip, allied, targetHex);
+	};
+	
+	this.placeShip = function(movingShip, allied, targetHex) {
+		movingShip.classList.remove([...movingShip.classList].find(c => {
+			return c.slice(0, 14) === "ship-position-";
+		}));
+		let friendlyShipCount = 0 + [...targetHex.getElementsByClassName("ship")].reduce((count, unit) => {
+			return count + ((unit.classList ? unit.classList.contains("controlled") : false) ? 1 : 0);
+		}, 0);
+		let enemyShipCount = 0 + [...targetHex.getElementsByClassName("ship")].reduce((count, unit) => {
+			return count + ((unit.classList ? !unit.classList.contains("controlled") : false) ? 1 : 0);
+		}, 0);
+		if (allied && (friendlyShipCount < 5 || (friendlyShipCount < 10 && enemyShipCount === 0))) {
+			movingShip.classList.add("ship-position-" + friendlyShipCount);
+		} else if (!allied && enemyShipCount < 5) {
+			movingShip.classList.add("ship-position-" + (enemyShipCount + 5));
+		} else if (!allied && enemyShipCount < 10 && friendlyShipCount === 0) {
+			movingShip.classList.add("ship-position-" + enemyShipCount - 5);
+		} else {
+			throw "NotImplementedError: Too many ships";
+		}
+		targetHex.append(movingShip);
+	};
+	
+	this.replaceShips = function(targetHex){
+		[...targetHex.getElementsByClassName("ship")].forEach(unit => {
+			// Temporarily put ships on the template hex.
+			hex.append(unit);
+		});
+		[...hex.getElementsByClassName("ship")].forEach(unit => {
+			this.placeShip(unit, true, targetHex);
+		});
 	};
 }).apply(Map);

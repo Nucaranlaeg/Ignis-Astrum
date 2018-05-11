@@ -30,4 +30,16 @@ var Empire = {};
 		sidebarParts.capital.innerHTML = income.capital;
 		sidebarParts.total.innerHTML = income.total;
 	};
+	
+	this.buyShip = function(type) {
+		let newShip = Wasm.getShipClass(type);
+		if (treasury < newShip.cost) {
+			ContextMenu.loadInfoWindow("Not enough IPCs in the capital.");
+			return;
+		}
+		let id = Map.getNewShipId();
+		newShip.id = id.slice(4);
+		Sidebar.addShip(newShip);
+		Map.createShip(type, id, true);
+	};
 }).apply(Empire);

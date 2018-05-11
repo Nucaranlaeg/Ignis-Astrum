@@ -1,0 +1,94 @@
+.sidebar {
+	height: 100vh;
+	flex: 1;
+}
+
+.accordion-bar {
+	height: 25px;
+	width: 100%;
+	background: linear-gradient(-85deg, #888888, #777777);
+	font-family: Impact, Charcoal, sans-serif;
+	text-align: center;
+	border: 2px outset #666666;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.accordion {
+	overflow: hidden;
+	transition: max-height 0.25s;
+	max-height: 0px;
+}
+
+.friendly {
+	background-color: blue;
+}
+
+.enemy {
+	background-color: red;
+}
+
+.ship-list {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+}
+
+.ship-detail {
+	width: 100%;
+	border: 1px solid gray;
+	height: 30px;
+	position: relative;
+	min-width: 100px;
+	display: inline-block;
+}
+
+.ship-detail svg {
+	top: 0;
+	left: 0;
+	width: 20px;
+	height: 20px;
+}
+
+.ship-stats-bar {
+	height: 100%;
+	top: 0;
+	position: absolute;
+	font-weight: bold;
+	line-height: 30px;
+}
+
+.ship-ability-icon {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	margin-top: 4px;
+	margin-bottom: -4px;
+}
+
+.image {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	position: relative;
+	margin: 4px 5px;
+}
+
+.ship-detail .cost {
+	float: right;
+	line-height: 30px;
+	font-weight: bolder;
+	color: #ffdf00;
+	padding-right: 5px;
+}
+
+#empire-income {
+	padding: 10px;
+    background: #add8e6;
+}
+
+.income {
+	width: 50%;
+	text-align: center;
+	float: right;
+}

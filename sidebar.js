@@ -16,22 +16,23 @@ var Sidebar = {};
 		let friendlySection = document.getElementById("friendly-ships-available");
 		let enemySection = document.getElementById("enemy-ships-available");
 		let newShip;
-		for (let i = 0; i < SHIP_CLASSES; i++){
-			newShip = detail.cloneNode(true);
-			newShip.id = "friendly-ship-class" + i;
+		// Ensure the map is loaded before populating the ship list.
+		window.setTimeout(() => {for (let i = 0; i < SHIP_CLASSES; i++){
+			newShip = this.createShipNode(Wasm.getShipClass(i), "friendy-ship-class");
+			newShip.setAttribute("onclick", "Empire.buyShip(" + i + ")");
 			friendlySection.append(newShip);
 			
 			newShip = detail.cloneNode(true);
 			newShip.id = "enemy-ship-class" + i;
 			newShip.style.display = "none";
 			enemySection.append(newShip);
-		}
+		}}, 0);
 		
 		//addShip({shipClass: 1, power: 3, currentHull: 3, maxHull: 5, shield: 1, repair: 1, id: "ship0", allied: true});
 		//addShip({shipClass: 1, power: 2, currentHull: 4, maxHull: 7, shield: 0, repair: 1, id: "ship1", allied: false});
 	}
 
-	document.addEventListener("DOMContentLoaded", initializeSidebar, {once: true});
+	document.addEventListener("DOMContentLoaded", initializeSidebar.bind(this), {once: true});
 
 	this.toggle = function(section) {
 		let target = document.getElementById(section);
@@ -43,18 +44,9 @@ var Sidebar = {};
 	};
 	
 	this.selectHex = function(event) {
-		let friendlyShips = document.getElementById("friendly-selected-ships");
-		let enemyShips = document.getElementById("enemy-selected-ships");
-		let friendlyBases = document.getElementById("friendly-selected-bases");
-		let enemyBases = document.getElementById("enemy-selected-bases");
-		
-		// Clear previous selection
+		// Clear previous selection.
 		if (selectedHex){
 			selectedHex.classList.remove("selected");
-			friendlyShips.innerHTML = "";
-			enemyShips.innerHTML = "";
-			friendlyBases.innerHTML = "";
-			enemyBases.innerHTML = "";
 		}
 		
 		let target = Utils.findHex(event.clientX, event.clientY);
@@ -64,6 +56,33 @@ var Sidebar = {};
 		}
 		selectedHex = target;
 		selectedHex.classList.add("selected");
+		this.findShipsInHex();
+		// Open the Selected Fleet tab.
+		document.getElementById("selected-fleet").style.maxHeight = "0px";
+		this.toggle("selected-fleet");
+	};
+	
+	this.updateSelectedHex = function(id) {
+		if (selectedHex && id === selectedHex.id){
+			this.findShipsInHex();
+			// Toggle twice - this will recalculate the height of the tab if it's open, but keep it closed if it's not.
+			this.toggle("selected-fleet");
+			this.toggle("selected-fleet");
+		}
+	};
+	
+	this.findShipsInHex = function() {
+		let friendlyShips = document.getElementById("friendly-selected-ships");
+		let enemyShips = document.getElementById("enemy-selected-ships");
+		let friendlyBases = document.getElementById("friendly-selected-bases");
+		let enemyBases = document.getElementById("enemy-selected-bases");
+		
+		// Clear previous selection.
+		friendlyShips.innerHTML = "";
+		enemyShips.innerHTML = "";
+		friendlyBases.innerHTML = "";
+		enemyBases.innerHTML = "";
+		
 		selectedHex.childNodes.forEach(unit => {
 			if (unit.nodeName == "#text") return; // Ignore the text node.
 			if (unit.classList.contains("trace")) return; // Ignore ship's initial positions.
@@ -87,23 +106,21 @@ var Sidebar = {};
 					break;
 			}
 		});
-		// Open the Selected Fleet tab.
-		document.getElementById("selected-fleet").style.maxHeight = "0px";
-		this.toggle("selected-fleet");
 	}
 	
-	function addShip(ship) {
+	this.addShip = function(ship) {
 		shipList.push(ship);
 	};
 
 	this.createShipNode = function(ship, idPrefix) {
 		let newShip = detail.cloneNode(true);
-		newShip.getElementsByClassName("image")[0].appendChild(Map.getShipNode(0));
+		newShip.getElementsByClassName("image")[0].appendChild(Map.getShipNode(ship.image));
 		newShip.getElementsByClassName("power")[0].innerHTML = ship.power;
 		newShip.getElementsByClassName("current-hull")[0].innerHTML = ship.currentHull;
 		newShip.getElementsByClassName("max-hull")[0].innerHTML = ship.maxHull;
 		newShip.getElementsByClassName("shield")[0].innerHTML = ship.shield;
 		newShip.getElementsByClassName("repair")[0].innerHTML = ship.repair;
+		newShip.getElementsByClassName("cost")[0].innerHTML = ship.cost ? ship.cost : "";
 		newShip.id = idPrefix + ship.id;
 		for (let i in ship.abilities) {
 			newShip.getElementsByClassName("ability-bar")[0].append(abilities[i]);
@@ -144,14 +161,8 @@ var Sidebar = {};
 	}
 	
 	function sortList() {
-		let section = document.getElementById("friendly-ships-seen")
-		while (section.firstChild) {
-			section.firstChild.remove();
-		}
-		section = document.getElementById("enemy-ships-seen");
-		while (section.firstChild) {
-			section.firstChild.remove();
-		}
+		document.getElementById("friendly-ships-seen").innerHTML = "";
+		document.getElementById("enemy-ships-seen").innerHTML = "";
 		shipList.sort((shipA, shipB) => {
 			if (shipA.shipClass - shipB.shipClass !== 0) return shipA.shipClass - shipB.shipClass;
 			return shipA.currentHull - shipB.currentHull;
