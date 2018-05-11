@@ -2,7 +2,7 @@
 
 var ContextMenu = {};
 (function() {
-	let contextMenu, shipMenu;
+	let contextMenu, shipMenu, infoWindow;
 	let menuItems = [];
 	let shipMenuClick = false;
 	const contextMenuMask = {
@@ -26,6 +26,7 @@ var ContextMenu = {};
 		menuItems[2] = document.getElementById("context-repair");
 		shipMenu = document.getElementById("ship-menu");
 		shipMenu.oncontextmenu = () => {shipMenuClick = true;}
+		infoWindow = document.getElementById("info-window");
 	}
 
 	document.addEventListener("DOMContentLoaded", initializeContextMenu, {once: true});
@@ -145,6 +146,7 @@ var ContextMenu = {};
 	this.closeContextMenu = function() {
 		contextMenu.classList.remove("active");
 		shipMenu.classList.remove("active");
+		infoWindow.classList.remove("active");
 	};
 
 	this.preventClose = function(event) {
@@ -167,4 +169,12 @@ var ContextMenu = {};
 		}
 		return true;
 	}
+	
+	this.loadInfoWindow = function(message, x = 75, y = 40) {
+		infoWindow.innerHTML = message;
+		infoWindow.classList.add("active");
+		infoWindow.style.top = y + "px";
+		infoWindow.style.left = x + "px";
+	}
+		
 }).apply(ContextMenu);

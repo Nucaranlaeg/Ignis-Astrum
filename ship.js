@@ -25,15 +25,32 @@ var Ship = {};
 	};
 	
 	function attemptMove(hex) {
-		let source = movingUnit.name ? movingUnit.name.split(".") : movingUnit.parentNode.id.split(".");
+		let origin = movingUnit.parentNode;
+		let source = movingUnit.name ? movingUnit.name.split(".") : origin.id.split(".");
 		let target = hex.id.split(".");
 		if (movingUnit.id.slice(0,4) === "ship") {
-			
-		} else {
-			// It's a base.
-			if (Utils.calculateDistance(source, target) <= 1) {
+			if (Utils.calculateDistance(source, target) <= 3) {
 				if (!movingUnit.name){
 					movingUnit.name = movingUnit.parentNode.id;
+					// Add some kind of movement trace.
+				}
+				Map.placeShip(movingUnit, true, hex);
+				Map.replaceShips(origin);
+			}
+		} else {
+			// It's a base.
+			// Test if there's an enemy unit in the hex - bases can't be a part of offensive operations.
+			if ([...hex.childNodes].some(unit => {
+				if (unit.nodeName === "#text") return false; // Ignore text nodes.
+				// Need to also test for enemy-controlled planets.
+				return !unit.classList.contains("controlled") && (unit.classList.contains("base") || unit.classList.contains("ship"));
+			})) {
+				ContextMenu.loadInfoWindow("Bases cannot participate in offensive operations.");
+				return;
+			}
+			if (Utils.calculateDistance(source, target) <= 1) {
+				if (!movingUnit.name){
+					movingUnit.name = origin.id;
 					let sourceBase = movingUnit.cloneNode(true);
 					sourceBase.classList.add("trace");
 					sourceBase.classList.remove("controlled");
@@ -43,6 +60,9 @@ var Ship = {};
 			}
 		}
 		// Attempt to move to said hex.
+		// Update to and from hexes.
+		Sidebar.updateSelectedHex(hex.id);
+		Sidebar.updateSelectedHex(origin.id);
 	}
 	
 	function continueDrag(event) {
