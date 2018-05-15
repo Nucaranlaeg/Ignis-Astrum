@@ -17,7 +17,7 @@ var Wasm = {};
 		return Math.floor(Math.random() * 1000000);
 	}
 	this.getShipClass = function(classNumber) {
-		return {shipClass: classNumber, power: 3, currentHull: 3, maxHull: 3, shield: 1, repair: 1, id: classNumber, allied: true, cost: 3, image: classNumber};
+		return {shipClass: classNumber, hullClass: classNumber, power: 3, currentHull: 3, maxHull: 3, shield: 1, repair: 1, id: classNumber, allied: true, cost: 3};
 	}
 	this.getBase = function(id){
 		let base = {level: Math.floor(Math.random() * 4), power: 5, currentHull: 5, maxHull: 5, shield: 1, repair: 3, id: id, allied: false};
@@ -25,7 +25,7 @@ var Wasm = {};
 		return base;
 	}
 	this.getShip = function(id){
-		return {shipClass: 1, power: 3, currentHull: 3, maxHull: 5, shield: 1, repair: 1, id: "id", allied: true};
+		return {shipClass: 1, hullClass: 0, power: 3, currentHull: 3, maxHull: 5, shield: 1, repair: 1, id: "id", allied: true};
 	}
 	this.getEmpireIncome = function() {
 		return {total: 7, capital: 6, territory: 1, majorPlanets: 0, minorPlanets: 0};

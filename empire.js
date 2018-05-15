@@ -40,6 +40,6 @@ var Empire = {};
 		let id = Map.getNewShipId();
 		newShip.id = id.slice(4);
 		Sidebar.addShip(newShip);
-		Map.createShip(type, id, true);
+		Map.createShip(newShip.hullClass, id, true);
 	};
 }).apply(Empire);

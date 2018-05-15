@@ -114,7 +114,7 @@ var Sidebar = {};
 
 	this.createShipNode = function(ship, idPrefix) {
 		let newShip = detail.cloneNode(true);
-		newShip.getElementsByClassName("image")[0].appendChild(Map.getShipNode(ship.image));
+		newShip.getElementsByClassName("image")[0].appendChild(Map.getShipNode(ship.hullClass));
 		newShip.getElementsByClassName("power")[0].innerHTML = ship.power;
 		newShip.getElementsByClassName("current-hull")[0].innerHTML = ship.currentHull;
 		newShip.getElementsByClassName("max-hull")[0].innerHTML = ship.maxHull;
