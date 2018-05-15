@@ -225,9 +225,9 @@ var Map = {};
 		return base[type].cloneNode(true);
 	};
 	
-	this.getShipNode = function(type) {
-		if (type > ship.length - 1 || type < 0) type = 0;
-		return ship[type].cloneNode(true);
+	this.getShipNode = function(hullClass) {
+		if (hullClass > ship.length - 1 || hullClass < 0) hullClass = 0;
+		return ship[hullClass].cloneNode(true);
 	};
 	
 	this.clearTraces = function() {
@@ -236,14 +236,14 @@ var Map = {};
 		[...map.getElementsByClassName("base")].forEach(base => base.name = "");
 	};
 	
-	this.createShip = function(type, id, allied, location) {
+	this.createShip = function(hullClass, id, allied, location) {
 		let targetHex;
 		if (!location) {
 			targetHex = friendlyCapital;
 		} else {
 			targetHex = document.getElementById(location);
 		}
-		let newShip = this.getShipNode(type);
+		let newShip = this.getShipNode(hullClass);
 		newShip.id = id;
 		if (allied) newShip.classList.add("controlled");
 		this.placeShip(newShip, allied, targetHex);
@@ -266,7 +266,10 @@ var Map = {};
 		} else if (!allied && enemyShipCount < 10 && friendlyShipCount === 0) {
 			movingShip.classList.add("ship-position-" + enemyShipCount - 5);
 		} else {
-			throw "NotImplementedError: Too many ships";
+			// Place the ship in the hex.
+			movingShip.classList.add("ship-position-" + friendlyShipCount);
+			// Replace ships by class.
+			throw "NotImplementedError: Cannot place ships by class.";
 		}
 		targetHex.append(movingShip);
 	};
