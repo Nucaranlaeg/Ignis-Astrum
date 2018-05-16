@@ -3,9 +3,10 @@
 <html>
 	<head>
 		<title>Ignis Astrum</title>
+		<script src="wasmFuncs.js"></script>
 		<script src="ship-creator.js"></script>
-		<link rel="stylesheet" type="text/css" href="creator.css">
 		<link rel="stylesheet" type="text/css" href="sidebar.css">
+		<link rel="stylesheet" type="text/css" href="creator.css">
 	</head>
 	<body>
 		<div id="templates">
@@ -14,17 +15,41 @@
 				<span class="image"></span>
 				<span class="ship-stats-bar">
 					<span class="power"></span>
-					<span class="current-hull"></span>/<span class="max-hull"></span>
+					<span class="max-hull"></span>
 					<span class="shield"></span>
 					<span class="repair"></span>
 				</span>
 				<span class="abilities-bar"></span>
 				<span class="cost"></span>
 			</span>
+			<span class="part ship-detail" id="part-template">
+				<span class="ship-stats-bar">
+					<span class="power"></span>
+					<span class="max-hull"></span>
+					<span class="shield"></span>
+					<span class="repair"></span>
+				</span>
+				<span class="cost"></span>
+			</span>
 		</div>
-		<div id="ship-list">
+		<div class="list-wrapper">
+			<center><h2>Your Ships</h2></center>
+			<div id="ship-list">
+			</div>
 		</div>
-		<div id="hulls">
+		<div class="list-wrapper">
+			<center><h2>Available Hulls</h2></center>
+			<div id="hulls">
+			</div>
+		</div>
+		<div class="list-wrapper">
+			<center><h2>Available Parts</h2></center>
+			<div id="parts">
+			</div>
+		</div>
+		<div style="display: block">
+			A note on costs: The costs under Hulls, Parts, and Components are base costs.  Two ships with the same total base cost will always have the same final cost,
+			but due to the difficulty of building larger ships, the final cost is actually (base cost)^(1.1).  This is listed under the "Your Ships" column.
 		</div>
 	</body>
 </html>

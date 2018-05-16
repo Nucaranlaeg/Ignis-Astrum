@@ -2,8 +2,6 @@ body{
 	height: 100%;
 	overflow: hidden;
 	margin: 0;
-	display: flex;
-	flex-direction: row;
 }
 
 * {
@@ -12,4 +10,38 @@ body{
 
 #templates {
 	display: none;
+}
+
+#hulls,
+#ship-list {
+	width: 250px;
+}
+
+.ship-stats-bar span {
+	width: 20px;
+	display: inline-block;
+}
+
+.list-wrapper {
+	padding-left: 5px;
+	padding-right: 5px;
+	display: inline-block;
+	vertical-align: top;
+	width: 260px;
+}
+
+.active {
+	border: 2px solid;
+}
+
+.power {
+	color: red;
+}
+
+.shield {
+	color: skyblue;
+}
+
+.repair {
+	color: brown;
 }

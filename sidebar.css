@@ -52,10 +52,10 @@
 
 .ship-stats-bar {
 	height: 100%;
-	top: 0;
-	position: absolute;
+	float: left;
 	font-weight: bold;
 	line-height: 30px;
+	padding-left: 10px;
 }
 
 .ship-ability-icon {
@@ -72,6 +72,11 @@
 	height: 20px;
 	position: relative;
 	margin: 4px 5px;
+	float: left;
+}
+
+.ability-bar {
+	float: right;
 }
 
 .ship-detail .cost {
