@@ -17,7 +17,47 @@ var Wasm = {};
 		return Math.floor(Math.random() * 1000000);
 	}
 	this.getShipClass = function(classNumber) {
-		return {shipClass: classNumber, hullClass: classNumber, power: 3, currentHull: 3, maxHull: 3, shield: 1, repair: 1, id: classNumber, allied: true, cost: 3};
+		let instance;
+		switch (parseInt(classNumber)) {
+			case 0:
+				instance = {power: 3, maxHull: 3, shield: 0, repair: 1, cost: 3};
+				break;
+			case 1:
+				instance = {power: 5, maxHull: 5, shield: 0, repair: 1, cost: 5};
+				break;
+			case 2:
+				instance = {power: 8, maxHull: 8, shield: 1, repair: 1, cost: 8};
+				break;
+			case 3:
+				instance = {power: 10, maxHull: 10, shield: 1, repair: 1, cost: 10};
+				break;
+			case 4:
+				instance = {power: 15, maxHull: 15, shield: 2, repair: 1, cost: 15};
+				break;
+			case 5:
+				instance = {power: 3, maxHull: 2, shield: 1, repair: 0, cost: 3};
+				break;
+			case 6:
+				instance = {power: 5, maxHull: 4, shield: 1, repair: 0, cost: 5};
+				break;
+			case 7:
+				instance = {power: 8, maxHull: 6, shield: 2, repair: 0, cost: 8};
+				break;
+			case 8:
+				instance = {power: 10, maxHull: 8, shield: 2, repair: 0, cost: 10};
+				break;
+			case 9:
+				instance = {power: 15, maxHull: 12, shield: 3, repair: 0, cost: 15};
+				break;
+			default:
+				instance = {power: 0, maxHull: 0, shield: 0, repair: 0, cost: 0};
+		}
+		instance.currentHull = instance.maxHull;
+		instance.shipClass = classNumber;
+		instance.hullClass = classNumber;
+		instance.id = null;
+		instance.allied = true;
+		return instance;
 	}
 	this.getBase = function(id){
 		let base = {level: Math.floor(Math.random() * 4), power: 5, currentHull: 5, maxHull: 5, shield: 1, repair: 3, id: id, allied: false};
@@ -40,5 +80,26 @@ var Wasm = {};
 	}
 	this.signalContinueTurn = function() {
 		return;
+	}
+	this.getPartDetails = function(index) {
+		let parts = [
+			{cost: 1, power: 1},
+			{cost: 2, power: 2},
+			{cost: 3, power: 4},
+			{cost: 5, power: 8},
+			{cost: 1, maxHull: 1},
+			{cost: 2, maxHull: 3},
+			{cost: 4, maxHull: 7},
+			{cost: 8, maxHull: 15},
+			{cost: 2.5, shield: 1},
+			{cost: 4.5, shield: 2},
+			{cost: 6.5, shield: 3},
+			{cost: 8, shield: 4},
+			{cost: 3, repair: 2},
+			{cost: 5, repair: 4},
+			{cost: 7, repair: 7},
+			{cost: 9, repair: 10},
+		];
+		return parts[index];
 	}
 }).apply(Wasm);
