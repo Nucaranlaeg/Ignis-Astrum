@@ -57,6 +57,7 @@ var Wasm = {};
 		instance.hullClass = classNumber;
 		instance.id = null;
 		instance.allied = true;
+		instance.abilities = [];
 		return instance;
 	}
 	this.getBase = function(id){
@@ -101,5 +102,11 @@ var Wasm = {};
 			{cost: 9, repair: 10},
 		];
 		return parts[index];
+	}
+	this.getabilityDetails = function(index) {
+		let abilities = [
+			{cost: 3, name: "Scout Sensors", description: "Allows the ship to detect terrain and enemy units 2 hexes away."},
+		];
+		return abilities[index];
 	}
 }).apply(Wasm);
