@@ -19,17 +19,22 @@
 					<span class="shield"></span>
 					<span class="repair"></span>
 				</span>
-				<span class="abilities-bar"></span>
 				<span class="cost"></span>
+				<span class="ability-bar"></span>
 			</span>
 			<span class="part ship-detail" id="part-template">
 				<span class="ship-stats-bar">
-					<span class="power"></span>
-					<span class="max-hull"></span>
-					<span class="shield"></span>
-					<span class="repair"></span>
+					<span class="value"></span>
 				</span>
+				<span class="type"></span>
 				<span class="cost"></span>
+			</span>
+			<span class="ability ship-detail" id="ability-template">
+				<span class="image"></span>
+				<span class="type"></span>
+				<span class="cost"></span>
+				<br>
+				<span class="description"></span>
 			</span>
 		</div>
 		<div class="list-wrapper">
@@ -47,8 +52,13 @@
 			<div id="parts">
 			</div>
 		</div>
+		<div class="list-wrapper">
+			<center><h2>Available abilities</h2></center>
+			<div id="abilities">
+			</div>
+		</div>
 		<div style="display: block">
-			A note on costs: The costs under Hulls, Parts, and Components are base costs.  Two ships with the same total base cost will always have the same final cost,
+			A note on costs: The costs under Hulls, Parts, and abilities are base costs.  Two ships with the same total base cost will always have the same final cost,
 			but due to the difficulty of building larger ships, the final cost is actually (base cost)^(1.1).  This is listed under the "Your Ships" column.
 		</div>
 	</body>

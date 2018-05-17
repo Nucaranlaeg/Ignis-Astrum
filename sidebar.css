@@ -77,6 +77,14 @@
 
 .ability-bar {
 	float: right;
+	padding: 2.5px;
+	max-width: 92px;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.ability-bar svg {
+    margin: 1px;
 }
 
 .ship-detail .cost {
@@ -85,6 +93,8 @@
 	font-weight: bolder;
 	color: #ffdf00;
 	padding-right: 5px;
+	min-width: 20px;
+	text-align: right;
 }
 
 #empire-income {

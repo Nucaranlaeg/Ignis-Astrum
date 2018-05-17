@@ -9,3 +9,4 @@ All generated elements which have ids and are not rows or hexes have a 4 letter 
 	bcxm - base in the context menu
 	shp- - ship svg
 	bse- - base svg
+	cmp- - ability (ability) svg
