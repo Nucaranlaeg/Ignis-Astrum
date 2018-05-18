@@ -26,13 +26,13 @@ var Wasm = {};
 				instance = {power: 5, maxHull: 5, shield: 0, repair: 1, cost: 5};
 				break;
 			case 2:
-				instance = {power: 8, maxHull: 8, shield: 1, repair: 1, cost: 8};
+				instance = {power: 8, maxHull: 8, shield: 1, repair: 1, cost: 10};
 				break;
 			case 3:
-				instance = {power: 10, maxHull: 10, shield: 1, repair: 1, cost: 10};
+				instance = {power: 10, maxHull: 10, shield: 1, repair: 1, cost: 13};
 				break;
 			case 4:
-				instance = {power: 15, maxHull: 15, shield: 2, repair: 1, cost: 15};
+				instance = {power: 15, maxHull: 15, shield: 2, repair: 1, cost: 18};
 				break;
 			case 5:
 				instance = {power: 3, maxHull: 2, shield: 1, repair: 0, cost: 3};
@@ -41,13 +41,13 @@ var Wasm = {};
 				instance = {power: 5, maxHull: 4, shield: 1, repair: 0, cost: 5};
 				break;
 			case 7:
-				instance = {power: 8, maxHull: 6, shield: 2, repair: 0, cost: 8};
+				instance = {power: 8, maxHull: 6, shield: 2, repair: 0, cost: 10};
 				break;
 			case 8:
-				instance = {power: 10, maxHull: 8, shield: 2, repair: 0, cost: 10};
+				instance = {power: 10, maxHull: 8, shield: 2, repair: 0, cost: 13};
 				break;
 			case 9:
-				instance = {power: 15, maxHull: 12, shield: 3, repair: 0, cost: 15};
+				instance = {power: 15, maxHull: 12, shield: 3, repair: 0, cost: 18};
 				break;
 			default:
 				instance = {power: 0, maxHull: 0, shield: 0, repair: 0, cost: 0};
@@ -92,10 +92,10 @@ var Wasm = {};
 			{cost: 2, maxHull: 3},
 			{cost: 4, maxHull: 7},
 			{cost: 8, maxHull: 15},
-			{cost: 2.5, shield: 1},
-			{cost: 4.5, shield: 2},
-			{cost: 6.5, shield: 3},
-			{cost: 8, shield: 4},
+			{cost: 2, shield: 1},
+			{cost: 3.5, shield: 2},
+			{cost: 5, shield: 3},
+			{cost: 6, shield: 4},
 			{cost: 3, repair: 2},
 			{cost: 5, repair: 4},
 			{cost: 7, repair: 7},
@@ -106,6 +106,9 @@ var Wasm = {};
 	this.getabilityDetails = function(index) {
 		let abilities = [
 			{cost: 3, name: "Scout Sensors", description: "Allows the ship to detect terrain and enemy units 2 hexes away."},
+			{cost: 3, name: "Efficient Warp Fields", description: "Allows the ship to enter combat if intercepted."},
+			{cost: 3, name: "Booster Packs", description: "Allows the ship to move 3 hexes and engage enemy units."},
+			{cost: 3, name: "Engine Stabilizers", description: "Allows the ship to move 4 hexes in a single turn."},
 		];
 		return abilities[index];
 	}

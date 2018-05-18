@@ -51,10 +51,10 @@ body{
 }
 
 .hex {
-  position: relative;
-  display: inline-block;
-  width: 131px;
-  font-size: 208px;
+	position: relative;
+	display: inline-block;
+	width: 131px;
+	font-size: 208px;
 }
 
 .hex {

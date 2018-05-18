@@ -38,7 +38,9 @@ var Creator = {};
 		
 		ship.forEach(s => {
 			let newShipDetail = shipDetails.cloneNode(true);
-			updateShip(newShipDetail, Wasm.getShipClass(s.dataset.hullClass));
+			let shipClass = Wasm.getShipClass(s.dataset.hullClass);
+			shipClass.cost = Math.floor(Math.pow(shipClass.cost, 1.1));
+			updateShip(newShipDetail, shipClass);
 			newShipDetail.onclick = () => {changeShipHull(s.dataset.hullClass)};
 			hulls.append(newShipDetail);
 		});
@@ -129,7 +131,7 @@ var Creator = {};
 	}
 	
 	function activate(hangerNumber) {
-		if (active) {
+		if (active !== null) {
 			hanger[active].classList.remove("active");
 			designs[active].parts.forEach(p => {
 				partList[p].classList.remove("active");
@@ -158,7 +160,7 @@ var Creator = {};
 	}
 	
 	function selectPart(partNumber) {
-		if (!active) return;
+		if (active === null) return;
 		let index = designs[active].parts.findIndex(p => p === partNumber);
 		if (index === -1) {
 			designs[active].parts.push(partNumber);
@@ -171,7 +173,7 @@ var Creator = {};
 	}
 	
 	function selectability(abilityNumber) {
-		if (!active) return;
+		if (active === null) return;
 		let index = designs[active].abilities.findIndex(c => c === abilityNumber);
 		if (index === -1) {
 			designs[active].abilities.push(abilityNumber);
