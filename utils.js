@@ -3,6 +3,9 @@
 var Utils = {};
 (function() {
 	this.findHex = function(x, y) {
+		// Don't open a context menu on the sidebar for now.
+		if (x - 10 > map.clientWidth) return;
+		
 		// Can't cache this, as it might change when panning.
 		let rows = [...map.children],
 			rowNum = null,

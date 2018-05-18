@@ -17,6 +17,16 @@ body{
 	width: 250px;
 }
 
+.ship-detail {
+	-webkit-touch-callout: none; /* iOS Safari */
+	-webkit-user-select: none; /* Safari */
+	-khtml-user-select: none; /* Konqueror HTML */
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* Internet Explorer/Edge */
+	user-select: none;
+	cursor: pointer;
+}
+
 .ship-stats-bar span {
 	width: 20px;
 	display: inline-block;
@@ -35,18 +45,6 @@ body{
 	margin: -1px;
 	height: 32px;
 	width: calc(100% + 2px);
-}
-
-.power {
-	color: red;
-}
-
-.shield {
-	color: skyblue;
-}
-
-.repair {
-	color: brown;
 }
 
 .type {

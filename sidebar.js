@@ -11,6 +11,9 @@ var Sidebar = {};
 	function initializeSidebar() {
 		detail = document.getElementById("ship-detail-template");
 		detail.removeAttribute("id");
+		[...detail.getElementsByClassName("ship-stats-bar")[0].childNodes].forEach(node => {
+			if (node.nodeType === Node.TEXT_NODE) node.remove();
+		});
 		
 		// Build the ships available list
 		let friendlySection = document.getElementById("friendly-ships-available");

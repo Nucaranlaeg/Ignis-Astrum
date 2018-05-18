@@ -43,6 +43,10 @@
 	display: inline-block;
 }
 
+#ships-available .partial-hull {
+	display: none;
+}
+
 .ship-detail svg {
 	top: 0;
 	left: 0;
@@ -56,6 +60,11 @@
 	font-weight: bold;
 	line-height: 30px;
 	padding-left: 10px;
+}
+
+.ship-stats-bar span {
+	width: 20px;
+	display: inline-block;
 }
 
 .ship-ability-icon {
@@ -106,4 +115,16 @@
 	width: 50%;
 	text-align: center;
 	float: right;
+}
+
+.power {
+	color: orange;
+}
+
+.shield {
+	color: skyblue;
+}
+
+.repair {
+	color: brown;
 }
