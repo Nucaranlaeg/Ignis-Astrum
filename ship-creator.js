@@ -4,6 +4,7 @@ var Creator = {};
 (function() {
 	let ship = [], designs = [];
 	let shipDetails, partDetails, abilityDetails, shipList, hulls, parts, abilities, hanger = [], partList = [], abilityList = [], abilityIcons = [];
+	let players;
 	let active = null;
 	
 	function initializeCreator() {
@@ -25,6 +26,7 @@ var Creator = {};
 			abilityIcons[i].removeChild(abilityIcons[i].firstChild);
 			abilityIcons[i].removeChild(abilityIcons[i].lastChild);
 		}
+		players = document.getElementById("players");
 		shipDetails = document.getElementById("ship-detail-template");
 		shipDetails.removeAttribute("id");
 		partDetails = document.getElementById("part-template");
@@ -76,9 +78,9 @@ var Creator = {};
 			let newability = abilityDetails.cloneNode(true);
 			// This is to ensure that each ability gets a reference to the correct ability number.
 			let k = i.valueOf();
-			newability.onclick = () => {selectability(k)};
-			newability.onmouseover = () => {expandability(newability)};
-			newability.onmouseout = () => {collapseability(newability)};
+			newability.onclick = () => {selectAbility(k)};
+			newability.onmouseover = () => {expandAbility(newability)};
+			newability.onmouseout = () => {collapseAbility(newability)};
 			newability.getElementsByClassName("image")[0].append(abilityIcons[i].cloneNode(true));
 			newability.getElementsByClassName("type")[0].innerHTML = nextability.name;
 			newability.getElementsByClassName("description")[0].innerHTML = nextability.description;
@@ -86,6 +88,12 @@ var Creator = {};
 			abilityList.push(newability);
 			abilities.append(newability);
 		}
+		
+		this.saveShips("default");
+		Object.keys(localStorage).forEach(key => {
+			if (localStorage[key].slice(0,3) !== "sds") return;
+			players.innerHTML += "<button onclick='Creator.loadShips(\"" + key + "\")'>Load " + key + "</button>";
+		});
 	}
 	
 	document.addEventListener("DOMContentLoaded", initializeCreator.bind(this), {once: true});
@@ -172,7 +180,7 @@ var Creator = {};
 		calculateShip(active);
 	}
 	
-	function selectability(abilityNumber) {
+	function selectAbility(abilityNumber) {
 		if (active === null) return;
 		let index = designs[active].abilities.findIndex(c => c === abilityNumber);
 		if (index === -1) {
@@ -185,11 +193,26 @@ var Creator = {};
 		calculateShip(active);
 	}
 	
-	function expandability(ability) {
+	function expandAbility(ability) {
 		ability.style.height = ability.scrollHeight + "px";
 	}
 	
-	function collapseability(ability) {
+	function collapseAbility(ability) {
 		ability.style.height = "30px";
 	}
+	
+	this.saveShips = function(name) {
+		let player = name || document.getElementById("player-name").value;
+		localStorage[player] = "sds" + JSON.stringify(designs);
+	};
+	
+	this.loadShips = function(name) {
+		if (!localStorage[name]) name = "default";
+		designs = JSON.parse(localStorage[name].slice(3));
+		for (let i = 0; i < 10; i++) calculateShip(i);
+		[...document.getElementsByClassName("active")].forEach(node => {
+			node.classList.remove("active");
+		});
+		active = null;
+	};
 }).apply(Creator);

@@ -15,24 +15,14 @@ var Sidebar = {};
 			if (node.nodeType === Node.TEXT_NODE) node.remove();
 		});
 		
-		// Build the ships available list
-		let friendlySection = document.getElementById("friendly-ships-available");
-		let enemySection = document.getElementById("enemy-ships-available");
-		let newShip;
-		// Ensure the map is loaded before populating the ship list.
-		window.setTimeout(() => {for (let i = 0; i < SHIP_CLASSES; i++){
-			newShip = this.createShipNode(Wasm.getShipClass(i), "friendy-ship-class");
-			newShip.setAttribute("onclick", "Empire.buyShip(" + i + ")");
-			friendlySection.append(newShip);
-			
-			newShip = detail.cloneNode(true);
-			newShip.id = "enemy-ship-class" + i;
-			newShip.style.display = "none";
-			enemySection.append(newShip);
-		}}, 0);
-		
-		//addShip({shipClass: 1, power: 3, currentHull: 3, maxHull: 5, shield: 1, repair: 1, id: "ship0", allied: true});
-		//addShip({shipClass: 1, power: 2, currentHull: 4, maxHull: 7, shield: 0, repair: 1, id: "ship1", allied: false});
+		for (let i = 0; true; i++) {
+			let c = document.getElementById("ability" + i + "-template");
+			if (!c) break;
+			abilities[i] = c;
+			abilities[i].removeAttribute("id");
+			abilities[i].removeChild(abilities[i].firstChild);
+			abilities[i].removeChild(abilities[i].lastChild);
+		}
 	}
 
 	document.addEventListener("DOMContentLoaded", initializeSidebar.bind(this), {once: true});
@@ -125,9 +115,9 @@ var Sidebar = {};
 		newShip.getElementsByClassName("repair")[0].innerHTML = ship.repair;
 		newShip.getElementsByClassName("cost")[0].innerHTML = ship.cost ? ship.cost : "";
 		newShip.id = idPrefix + ship.id;
-		for (let i in ship.abilities) {
-			newShip.getElementsByClassName("ability-bar")[0].append(abilities[i]);
-		}
+		ship.abilities.forEach(a => {
+			newShip.getElementsByClassName("ability-bar")[0].append(abilities[a].cloneNode(true));
+		});
 		return newShip;
 	}
 
@@ -181,5 +171,62 @@ var Sidebar = {};
 		// Scale value from 0.5 to 2
 		value = Math.pow(2, value / 50 - 1);
 		console.log("readPriority: value", value);
+	}
+	
+	this.loadPlayers = function() {
+		let player1Name = document.getElementById("player1-name").value;
+		let player2Name = document.getElementById("player2-name").value;
+		if (!player1Name || !player2Name) return;
+		(loadPlayer.bind(Sidebar))(player1Name, true);
+		(loadPlayer.bind(Sidebar))(player2Name, false);
+		document.getElementById("load-player").remove();
+	}
+	
+	// This function will likely have to be replaced with an AJAX call through Wasm.
+	// I'm not sure what it will look like, though, so it's sitting here for now.
+	function loadPlayer(name, friendly) {
+		let friendlySection = document.getElementById("friendly-ships-available");
+		let enemySection = document.getElementById("enemy-ships-available");
+		let thisSection;
+		if (friendly) {
+			thisSection = friendlySection;
+		} else {
+			thisSection = enemySection;
+		}
+		thisSection.innerHTML = "";
+		if (!localStorage[name]) name = "default";
+		let designs = JSON.parse(localStorage[name].slice(3));
+		for (let i = 0; i < 10; i++) {
+			let newShip = this.createShipNode(calculateShip(designs[i], i), friendly ? "friendly-ship-class" : "enemy-ship-class");
+			newShip.setAttribute("onclick", "Empire.buyShip(" + i + ")");
+			thisSection.append(newShip);
+		}
+	};
+	
+	function calculateShip(design, id) {
+		let shipCalc = Wasm.getShipClass(design.hullClass);
+		design.parts.forEach(p => {
+			let partVals = Wasm.getPartDetails(p);
+			shipCalc.power += partVals.power ? partVals.power : 0;
+			shipCalc.maxHull += partVals.maxHull ? partVals.maxHull : 0;
+			shipCalc.shield += partVals.shield ? partVals.shield : 0;
+			shipCalc.repair += partVals.repair ? partVals.repair : 0;
+			shipCalc.cost += partVals.cost;
+		});
+		shipCalc.abilities = [];
+		design.abilities.forEach(c => {
+			let abilityVals = Wasm.getabilityDetails(c);
+			shipCalc.abilities.push(c);
+			shipCalc.power += abilityVals.power ? abilityVals.power : 0;
+			shipCalc.maxHull += abilityVals.maxHull ? abilityVals.maxHull : 0;
+			shipCalc.shield += abilityVals.shield ? abilityVals.shield : 0;
+			shipCalc.repair += abilityVals.repair ? abilityVals.repair : 0;
+			shipCalc.cost += abilityVals.cost;
+		});
+		
+		// Calculate the total cost of the ship.
+		shipCalc.cost = Math.floor(Math.pow(shipCalc.cost, 1.1));
+		shipCalc.id = id;
+		return shipCalc;
 	}
 }).apply(Sidebar);

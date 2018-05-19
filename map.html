@@ -198,5 +198,12 @@
 			</div>
 		</div>
 		<div id="info-window" class="floating-menu" onclick="ContextMenu.preventClose(event)"></div>
+		<div id="load-player" class="floating-menu active centred">
+			Player on the Blue side:<br>
+			<input id="player1-name" placeholder="Please input a name" /><br><br>
+			Player on the Red side:<br>
+			<input id="player2-name" placeholder="Please input a name" /><br><br>
+			<button onclick="Sidebar.loadPlayers()">Begin Game</button>
+		</div>
 	</body>
 </html>
