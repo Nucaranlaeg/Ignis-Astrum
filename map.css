@@ -123,6 +123,11 @@ body{
 	display: block;
 }
 
+.floating-menu.centred {
+    top: 40%;
+    left: 40%;
+}
+
 .context-menu-label {
 	font-weight: bold;
 	text-align: center;
