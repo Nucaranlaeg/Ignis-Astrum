@@ -1,0 +1,35 @@
+:root {
+	/* ----- Ship detail colours ----- */
+	
+	--power: orange;
+	--cost: #ffdf00;
+	--shield: skyblue;
+	--repair: brown;
+	
+	/* ----- UI Component colours ----- */
+	
+	--summary-background: #add8e6;
+	
+	--friendly: blue;
+	--enemy: red;
+	
+	--default-unit: #999999;
+	--hex-background: #000000;
+	--map-background: #cccccc;
+	
+	--menu-border: #999999;
+	--menu-background: #aaaaaa;
+	
+	/* ----- Map positioning ----- */
+	
+	--hex-width: 131px;
+	
+	--base-h-offset: 62.5px;
+	--base-v-offset: 129px;
+	
+	/* ----- Z-indicies ----- */
+	
+	--timer-z: 10;
+	--home-z: 10;
+	--context-z: 20;
+}

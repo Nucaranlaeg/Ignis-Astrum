@@ -22,11 +22,11 @@
 }
 
 .friendly {
-	background-color: blue;
+	background-color: var(--friendly);
 }
 
 .enemy {
-	background-color: red;
+	background-color: var(--enemy);
 }
 
 .ship-list {
@@ -101,7 +101,7 @@
 	float: right;
 	line-height: 30px;
 	font-weight: bolder;
-	color: #ffdf00;
+	color: var(--cost);
 	padding-right: 5px;
 	min-width: 20px;
 	text-align: right;
@@ -109,7 +109,7 @@
 
 #empire-income {
 	padding: 10px;
-    background: #add8e6;
+    background: var(--summary-background);
 }
 
 .income {
@@ -119,13 +119,13 @@
 }
 
 .power {
-	color: orange;
+	color: var(--power);
 }
 
 .shield {
-	color: skyblue;
+	color: var(--shield);
 }
 
 .repair {
-	color: brown;
+	color: var(--repair);
 }

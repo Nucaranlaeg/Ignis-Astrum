@@ -19,7 +19,7 @@ body{
 	border: 10px solid gray;
 	flex: 4;
 	overflow: hidden;
-	background-color: #CCCCCC;
+	background-color: var(--map-background);
 }
 
 #map * {
@@ -37,7 +37,7 @@ body{
 	position: fixed;
 	top: 20px;
 	left: 20px;
-	z-index: 10;
+	z-index: var(--home-z);
 }
 
 .hex-row {
@@ -53,20 +53,20 @@ body{
 .hex {
 	position: relative;
 	display: inline-block;
-	width: 131px;
+	width: var(--hex-width);
 	font-size: 208px;
 }
 
 .hex {
-	color: #000000;
+	color: var(--hex-background);
 }
 
 .hex.red {
-	color: #FF0000;
+	color: var(--enemy);
 }
 
 .hex.blue {
-	color: #0000FF;
+	color: var(--friendly);
 }
 
 .hex.selected {
@@ -74,11 +74,11 @@ body{
 }
 
 .base {
-	fill: #999999;
-	stroke: #999999;
+	fill: var(--default-unit);
+	stroke: var(--default-unit);
 	position: absolute;
-	top: 129px;
-	left: 62.5px;
+	top: var(--base-v-offset);
+	left: var(--base-h-offset);
 	stroke-width: 2;
 }
 
@@ -89,8 +89,8 @@ body{
 }
 
 .ship {
-	fill: #999999;
-	stroke: #999999;
+	fill: var(--default-unit);
+	stroke: var(--default-unit);
 	position: absolute;
 	stroke-width: 2;
 	height: 20px;
@@ -104,10 +104,10 @@ body{
 .floating-menu {
 	display: none;
 	position:absolute;
-	z-index: 100;
+	z-index: var(--context-z);
 	padding: 2px 2px 0 2px;
-	background-color: #AAAAAA;
-	border: 2px ridge #999999;
+	background-color: var(--menu-background);
+	border: 2px ridge var(--menu-border);
 }
 
 #context-menu > * {
@@ -115,7 +115,7 @@ body{
 }
 
 .floating-menu > .active ~ * {
-	border-top: 1px solid #999999;
+	border-top: 1px solid var(--menu-border);
 }
 
 .floating-menu.active,
@@ -150,7 +150,7 @@ body{
 	position: fixed;
 	bottom: 20px;
 	right: calc(20px + 20%);
-	z-index: 10;
+	z-index: var(--timer-z);
 	border-radius: 50%;
 }
 
