@@ -11,11 +11,6 @@ body{
 	display: none;
 }
 
-#hulls,
-#ship-list {
-	width: 250px;
-}
-
 .ship-detail {
 	-webkit-touch-callout: none; /* iOS Safari */
 	-webkit-user-select: none; /* Safari */

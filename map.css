@@ -57,8 +57,12 @@ body{
 	font-size: 208px;
 }
 
-.hex {
+.hex.seen {
 	color: var(--hex-background);
+}
+
+.hex {
+	color: var(--unseen-hex-background);
 }
 
 .hex.red {
@@ -77,8 +81,8 @@ body{
 	fill: var(--default-unit);
 	stroke: var(--default-unit);
 	position: absolute;
-	top: var(--base-v-offset);
-	left: var(--base-h-offset);
+	top: 129px;
+	left: 62.5px;
 	stroke-width: 2;
 }
 
@@ -160,9 +164,9 @@ body{
 
 .circle_animation {
 	transition: all .25s linear;
-	stroke: #6fdb6f;
+	stroke: var(--timer-colour);
 }
 
 .turn-ended {
-	stroke: #6f6fdb;
+	stroke: var(--turn-end-timer-colour);
 }

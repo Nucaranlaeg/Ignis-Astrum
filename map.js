@@ -68,8 +68,6 @@ var Map = {};
 						newBase.id = getNewBaseId();
 						newHex.append(newBase);
 					}
-					hexRow.append(newHex);
-					continue;
 				}
 				hexRow.append(newHex);
 				createHex(newHex.id);
@@ -207,8 +205,7 @@ var Map = {};
 		return "base" + baseCount++;
 	}
 
-	this.getNewShipId = function() {
-		let shipId = Wasm.addShip();
+	this.getNewShipId = function(shipId) {
 		let index = ships.findIndex(ship => {
 			return ship.DBid === shipId;
 		});
@@ -282,5 +279,65 @@ var Map = {};
 		[...hex.getElementsByClassName("ship")].forEach(unit => {
 			this.placeShip(unit, true, targetHex);
 		});
+	};
+	
+	this.drawVision = function() {
+		// Unsee all hexes.
+		[...map.getElementsByClassName("seen")].forEach(hex => hex.classList.remove("seen"));
+		let alliedShips = [...map.getElementsByClassName("ship")].filter(ship => {
+			return Wasm.getShip(ships[ship.id.slice(4)].DBid).allied;
+		});
+		// Get all the hexes with friendly ships or bases.
+		let occupiedHexes = alliedShips.map(ship => ship.parentNode);
+		// This commented out bit will work once base stats are implemented.
+		/*let occupiedHexes = [...[...map.getElementsByClassName("ship")].filter(ship => {
+			return Wasm.getShip(ships[ship.id.slice(4)].DBid).allied;
+		}).map(ship => ship.parentNode),
+			...[...map.getElementsByClassName("base")].filter(base => {
+			return Wasm.getBase(bases[base.id.slice(4)].DBid).allied;
+		}).map(base => base.parentNode)];*/
+		// Add all hexes adjacent to scouts.
+		let scoutedHexes = [].concat(...(alliedShips.filter(ship => {
+			return Wasm.getShip(ships[ship.id.slice(4)].DBid).abilities.find(a => a === Utils.ABILITY.SCOUT) !== undefined;
+		}).map(ship => {
+			return getAdjacentHexes(ship.parentNode);
+		})));
+		// See all hexes adjacent to hexes found.  Don't add the scouted hexes in - by definition, they're next to a ship.
+		let visibleHexes = [].concat(...[...occupiedHexes, ...scoutedHexes].map(hex => {
+			return getAdjacentHexes(hex);
+		}), occupiedHexes);
+		visibleHexes.forEach(hex => {
+			if (hex.classList.contains("seen")) return;
+			hex.classList.add("seen");
+			let owner = Wasm.getHexOwner(hexes.find(h => h.id === hex.id).DBid);
+			hex.classList.remove("red", "blue");
+			if (owner === 1) hex.classList.add("blue");
+			if (owner === -1) hex.classList.add("red");
+		});
+	};
+	
+	function getAdjacentHexes(centreHex) {
+		let y = +centreHex.id.split('.')[0], x = +centreHex.id.split('.')[1];
+		let odd = y % 2 === 0 ? -1 : 1;
+		return [
+			checkForHex(y, x - 1),
+			checkForHex(y, x + 1),
+			checkForHex(y - 1, x),
+			checkForHex(y - 1, x + odd),
+			checkForHex(y + 1, x),
+			checkForHex(y + 1, x + odd)
+		];
+	}
+	
+	function checkForHex(y, x) {
+		let target = document.getElementById(y + '.' + x);
+		while (!target){
+			addRowToBottom();
+			addRowToTop();
+			addHexToRowEnd();
+			addHexToRowStart();
+			target = document.getElementById(y + '.' + x);
+		}
+		return target;
 	};
 }).apply(Map);
