@@ -15,17 +15,18 @@
 	
 	--default-unit: #999999;
 	--hex-background: #000000;
+	--unseen-hex-background: #444444;
 	--map-background: #cccccc;
 	
 	--menu-border: #999999;
 	--menu-background: #aaaaaa;
 	
+	--timer-colour: #6fdb6f;
+	--turn-end-timer-colour: #6f6fdb;
+	
 	/* ----- Map positioning ----- */
 	
 	--hex-width: 131px;
-	
-	--base-h-offset: 62.5px;
-	--base-v-offset: 129px;
 	
 	/* ----- Z-indicies ----- */
 	

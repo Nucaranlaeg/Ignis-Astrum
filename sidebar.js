@@ -185,6 +185,8 @@ var Sidebar = {};
 	// This function will likely have to be replaced with an AJAX call through Wasm.
 	// I'm not sure what it will look like, though, so it's sitting here for now.
 	function loadPlayer(name, friendly) {
+		let designs = Wasm.loadPlayer(name, friendly);
+		if (!friendly) return;
 		let friendlySection = document.getElementById("friendly-ships-available");
 		let enemySection = document.getElementById("enemy-ships-available");
 		let thisSection;
@@ -194,39 +196,10 @@ var Sidebar = {};
 			thisSection = enemySection;
 		}
 		thisSection.innerHTML = "";
-		if (!localStorage[name]) name = "default";
-		let designs = JSON.parse(localStorage[name].slice(3));
 		for (let i = 0; i < 10; i++) {
-			let newShip = this.createShipNode(calculateShip(designs[i], i), friendly ? "friendly-ship-class" : "enemy-ship-class");
+			let newShip = this.createShipNode(designs[i], friendly ? "friendly-ship-class" : "enemy-ship-class");
 			newShip.setAttribute("onclick", "Empire.buyShip(" + i + ")");
 			thisSection.append(newShip);
 		}
 	};
-	
-	function calculateShip(design, id) {
-		let shipCalc = Wasm.getShipClass(design.hullClass);
-		design.parts.forEach(p => {
-			let partVals = Wasm.getPartDetails(p);
-			shipCalc.power += partVals.power ? partVals.power : 0;
-			shipCalc.maxHull += partVals.maxHull ? partVals.maxHull : 0;
-			shipCalc.shield += partVals.shield ? partVals.shield : 0;
-			shipCalc.repair += partVals.repair ? partVals.repair : 0;
-			shipCalc.cost += partVals.cost;
-		});
-		shipCalc.abilities = [];
-		design.abilities.forEach(c => {
-			let abilityVals = Wasm.getabilityDetails(c);
-			shipCalc.abilities.push(c);
-			shipCalc.power += abilityVals.power ? abilityVals.power : 0;
-			shipCalc.maxHull += abilityVals.maxHull ? abilityVals.maxHull : 0;
-			shipCalc.shield += abilityVals.shield ? abilityVals.shield : 0;
-			shipCalc.repair += abilityVals.repair ? abilityVals.repair : 0;
-			shipCalc.cost += abilityVals.cost;
-		});
-		
-		// Calculate the total cost of the ship.
-		shipCalc.cost = Math.floor(Math.pow(shipCalc.cost, 1.1));
-		shipCalc.id = id;
-		return shipCalc;
-	}
 }).apply(Sidebar);

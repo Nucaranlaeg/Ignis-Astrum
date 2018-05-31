@@ -40,7 +40,7 @@ var Creator = {};
 		
 		ship.forEach(s => {
 			let newShipDetail = shipDetails.cloneNode(true);
-			let shipClass = Wasm.getShipClass(s.dataset.hullClass);
+			let shipClass = Wasm.getHullClass(s.dataset.hullClass);
 			shipClass.cost = Math.floor(Math.pow(shipClass.cost, 1.1));
 			updateShip(newShipDetail, shipClass);
 			newShipDetail.onclick = () => {changeShipHull(s.dataset.hullClass)};
@@ -113,7 +113,7 @@ var Creator = {};
 	}
 	
 	function calculateShip(designNumber) {
-		let shipCalc = Wasm.getShipClass(designs[designNumber].hullClass);
+		let shipCalc = Wasm.getHullClass(designs[designNumber].hullClass);
 		designs[designNumber].parts.forEach(p => {
 			let partVals = Wasm.getPartDetails(p);
 			shipCalc.power += partVals.power ? partVals.power : 0;

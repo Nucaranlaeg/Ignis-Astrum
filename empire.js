@@ -33,11 +33,13 @@ var Empire = {};
 	
 	this.buyShip = function(type) {
 		let newShip = Wasm.getShipClass(type);
-		if (treasury < newShip.cost) {
+		let shipId = Wasm.addShip(type);
+		if (treasury < newShip.cost || shipId === -1) {
 			ContextMenu.loadInfoWindow("Not enough IPCs in the capital.");
 			return;
 		}
-		let id = Map.getNewShipId();
+		this.updateEmpireSidebar();
+		let id = Map.getNewShipId(shipId);
 		newShip.id = id.slice(4);
 		Sidebar.addShip(newShip);
 		Map.createShip(newShip.hullClass, id, true);

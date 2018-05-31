@@ -66,4 +66,11 @@ var Utils = {};
 			return Math.max(Math.abs(dx), Math.abs(dy));
 		}
 	};
+	
+	this.ABILITY = Object.freeze({
+		SCOUT: 0,
+		WARP_FIELDS: 1,
+		BOOSTER_PACKS: 2,
+		STABILIZERS: 3,
+	});
 }).apply(Utils);
