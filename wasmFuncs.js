@@ -28,7 +28,7 @@ var Wasm = {};
 	}
 	this.addShip = function(classNumber){
 		let newShip = this.getShipClass(classNumber);
-		if (treasury <= newShip.cost) return -1;
+		if (treasury < newShip.cost) return -1;
 		treasury = Math.round(treasury - newShip.cost);
 		newShip.id = Math.floor(Math.random() * 1000000000);
 		newShip.x = 0;
