@@ -34,7 +34,7 @@ var Empire = {};
 	this.buyShip = function(type) {
 		let newShip = Wasm.getShipClass(type);
 		let shipId = Wasm.addShip(type);
-		if (treasury < newShip.cost || shipId === -1) {
+		if (shipId === -1) {
 			ContextMenu.loadInfoWindow("Not enough IPCs in the capital.");
 			return;
 		}
