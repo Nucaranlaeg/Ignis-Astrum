@@ -81,7 +81,30 @@ var Wasm = {};
 		instance.abilities = [];
 		return instance;
 	}
-	// classNumber is 0-9 for friendly ships, 10-19 for enemy ships.
+	this.getBaseClass = function(classNumber){
+		let instance;
+		switch (parseInt(classNumber)) {
+			case 0:
+				instance = {power: 3, maxHull: 3, shield: 1, repair: 3, cost: 4.32};
+				break;
+			case 1:
+				instance = {power: 6, maxHull: 6, shield: 2, repair: 6, cost: 4.32};
+				break;
+			case 2:
+				instance = {power: 9, maxHull: 9, shield: 3, repair: 9, cost: 4.32};
+				break;
+			case 3:
+				instance = {power: 12, maxHull: 12, shield: 4, repair: 12, cost: 4.32};
+				break;
+		}
+		instance.currentHull = instance.maxHull;
+		instance.hullClass = classNumber;
+		instance.id = null;
+		instance.allied = true;
+		instance.abilities = [];
+		return instance;
+	}
+	// In this function, classNumber is 0-9 for friendly ships, 10-19 for enemy ships.
 	this.getShipClass = function (classNumber) {
 		if (classNumber < 10){
 			return JSON.parse(JSON.stringify(friendlyDesigns[classNumber]));
@@ -190,7 +213,9 @@ var Wasm = {};
 	this.loadPlayer = function(name, friendly) {
 		if (!localStorage[name]) name = "default";
 		let designs = JSON.parse(localStorage[name].slice(3));
-		designs = designs.map(ship => calculateShip(ship, ship.id));
+		designs = designs.map((ship, index) => {
+			return index < 10 ? calculateShip(ship, ship.id) : calculateBase(base, base.id);
+		});
 		if (friendly) {
 			friendlyDesigns = designs;
 		} else {

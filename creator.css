@@ -57,3 +57,7 @@ body{
     padding: 0 10px 5px;
     display: inline-block;
 }
+
+svg.base {
+	stroke: black;
+}
