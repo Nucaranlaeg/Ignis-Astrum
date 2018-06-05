@@ -13,6 +13,7 @@ var Map = {};
 	let baseCount = 0, shipCount = 0;
 	// DOM elements we don't want to keep searching for.
 	let map, row, hex, friendlyCapital, enemyCapital, base = [], ship = [];
+	let BASE_TYPES = Wasm.getBaseTypes();
 
 	function initializeMap() {
 		// Load references to DOM elements from the HTML.
@@ -56,17 +57,10 @@ var Map = {};
 					if (i === Math.floor(numcols / 2)) {
 						newHex.classList.add("blue");
 						friendlyCapital = newHex;
-						let newBase = this.getBaseNode(0);
-						newBase.id = getNewBaseId();
-						newBase.classList.add("controlled");
-						newHex.append(newBase);
 					} else if (i === Math.floor(numcols / 2) + 4) {
 						// Hex "0.4" is the enemy capital
 						newHex.classList.add("red");
 						enemyCapital = newHex;
-						let newBase = this.getBaseNode(0);
-						newBase.id = getNewBaseId();
-						newHex.append(newBase);
 					}
 				}
 				hexRow.append(newHex);
@@ -192,10 +186,9 @@ var Map = {};
 		map.scrollLeft = friendlyCapital.offsetLeft + (friendlyCapital.clientWidth / 2) - (map.clientWidth / 2);
 	};
 
-	function getNewBaseId() {
-		let baseId = Wasm.addBase();
+	this.getNewBaseId = function(baseId) {
 		let index = bases.findIndex(base => {
-			return base.DBid === baseId;
+			return base.DBid == baseId;
 		});
 		if (index === -1){
 			bases.push({id: baseCount, DBid: baseId});
@@ -204,10 +197,16 @@ var Map = {};
 		}
 		return "base" + baseCount++;
 	}
+	
+	this.getBaseDBId = function(baseId) {
+		return bases.find(base => {
+			return base.id == baseId;
+		}).DBid;
+	}
 
 	this.getNewShipId = function(shipId) {
 		let index = ships.findIndex(ship => {
-			return ship.DBid === shipId;
+			return ship.DBid == shipId;
 		});
 		if (index === -1){
 			ships.push({id: shipCount, DBid: shipId});
@@ -215,6 +214,12 @@ var Map = {};
 			ships[index].id = shipCount;
 		}
 		return "ship" + shipCount++;
+	}
+	
+	this.getShipDBId = function(shipId) {
+		return ships.find(ship => {
+			return ship.id == shipId;
+		}).DBid;
 	}
 	
 	this.getBaseNode = function(type) {
@@ -269,6 +274,23 @@ var Map = {};
 			throw "NotImplementedError: Cannot place ships by class.";
 		}
 		targetHex.append(movingShip);
+	};
+	
+	this.createBase = function(level, id, allied, location) {
+		let targetHex;
+		if (!location) {
+			targetHex = friendlyCapital;
+		} else {
+			targetHex = document.getElementById(location);
+		}
+		let newBase = this.getBaseNode(level);
+		newBase.id = id;
+		if (allied) newBase.classList.add("controlled");
+		this.placeBase(newBase, allied, targetHex);
+	};
+	
+	this.placeBase = function(base, allied, targetHex){
+		targetHex.append(base);
 	};
 	
 	this.replaceShips = function(targetHex){

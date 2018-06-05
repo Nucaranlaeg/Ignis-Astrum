@@ -6,6 +6,7 @@ var Creator = {};
 	let shipDetails, partDetails, abilityDetails, shipList, baseList, hulls, parts, abilities, hanger = [], partList = [], abilityList = [], abilityIcons = [];
 	let players;
 	let active = null;
+	let SHIP_TYPES = Wasm.getShipTypes(), BASE_TYPES = Wasm.getBaseTypes();
 	
 	function initializeCreator() {
 		// Load references to DOM elements from the HTML.
@@ -59,7 +60,7 @@ var Creator = {};
 		});
 		
 		// Populate the player's ship list
-		for (let i = 0; i < 10; i++){
+		for (let i = 0; i < SHIP_TYPES; i++){
 			let newShipDetail = shipDetails.cloneNode(true);
 			designs[i] = {hullClass: 0, parts: [], abilities: []};
 			newShipDetail.onclick = () => {activate(i)};
@@ -71,8 +72,8 @@ var Creator = {};
 		// Populate the base list
 		base.forEach(b => {
 			let newBaseDetail = shipDetails.cloneNode(true);
-			let baseClass = Wasm.getBaseClass(b.dataset.hullClass);
-			let hangerNumber = +b.dataset.hullClass + 10;
+			let baseClass = Wasm.getBaseHullClass(b.dataset.hullClass);
+			let hangerNumber = +b.dataset.hullClass + SHIP_TYPES;
 			baseClass.cost = Math.floor(Math.pow(baseClass.cost, 1.1));
 			newBaseDetail.onclick = () => {activate(hangerNumber)};
 			designs[hangerNumber] = {hullClass: +b.dataset.hullClass, parts: [], abilities: []};
@@ -154,8 +155,8 @@ var Creator = {};
 	}
 	
 	function calculateBase(designNumber) {
-		let baseCalc = Wasm.getBaseClass(designs[designNumber].hullClass);
-		for (var i = 10; i <= designNumber; i++) {
+		let baseCalc = Wasm.getBaseHullClass(designs[designNumber].hullClass);
+		for (var i = SHIP_TYPES; i <= designNumber; i++) {
 			designs[i].parts.forEach(p => {
 				let partVals = Wasm.getPartDetails(p);
 				baseCalc.power += partVals.power ? partVals.power : 0;
@@ -179,7 +180,7 @@ var Creator = {};
 		// Calculate the total cost of the base.
 		baseCalc.cost = Math.floor(Math.pow(baseCalc.cost, 1.1));
 		updateBase(hanger[designNumber], baseCalc);
-		if (designNumber < 13) calculateBase(designNumber + 1);
+		if (designNumber < SHIP_TYPES + BASE_TYPES) calculateBase(designNumber + 1);
 	}
 	
 	function calculateShip(designNumber) {
@@ -247,21 +248,21 @@ var Creator = {};
 			designs[active].parts.splice(index, 1);
 			partList[partNumber].classList.remove("active");
 		}
-		active < 10 ? calculateShip(active) : calculateBase(active);
+		active < SHIP_TYPES ? calculateShip(active) : calculateBase(active);
 	}
 	
 	function selectAbility(abilityNumber) {
 		if (active === null) return;
 		let index = designs[active].abilities.findIndex(c => c === abilityNumber);
 		if (index === -1) {
-			if (designs[active].abilities.length === 3 || (active >= 10 && designs[13].abilities.length === 3)) return;
+			if (designs[active].abilities.length === 3 || (active >= SHIP_TYPES && designs[SHIP_TYPES + BASE_TYPES].abilities.length === 3)) return;
 			designs[active].abilities.push(abilityNumber);
 			abilityList[abilityNumber].classList.add("active");
 		} else {
 			designs[active].abilities.splice(index, 1);
 			abilityList[abilityNumber].classList.remove("active");
 		}
-		active < 10 ? calculateShip(active) : calculateBase(active);
+		active < SHIP_TYPES ? calculateShip(active) : calculateBase(active);
 	}
 	
 	function expandAbility(ability) {

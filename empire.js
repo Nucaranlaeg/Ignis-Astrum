@@ -5,6 +5,7 @@ var Empire = {};
 	let treasury;
 	let income = {total: 7, capital: 6, territory: 1, majorPlanets: 0, minorPlanets: 0};
 	let sidebar, sidebarParts = {total: null, capital: null, territory: null, majorPlanets: null, minorPlanets: null, treasury: null};
+	let SHIP_TYPES = Wasm.getShipTypes();
 	
 	function initializeEmpire() {
 		sidebar = document.getElementById("empire-summary");
@@ -32,16 +33,30 @@ var Empire = {};
 	};
 	
 	this.buyShip = function(type) {
-		let newShip = Wasm.getShipClass(type);
 		let shipId = Wasm.addShip(type);
 		if (shipId === -1) {
 			ContextMenu.loadInfoWindow("Not enough IPCs in the capital.");
 			return;
 		}
+		let newShip = Wasm.getUnitClass(type);
 		this.updateEmpireSidebar();
 		let id = Map.getNewShipId(shipId);
 		newShip.id = id.slice(4);
-		Sidebar.addShip(newShip);
 		Map.createShip(newShip.hullClass, id, true);
+		Sidebar.addShip(newShip);
+	};
+	
+	this.buyBase = function() {
+		let baseId = Wasm.addBase(0);
+		if (baseId === -1) {
+			ContextMenu.loadInfoWindow("Not enough IPCs in the capital.");
+			return;
+		}
+		let newBase = Wasm.getBaseClass(0);
+		this.updateEmpireSidebar();
+		let id = Map.getNewBaseId(baseId);
+		newBase.id = id.slice(4);
+		Map.createBase(0, id, true);
+		Sidebar.addBase(newBase);
 	};
 }).apply(Empire);
