@@ -8,11 +8,15 @@
 var Wasm = {};
 (function() {
 	let friendlyDesigns = [], enemyDesigns = [];
-	let ships = [];
+	let ships = [], bases = [];
 	let hexes = [];
-	let treasury = 7;
+	let treasury = 12; // This is equivalent to two turns of capital income, with no hexes captured.
+	let SHIP_TYPES = 10;
+	let BASE_TYPES = 4;
 	let income = {capital: 6, territory: 1, majorPlanets: 0, minorPlanets: 0};
 	
+	this.getShipTypes = function() {return SHIP_TYPES;}
+	this.getBaseTypes = function() {return BASE_TYPES;}
 	this.addHex = function(context){
 		let newHex = {x: context.split('.')[1],
 					  y: context.split('.')[0],
@@ -23,11 +27,20 @@ var Wasm = {};
 		hexes.push(newHex);
 		return newHex.id;
 	}
-	this.addBase = function(){
-		return Math.floor(Math.random() * 1000000000);
+	this.addBase = function(classNumber){
+		let newBase = this.getBaseClass(classNumber);
+		console.log(newBase);
+		if (treasury < newBase.cost) return -1;
+		treasury = Math.round(treasury - newBase.cost);
+		newBase.id = Math.floor(Math.random() * 1000000000);
+		newBase.x = 0;
+		newBase.y = 0;
+		newBase.allied = true;
+		bases.push(newBase);
+		return newBase.id;
 	}
 	this.addShip = function(classNumber){
-		let newShip = this.getShipClass(classNumber);
+		let newShip = this.getUnitClass(classNumber);
 		if (treasury < newShip.cost) return -1;
 		treasury = Math.round(treasury - newShip.cost);
 		newShip.id = Math.floor(Math.random() * 1000000000);
@@ -81,7 +94,7 @@ var Wasm = {};
 		instance.abilities = [];
 		return instance;
 	}
-	this.getBaseClass = function(classNumber){
+	this.getBaseHullClass = function(classNumber){
 		let instance;
 		switch (parseInt(classNumber)) {
 			case 0:
@@ -106,21 +119,30 @@ var Wasm = {};
 	}
 	// In this function, classNumber is 0-9 for friendly ships, 10-19 for enemy ships.
 	this.getShipClass = function (classNumber) {
-		if (classNumber < 10){
+		if (classNumber < SHIP_TYPES){
 			return JSON.parse(JSON.stringify(friendlyDesigns[classNumber]));
 		} else {
-			return JSON.parse(JSON.stringify(enemyDesigns[classNumber - 10]));
+			return JSON.parse(JSON.stringify(enemyDesigns[classNumber - SHIP_TYPES]));
+		}
+	}
+	// In this function, classNumber is 0-3 for friendly bases, 4-7 for enemy bases.
+	this.getBaseClass = function (classNumber) {
+		console.log(classNumber, friendlyDesigns, friendlyDesigns[10 + classNumber]);
+		if (classNumber < BASE_TYPES){
+			return JSON.parse(JSON.stringify(friendlyDesigns[SHIP_TYPES + classNumber]));
+		} else {
+			return JSON.parse(JSON.stringify(enemyDesigns[SHIP_TYPES + classNumber - BASE_TYPES]));
 		}
 	}
 	this.getBase = function(id){
 		let base = {level: Math.floor(Math.random() * 4), power: 5, currentHull: 5, maxHull: 5, shield: 1, repair: 3, id: id, allied: false};
 		if (id <= 1) base.allied = true;
-		return base;
+		return JSON.parse(JSON.stringify(base));
 	}
 	this.getShip = function(id){
 		let requestedShip = ships.find(ship => ship.id === id);
 		if (!requestedShip) throw "Error: Ship with ID " + id + " does not exist.";
-		return requestedShip;
+		return JSON.parse(JSON.stringify(requestedShip));
 	}
 	this.getEmpireIncome = function() {
 		let sum = Object.keys(income).reduce((s, k) => {return s + income[k]}, 0);
@@ -176,7 +198,6 @@ var Wasm = {};
 		return abilities[index];
 	}
 	this.computeTerritoryOwnership = function() {
-		console.log("Calculating...");
 		hexes.forEach(hex => {
 			let nearbyShips = ships.filter(ship => {
 				if ((ship.x == hex.x || (ship.x + 1 == hex.x && (ship.y % 2 === 1 || ship.y == hex.y)) || (ship.x - 1 == hex.x && (ship.y % 2 === 0 || ship.y == hex.y))) &&
@@ -213,8 +234,8 @@ var Wasm = {};
 	this.loadPlayer = function(name, friendly) {
 		if (!localStorage[name]) name = "default";
 		let designs = JSON.parse(localStorage[name].slice(3));
-		designs = designs.map((ship, index) => {
-			return index < 10 ? calculateShip(ship, ship.id) : calculateBase(base, base.id);
+		designs = designs.map((unit, index) => {
+			return index < SHIP_TYPES ? calculateShip(unit, unit.id) : calculateBase(unit, unit.id, index, designs);
 		});
 		if (friendly) {
 			friendlyDesigns = designs;
@@ -248,5 +269,34 @@ var Wasm = {};
 		shipCalc.cost = Math.floor(Math.pow(shipCalc.cost, 1.1));
 		shipCalc.id = id;
 		return shipCalc;
+	}
+	function calculateBase(design, id, index, designs) {
+		let baseCalc = Wasm.getBaseHullClass(design.hullClass);
+		for (var i = SHIP_TYPES; i <= index; i++) {
+			designs[i].parts.forEach(p => {
+				let partVals = Wasm.getPartDetails(p);
+				baseCalc.power += partVals.power ? partVals.power : 0;
+				baseCalc.maxHull += partVals.maxHull ? partVals.maxHull : 0;
+				baseCalc.shield += partVals.shield ? partVals.shield : 0;
+				baseCalc.repair += partVals.repair ? partVals.repair : 0;
+				if (i === index) baseCalc.cost += partVals.cost;
+			});
+		}
+		baseCalc.abilities = [];
+		design.abilities.forEach(c => {
+			let abilityVals = Wasm.getabilityDetails(c);
+			baseCalc.abilities.push(c);
+			baseCalc.power += abilityVals.power ? abilityVals.power : 0;
+			baseCalc.maxHull += abilityVals.maxHull ? abilityVals.maxHull : 0;
+			baseCalc.shield += abilityVals.shield ? abilityVals.shield : 0;
+			baseCalc.repair += abilityVals.repair ? abilityVals.repair : 0;
+			baseCalc.cost += abilityVals.cost;
+		});
+		
+		// Calculate the total cost of the base.
+		baseCalc.cost = Math.floor(Math.pow(baseCalc.cost, 1.1));
+		baseCalc.id = id;
+		baseCalc.level = index - SHIP_TYPES;
+		return baseCalc;
 	}
 }).apply(Wasm);

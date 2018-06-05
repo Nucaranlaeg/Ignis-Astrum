@@ -53,7 +53,7 @@ var Ship = {};
 					movingUnit.name = origin.id;
 					let sourceBase = movingUnit.cloneNode(true);
 					sourceBase.classList.add("trace");
-					sourceBase.classList.remove("controlled");
+					sourceBase.classList.remove("moving");
 					movingUnit.parentNode.appendChild(sourceBase);
 				}
 				hex.appendChild(movingUnit);

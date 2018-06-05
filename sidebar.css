@@ -66,6 +66,7 @@
 .ship-stats-bar span {
 	width: 20px;
 	display: inline-block;
+	text-align: right;
 }
 
 .ship-ability-icon {
@@ -104,7 +105,6 @@
 	color: var(--cost);
 	padding-right: 5px;
 	min-width: 20px;
-	text-align: right;
 }
 
 #empire-income {
@@ -128,4 +128,16 @@
 
 .repair {
 	color: var(--repair);
+}
+
+.ship-stats-bar .partial-hull {
+	width: 25px;
+}
+
+.partial-hull .max-hull {
+	text-align: left;
+}
+
+.partial-hull .solidus {
+	width: 5px;
 }

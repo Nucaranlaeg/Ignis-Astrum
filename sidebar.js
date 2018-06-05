@@ -5,6 +5,7 @@ var Sidebar = {};
 	let abilities = {};
 	let detail;
 	let shipList = [];
+	let baseList = [];
 	let selectedHex;
 	const SHIP_CLASSES = 10;
 
@@ -77,20 +78,23 @@ var Sidebar = {};
 		enemyBases.innerHTML = "";
 		
 		selectedHex.childNodes.forEach(unit => {
-			if (unit.nodeName == "#text") return; // Ignore the text node.
+			if (unit.nodeName == "#text") return; // Ignore the text node(s).
 			if (unit.classList.contains("trace")) return; // Ignore ship's initial positions.
-			let type = unit.id.slice(0,4);
+			let type = unit.id.slice(0,4), id = unit.id.slice(4);
 			switch (type) {
 				case "ship":
-					let ship = Wasm.getShip(unit.id.slice(4));
+					let ship = Wasm.getShip(Map.getShipDBId(id));
+					ship.id = id;
 					if (ship.allied) {
-						friendlyShips.append(this.createShipNode(ship, "sflt"));
+						placeInList(ship.shipClass, ship.currentHull, friendlyShips, this.createShipNode(ship, "sflt"));
+						//friendlyShips.append(this.createShipNode(ship, "sflt"));
 					} else {
 						enemyShips.append(this.createShipNode(ship, "sflt"));
 					}
 					break;
 				case "base":
-					let base = Wasm.getBase(unit.id.slice(4));
+					let base = Wasm.getBase(id);
+					base.id = id;
 					if (base.allied) {
 						friendlyBases.append(this.createBaseNode(base, "bflt"));
 					} else {
@@ -101,12 +105,31 @@ var Sidebar = {};
 		});
 	}
 	
+	function placeInList(type, currentHull, list, node){
+		let nodes = list.childNodes;
+		for (var i = 0; i < nodes.length; i++){
+			if (nodes[i].nodeName == "#text") continue;
+			if (type < nodes[i].dataset.unitClass || (type == nodes[i].dataset.unitClass && currentHull < nodes[i].getElementsByClassName("current-hull")[0].innerHTML)){
+				list.insertBefore(node, nodes[i]);
+				return;
+			}
+		}
+		list.append(node);
+	}
+	
 	this.addShip = function(ship) {
 		shipList.push(ship);
+		this.updateSelectedHex("0.0");
+	};
+	
+	this.addBase = function(base) {
+		baseList.push(base);
+		this.updateSelectedHex("0.0");
 	};
 
 	this.createShipNode = function(ship, idPrefix) {
 		let newShip = detail.cloneNode(true);
+		newShip.dataset.unitClass = ship.shipClass;
 		newShip.getElementsByClassName("image")[0].appendChild(Map.getShipNode(ship.hullClass));
 		newShip.getElementsByClassName("power")[0].innerHTML = ship.power;
 		newShip.getElementsByClassName("current-hull")[0].innerHTML = ship.currentHull;
@@ -123,12 +146,14 @@ var Sidebar = {};
 
 	this.createBaseNode = function(base, idPrefix) {
 		let newBase = detail.cloneNode(true);
+		newBase.dataset.unitClass = base.level;
 		newBase.getElementsByClassName("image")[0].appendChild(Map.getBaseNode(base.level));
 		newBase.getElementsByClassName("power")[0].innerHTML = base.power;
 		newBase.getElementsByClassName("current-hull")[0].innerHTML = base.currentHull;
 		newBase.getElementsByClassName("max-hull")[0].innerHTML = base.maxHull;
 		newBase.getElementsByClassName("shield")[0].innerHTML = base.shield;
 		newBase.getElementsByClassName("repair")[0].innerHTML = base.repair;
+		newBase.getElementsByClassName("cost")[0].innerHTML = base.cost ? base.cost : "";
 		newBase.id = idPrefix + base.id;
 		for (let i in base.abilities) {
 			newBase.getElementsByClassName("ability-bar")[0].append(abilities[i]);
@@ -143,29 +168,13 @@ var Sidebar = {};
 		if (index > -1) shipList.splice(index, 1);
 	}
 	
-	function identifyShip(ship){
-		shipClass = document.getElementById("enemy-ship-class" + ship.shipClass);
-		shipClass.getElementsByClassName("power")[0].innerHTML = ship.power;
-		shipClass.getElementsByClassName("current-hull")[0].innerHTML = ship.maxHull;
-		shipClass.getElementsByClassName("max-hull")[0].innerHTML = ship.maxHull;
-		shipClass.getElementsByClassName("shield")[0].innerHTML = ship.shield;
-		shipClass.getElementsByClassName("repair")[0].innerHTML = ship.repair;
-		shipClass.style.display = "block";
+	function removeBase(id) {
+		let baseDetails = document.getElementById(id);
+		if (baseDetails) baseDetails.remove();
+		let index = baseList.indexOf(base => base.id === id);
+		if (index > -1) baseList.splice(index, 1);
 	}
 	
-	function sortList() {
-		document.getElementById("friendly-ships-seen").innerHTML = "";
-		document.getElementById("enemy-ships-seen").innerHTML = "";
-		shipList.sort((shipA, shipB) => {
-			if (shipA.shipClass - shipB.shipClass !== 0) return shipA.shipClass - shipB.shipClass;
-			return shipA.currentHull - shipB.currentHull;
-		});
-		shipList.forEach(ship => {
-			let section = ship.allied ? document.getElementById("friendly-ships-seen") : document.getElementById("enemy-ships-seen");
-			section.append(this.createShipNode(ship, "list"));
-		});
-	}
-
 	function readPriority(inputId) {
 		let value = document.getElementById(inputId).value;
 		// Scale value from 0.5 to 2
@@ -188,18 +197,16 @@ var Sidebar = {};
 		let designs = Wasm.loadPlayer(name, friendly);
 		if (!friendly) return;
 		let friendlySection = document.getElementById("friendly-ships-available");
-		let enemySection = document.getElementById("enemy-ships-available");
-		let thisSection;
-		if (friendly) {
-			thisSection = friendlySection;
-		} else {
-			thisSection = enemySection;
-		}
-		thisSection.innerHTML = "";
-		for (let i = 0; i < 10; i++) {
-			let newShip = this.createShipNode(designs[i], friendly ? "friendly-ship-class" : "enemy-ship-class");
+		friendlySection.innerHTML = "";
+		for (let i = 0; i < SHIP_CLASSES; i++) {
+			designs[i].id = i;
+			let newShip = this.createShipNode(designs[i], "friendly-ship-class");
 			newShip.setAttribute("onclick", "Empire.buyShip(" + i + ")");
-			thisSection.append(newShip);
+			friendlySection.append(newShip);
 		}
+		designs[SHIP_CLASSES].id = "";
+		let newBase = this.createBaseNode(designs[SHIP_CLASSES], "friendly-base");
+		newBase.setAttribute("onclick", "Empire.buyBase()");
+		friendlySection.append(newBase);
 	};
 }).apply(Sidebar);
