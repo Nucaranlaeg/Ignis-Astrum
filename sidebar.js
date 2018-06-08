@@ -7,7 +7,7 @@ var Sidebar = {};
 	let shipList = [];
 	let baseList = [];
 	let selectedHex;
-	const SHIP_CLASSES = 10;
+	const SHIP_TYPES = Wasm.getShipTypes(), BASE_TYPES = Wasm.getBaseTypes();
 
 	function initializeSidebar() {
 		detail = document.getElementById("ship-detail-template");
@@ -93,7 +93,7 @@ var Sidebar = {};
 					}
 					break;
 				case "base":
-					let base = Wasm.getBase(id);
+					let base = Wasm.getBase(Map.getBaseDBId(id));
 					base.id = id;
 					if (base.allied) {
 						friendlyBases.append(this.createBaseNode(base, "bflt"));
@@ -198,15 +198,21 @@ var Sidebar = {};
 		if (!friendly) return;
 		let friendlySection = document.getElementById("friendly-ships-available");
 		friendlySection.innerHTML = "";
-		for (let i = 0; i < SHIP_CLASSES; i++) {
+		for (let i = 0; i < SHIP_TYPES; i++) {
 			designs[i].id = i;
 			let newShip = this.createShipNode(designs[i], "friendly-ship-class");
 			newShip.setAttribute("onclick", "Empire.buyShip(" + i + ")");
 			friendlySection.append(newShip);
 		}
-		designs[SHIP_CLASSES].id = "";
-		let newBase = this.createBaseNode(designs[SHIP_CLASSES], "friendly-base");
-		newBase.setAttribute("onclick", "Empire.buyBase()");
-		friendlySection.append(newBase);
+		for (let i = SHIP_TYPES; i < SHIP_TYPES + BASE_TYPES; i++) {
+			designs[i].id = "";
+			let newBase = this.createBaseNode(designs[i], "friendly-base");
+			if (i == SHIP_TYPES){
+				newBase.setAttribute("onclick", "Empire.buyBase()");
+			} else {
+				newBase.getElementsByClassName("cost")[0].innerHTML = "";
+			}
+			friendlySection.append(newBase);
+		}
 	};
 }).apply(Sidebar);

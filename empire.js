@@ -5,7 +5,7 @@ var Empire = {};
 	let treasury;
 	let income = {total: 7, capital: 6, territory: 1, majorPlanets: 0, minorPlanets: 0};
 	let sidebar, sidebarParts = {total: null, capital: null, territory: null, majorPlanets: null, minorPlanets: null, treasury: null};
-	let SHIP_TYPES = Wasm.getShipTypes();
+	const SHIP_TYPES = Wasm.getShipTypes();
 	
 	function initializeEmpire() {
 		sidebar = document.getElementById("empire-summary");
@@ -38,7 +38,7 @@ var Empire = {};
 			ContextMenu.loadInfoWindow("Not enough IPCs in the capital.");
 			return;
 		}
-		let newShip = Wasm.getUnitClass(type);
+		let newShip = Wasm.getShipClass(type);
 		this.updateEmpireSidebar();
 		let id = Map.getNewShipId(shipId);
 		newShip.id = id.slice(4);

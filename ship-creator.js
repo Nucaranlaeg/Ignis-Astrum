@@ -6,7 +6,7 @@ var Creator = {};
 	let shipDetails, partDetails, abilityDetails, shipList, baseList, hulls, parts, abilities, hanger = [], partList = [], abilityList = [], abilityIcons = [];
 	let players;
 	let active = null;
-	let SHIP_TYPES = Wasm.getShipTypes(), BASE_TYPES = Wasm.getBaseTypes();
+	const SHIP_TYPES = Wasm.getShipTypes(), BASE_TYPES = Wasm.getBaseTypes();
 	
 	function initializeCreator() {
 		// Load references to DOM elements from the HTML.
