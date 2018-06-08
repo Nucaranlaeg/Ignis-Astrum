@@ -11,8 +11,8 @@ var Wasm = {};
 	let ships = [], bases = [];
 	let hexes = [];
 	let treasury = 12; // This is equivalent to two turns of capital income, with no hexes captured.
-	let SHIP_TYPES = 10;
-	let BASE_TYPES = 4;
+	const SHIP_TYPES = 10;
+	const BASE_TYPES = 4;
 	let income = {capital: 6, territory: 1, majorPlanets: 0, minorPlanets: 0};
 	
 	this.getShipTypes = function() {return SHIP_TYPES;}
@@ -40,7 +40,7 @@ var Wasm = {};
 		return newBase.id;
 	}
 	this.addShip = function(classNumber){
-		let newShip = this.getUnitClass(classNumber);
+		let newShip = this.getShipClass(classNumber);
 		if (treasury < newShip.cost) return -1;
 		treasury = Math.round(treasury - newShip.cost);
 		newShip.id = Math.floor(Math.random() * 1000000000);
@@ -127,7 +127,6 @@ var Wasm = {};
 	}
 	// In this function, classNumber is 0-3 for friendly bases, 4-7 for enemy bases.
 	this.getBaseClass = function (classNumber) {
-		console.log(classNumber, friendlyDesigns, friendlyDesigns[10 + classNumber]);
 		if (classNumber < BASE_TYPES){
 			return JSON.parse(JSON.stringify(friendlyDesigns[SHIP_TYPES + classNumber]));
 		} else {
@@ -135,9 +134,10 @@ var Wasm = {};
 		}
 	}
 	this.getBase = function(id){
-		let base = {level: Math.floor(Math.random() * 4), power: 5, currentHull: 5, maxHull: 5, shield: 1, repair: 3, id: id, allied: false};
-		if (id <= 1) base.allied = true;
-		return JSON.parse(JSON.stringify(base));
+		console.log(bases);
+		let requestedBase = bases.find(base => base.id === id);
+		if (!requestedBase) throw "Error: Base with ID " + id + " does not exist.";
+		return JSON.parse(JSON.stringify(requestedBase));
 	}
 	this.getShip = function(id){
 		let requestedShip = ships.find(ship => ship.id === id);

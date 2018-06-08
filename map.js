@@ -13,7 +13,7 @@ var Map = {};
 	let baseCount = 0, shipCount = 0;
 	// DOM elements we don't want to keep searching for.
 	let map, row, hex, friendlyCapital, enemyCapital, base = [], ship = [];
-	let BASE_TYPES = Wasm.getBaseTypes();
+	const BASE_TYPES = Wasm.getBaseTypes();
 
 	function initializeMap() {
 		// Load references to DOM elements from the HTML.

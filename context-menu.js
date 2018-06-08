@@ -5,25 +5,28 @@ var ContextMenu = {};
 	let contextMenu, shipMenu, infoWindow;
 	let menuItems = [];
 	let shipMenuClick = false;
+	const BASE_TYPES = Wasm.getBaseTypes();
 	const contextMenuMask = {
-		friendlyShip: [false, true, true],
-		friendlyShipMenu: [false, false, true],
-		enemyShip: [true, false, false],
-		friendlyFleet: [false, true, true],
-		enemyFleet: [false, false, false],
-		friendlyBase: [false, true, true],
-		friendlyBaseMenu: [false, false, true],
-		enemyBase: [true, false, false],
-		hex: [false, true, false],
-		all: [true, true, true]
+		friendlyShip: [true, false, true, true, false],
+		friendlyShipMenu: [true, false, false, true, false],
+		enemyShip: [true, true, false, false, false],
+		friendlyFleet: [true, false, true, true, false],
+		enemyFleet: [true, false, false, false, false],
+		friendlyBase: [true, false, true, true, true],
+		friendlyBaseMenu: [true, false, false, true, true],
+		enemyBase: [true, true, false, false, false],
+		hex: [false, false, true, false, false],
+		all: [true, true, true, true, true]
 	};
-	const loadContextMenuEntry = [() => {return true}, () => {return true}, repairPossible];
+	const loadContextMenuEntry = [() => {return true}, () => {return true}, () => {return true}, repairPossible, upgradePossible];
 
 	function initializeContextMenu() {
 		contextMenu = document.getElementById("context-menu");
-		menuItems[0] = document.getElementById("context-target-priority");
-		menuItems[1] = document.getElementById("context-supply-grid");
-		menuItems[2] = document.getElementById("context-repair");
+		menuItems[0] = document.getElementById("context-target-info");
+		menuItems[1] = document.getElementById("context-target-priority");
+		menuItems[2] = document.getElementById("context-supply-grid");
+		menuItems[3] = document.getElementById("context-repair");
+		menuItems[4] = document.getElementById("context-upgrade");
 		shipMenu = document.getElementById("ship-menu");
 		shipMenu.oncontextmenu = () => {shipMenuClick = true;}
 		infoWindow = document.getElementById("info-window");
@@ -108,10 +111,10 @@ var ContextMenu = {};
 		shipMenu.innerHTML = "";
 		units.forEach(unit => {
 			let node;
-			let type = unit.id.slice(0, 4);
+			let type = unit.id.slice(0, 4), id = unit.id.slice(4);
 			switch (type) {
 				case "ship":
-					let ship = Wasm.getShip(unit.id.slice(4));
+					let ship = Wasm.getShip(Map.getShipDBId(id));
 					node = Sidebar.createShipNode(ship, "scxm");
 					if (ship.allied) {
 						node.classList.add("friendly");
@@ -121,7 +124,7 @@ var ContextMenu = {};
 					shipMenu.append(node);
 					break;
 				case "base":
-					let base = Wasm.getBase(unit.id.slice(4));
+					let base = Wasm.getBase(Map.getBaseDBId(id));
 					node = Sidebar.createBaseNode(base, "bcxm");
 					if (base.allied) {
 						node.classList.add("friendly");
@@ -154,19 +157,26 @@ var ContextMenu = {};
 	};
 	
 	function repairPossible(target) {
-		let type = target.id.slice(0, 4);
+		let type = target.id.slice(0, 4), id = target.id.slice(4);
 		switch (type) {
 			case "ship":
-				let targetShip = Wasm.getShip(target.id.slice(4));
+				let targetShip = Wasm.getShip(Map.getShipDBId(id));
 				if (targetShip.currentHull === targetShip.maxHull) return false;
 				break;
 			case "base":
-				let targetBase = Wasm.getBase(target.id.slice(4));
+				let targetBase = Wasm.getBase(Map.getBaseDBId(id));
 				if (targetBase.currentHull === targetBase.maxHull) return false;
 				break;
 			default:
 				return false;
 		}
+		return true;
+	}
+	
+	function upgradePossible(target) {
+		let id = target.id.slice(4);
+		let targetBase = Wasm.getBase(Map.getBaseDBId(id));
+		if (targetBase.level === BASE_TYPES - 1) return false;
 		return true;
 	}
 	
