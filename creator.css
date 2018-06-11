@@ -61,3 +61,8 @@ body{
 svg.base {
 	stroke: black;
 }
+
+#abilities .unavailable {
+	pointer-events: none;
+	background: #f8f8f8;
+}

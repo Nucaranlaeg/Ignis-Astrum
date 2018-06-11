@@ -11,12 +11,12 @@ var Wasm = {};
 	let ships = [], bases = [];
 	let hexes = [];
 	let treasury = 12; // This is equivalent to two turns of capital income, with no hexes captured.
-	const SHIP_TYPES = 10;
-	const BASE_TYPES = 4;
+	const SHIP_TYPES = 10, BASE_TYPES = 4, MAX_ABILITIES = 3;
 	let income = {capital: 6, territory: 1, majorPlanets: 0, minorPlanets: 0};
 	
 	this.getShipTypes = function() {return SHIP_TYPES;}
 	this.getBaseTypes = function() {return BASE_TYPES;}
+	this.getMaxAbilities = function() {return MAX_ABILITIES;}
 	this.addHex = function(context){
 		let newHex = {x: context.split('.')[1],
 					  y: context.split('.')[0],
@@ -29,7 +29,6 @@ var Wasm = {};
 	}
 	this.addBase = function(classNumber){
 		let newBase = this.getBaseClass(classNumber);
-		console.log(newBase);
 		if (treasury < newBase.cost) return -1;
 		treasury = Math.round(treasury - newBase.cost);
 		newBase.id = Math.floor(Math.random() * 1000000000);
@@ -109,9 +108,11 @@ var Wasm = {};
 			case 3:
 				instance = {power: 12, maxHull: 12, shield: 4, repair: 12, cost: 4.32};
 				break;
+			default:
+				throw "Error: Base of level " + classNumber + " does not exist.";
 		}
 		instance.currentHull = instance.maxHull;
-		instance.hullClass = classNumber;
+		instance.level = classNumber;
 		instance.id = null;
 		instance.allied = true;
 		instance.abilities = [];
@@ -134,7 +135,6 @@ var Wasm = {};
 		}
 	}
 	this.getBase = function(id){
-		console.log(bases);
 		let requestedBase = bases.find(base => base.id === id);
 		if (!requestedBase) throw "Error: Base with ID " + id + " does not exist.";
 		return JSON.parse(JSON.stringify(requestedBase));
@@ -188,12 +188,12 @@ var Wasm = {};
 		];
 		return parts[index];
 	}
-	this.getabilityDetails = function(index) {
+	this.getAbilityDetails = function(index) {
 		let abilities = [
-			{cost: 3, name: "Scout Sensors", description: "Allows the ship to detect terrain and enemy units 2 hexes away."},
-			{cost: 3, name: "Efficient Warp Fields", description: "Allows the ship to enter combat if intercepted."},
-			{cost: 3, name: "Booster Packs", description: "Allows the ship to move 3 hexes and engage enemy units."},
-			{cost: 3, name: "Engine Stabilizers", description: "Allows the ship to move 4 hexes in a single turn."},
+			{cost: 3, name: "Scout Sensors", description: "Allows the ship to detect terrain and enemy units 2 hexes away.", base: false},
+			{cost: 3, name: "Efficient Warp Fields", description: "Allows the ship to enter combat if intercepted.", base: false},
+			{cost: 3, name: "Booster Packs", description: "Allows the ship to move 3 hexes and engage enemy units.", base: false},
+			{cost: 3, name: "Engine Stabilizers", description: "Allows the ship to move 4 hexes in a single turn.", base: false},
 		];
 		return abilities[index];
 	}
@@ -256,7 +256,7 @@ var Wasm = {};
 		});
 		shipCalc.abilities = [];
 		design.abilities.forEach(c => {
-			let abilityVals = Wasm.getabilityDetails(c);
+			let abilityVals = Wasm.getAbilityDetails(c);
 			shipCalc.abilities.push(c);
 			shipCalc.power += abilityVals.power ? abilityVals.power : 0;
 			shipCalc.maxHull += abilityVals.maxHull ? abilityVals.maxHull : 0;
@@ -284,7 +284,7 @@ var Wasm = {};
 		}
 		baseCalc.abilities = [];
 		design.abilities.forEach(c => {
-			let abilityVals = Wasm.getabilityDetails(c);
+			let abilityVals = Wasm.getAbilityDetails(c);
 			baseCalc.abilities.push(c);
 			baseCalc.power += abilityVals.power ? abilityVals.power : 0;
 			baseCalc.maxHull += abilityVals.maxHull ? abilityVals.maxHull : 0;

@@ -6,7 +6,7 @@ var Creator = {};
 	let shipDetails, partDetails, abilityDetails, shipList, baseList, hulls, parts, abilities, hanger = [], partList = [], abilityList = [], abilityIcons = [];
 	let players;
 	let active = null;
-	const SHIP_TYPES = Wasm.getShipTypes(), BASE_TYPES = Wasm.getBaseTypes();
+	const SHIP_TYPES = Wasm.getShipTypes(), BASE_TYPES = Wasm.getBaseTypes(), MAX_ABILITIES = Wasm.getMaxAbilities();
 	
 	function initializeCreator() {
 		// Load references to DOM elements from the HTML.
@@ -102,7 +102,7 @@ var Creator = {};
 		
 		// Populate the available abilities list
 		for (let i = 0; i < abilityIcons.length; i++) {
-			let	nextability = Wasm.getabilityDetails(i);
+			let	nextability = Wasm.getAbilityDetails(i);
 			let newability = abilityDetails.cloneNode(true);
 			// This is to ensure that each ability gets a reference to the correct ability number.
 			let k = i.valueOf();
@@ -167,20 +167,22 @@ var Creator = {};
 			});
 		}
 		baseCalc.abilities = [];
-		designs[designNumber].abilities.forEach(c => {
-			let abilityVals = Wasm.getabilityDetails(c);
-			baseCalc.abilities.push({index: c, description: abilityVals.description});
-			baseCalc.power += abilityVals.power ? abilityVals.power : 0;
-			baseCalc.maxHull += abilityVals.maxHull ? abilityVals.maxHull : 0;
-			baseCalc.shield += abilityVals.shield ? abilityVals.shield : 0;
-			baseCalc.repair += abilityVals.repair ? abilityVals.repair : 0;
-			baseCalc.cost += abilityVals.cost;
-		});
+		for (var i = SHIP_TYPES; i <= designNumber; i++) {
+			designs[i].abilities.forEach(c => {
+				let abilityVals = Wasm.getAbilityDetails(c);
+				baseCalc.abilities.push({index: c, description: abilityVals.description});
+				baseCalc.power += abilityVals.power ? abilityVals.power : 0;
+				baseCalc.maxHull += abilityVals.maxHull ? abilityVals.maxHull : 0;
+				baseCalc.shield += abilityVals.shield ? abilityVals.shield : 0;
+				baseCalc.repair += abilityVals.repair ? abilityVals.repair : 0;
+				if (i === designNumber) baseCalc.cost += abilityVals.cost;
+			});
+		}
 		
 		// Calculate the total cost of the base.
 		baseCalc.cost = Math.floor(Math.pow(baseCalc.cost, 1.1));
 		updateBase(hanger[designNumber], baseCalc);
-		if (designNumber < SHIP_TYPES + BASE_TYPES) calculateBase(designNumber + 1);
+		if (designNumber < SHIP_TYPES + BASE_TYPES - 1) calculateBase(designNumber + 1);
 	}
 	
 	function calculateShip(designNumber) {
@@ -195,7 +197,7 @@ var Creator = {};
 		});
 		shipCalc.abilities = [];
 		designs[designNumber].abilities.forEach(c => {
-			let abilityVals = Wasm.getabilityDetails(c);
+			let abilityVals = Wasm.getAbilityDetails(c);
 			shipCalc.abilities.push({index: c, description: abilityVals.description});
 			shipCalc.power += abilityVals.power ? abilityVals.power : 0;
 			shipCalc.maxHull += abilityVals.maxHull ? abilityVals.maxHull : 0;
@@ -218,12 +220,25 @@ var Creator = {};
 			designs[active].abilities.forEach(c => {
 				abilityList[c].classList.remove("active");
 			});
+			abilityList.forEach(c => {
+				c.classList.remove("unavailable");
+			});
 		}
 		if (active === hangerNumber) {
 			active = null;
 			return;
 		}
 		active = hangerNumber;
+		if (active >= SHIP_TYPES) {
+			abilityList.forEach((c, index) => {
+				if (!Wasm.getAbilityDetails(index).base) {
+					c.classList.add("unavailable");
+				}
+				for (let i = SHIP_TYPES; i < active; i++){
+					if (designs[i].abilities.findIndex(a => a === index) !== -1) c.classList.add("unavailable");
+				}
+			});
+		}
 		hanger[hangerNumber].classList.add("active");
 		designs[active].parts.forEach(p => {
 			partList[p].classList.add("active");
@@ -255,7 +270,18 @@ var Creator = {};
 		if (active === null) return;
 		let index = designs[active].abilities.findIndex(c => c === abilityNumber);
 		if (index === -1) {
-			if (designs[active].abilities.length === 3 || (active >= SHIP_TYPES && designs[SHIP_TYPES + BASE_TYPES].abilities.length === 3)) return;
+			// Prevent a ship from having more than the maximum number of abilities.
+			if (designs[active].abilities.length === MAX_ABILITIES) return;
+			// Prevent a base from having more than the maximum number of abilities.
+			if (active >= SHIP_TYPES){
+				let abilityCount = 0;
+				for (let i = SHIP_TYPES; i < SHIP_TYPES + BASE_TYPES; i++){
+					abilityCount += designs[i].abilities.length;
+					// Prevent a base from having the same ability twice.
+					if (designs[i].abilities.findIndex(c => c === abilityNumber) !== -1) return;
+				}
+				if (abilityCount === MAX_ABILITIES) return;
+			}
 			designs[active].abilities.push(abilityNumber);
 			abilityList[abilityNumber].classList.add("active");
 		} else {
@@ -274,6 +300,7 @@ var Creator = {};
 	}
 	
 	this.saveShips = function(name) {
+		console.log(designs);
 		let player = name || document.getElementById("player-name").value;
 		localStorage[player] = "sds" + JSON.stringify(designs);
 	};
