@@ -199,9 +199,11 @@ var Map = {};
 	}
 	
 	this.getBaseDBId = function(baseId) {
-		return bases.find(base => {
+		let targetBase = bases.find(base => {
 			return base.id == baseId;
-		}).DBid;
+		});
+		if (!targetBase) throw "Error: Could not find base with id " + baseId;
+		return targetBase.DBid;
 	}
 
 	this.getNewShipId = function(shipId) {
@@ -223,12 +225,12 @@ var Map = {};
 	}
 	
 	this.getBaseNode = function(type) {
-		if (type > base.length - 1 || type < 0) type = 0;
+		if (!base[type]) throw "Error: Base of level " + type + " does not exist";
 		return base[type].cloneNode(true);
 	};
 	
 	this.getShipNode = function(hullClass) {
-		if (hullClass > ship.length - 1 || hullClass < 0) hullClass = 0;
+		if (!ship[hullClass]) throw "Error: Ship of class " + hullClass + " does not exist";
 		return ship[hullClass].cloneNode(true);
 	};
 	
@@ -287,6 +289,10 @@ var Map = {};
 		newBase.id = id;
 		if (allied) newBase.classList.add("controlled");
 		this.placeBase(newBase, allied, targetHex);
+	};
+	
+	this.deleteBase = function(id) {
+		document.getElementById("base" + id).remove();
 	};
 	
 	this.placeBase = function(base, allied, targetHex){

@@ -59,4 +59,15 @@ var Empire = {};
 		Map.createBase(0, id, true);
 		Sidebar.addBase(newBase);
 	};
+	
+	this.upgradeBase = function(id) {
+		let targetBase = Wasm.upgradeBase(id);
+		if (targetBase === -1) {
+			ContextMenu.loadInfoWindow("Not enough IPCs available to that base.");
+		}
+		this.updateEmpireSidebar();
+		console.log(targetBase.y, targetBase.x);
+		Map.createBase(0, id, true, targetBase.y + "," + targetBase.x);
+		Map.deleteBase(id);
+	};
 }).apply(Empire);

@@ -2,9 +2,10 @@
 
 var ContextMenu = {};
 (function() {
-	let contextMenu, shipMenu, infoWindow;
+	let contextMenu, shipMenu, infoWindow, upgradeMenu;
 	let menuItems = [];
 	let shipMenuClick = false;
+	let closeInfoWindow;
 	const BASE_TYPES = Wasm.getBaseTypes();
 	const contextMenuMask = {
 		friendlyShip: [true, false, true, true, false],
@@ -30,6 +31,7 @@ var ContextMenu = {};
 		shipMenu = document.getElementById("ship-menu");
 		shipMenu.oncontextmenu = () => {shipMenuClick = true;}
 		infoWindow = document.getElementById("info-window");
+		upgradeMenu = document.getElementById("context-upgrade-base")
 	}
 
 	document.addEventListener("DOMContentLoaded", initializeContextMenu, {once: true});
@@ -177,6 +179,14 @@ var ContextMenu = {};
 		let id = target.id.slice(4);
 		let targetBase = Wasm.getBase(Map.getBaseDBId(id));
 		if (targetBase.level === BASE_TYPES - 1) return false;
+		let upgradedBase = Wasm.getBaseClass(targetBase.level + 1);
+		upgradedBase.currentHull -= targetBase.maxHull + targetBase.currentHull;
+		upgradedBase.id = id;
+		let node = Sidebar.createBaseNode(upgradedBase, "bcxm");
+		node.classList.add("friendly");
+		node.setAttribute("onclick", "Empire.upgradeBase(" + targetBase.id + ")");
+		upgradeMenu.innerHTML = "";
+		upgradeMenu.append(node);
 		return true;
 	}
 	
@@ -185,6 +195,8 @@ var ContextMenu = {};
 		infoWindow.classList.add("active");
 		infoWindow.style.top = y + "px";
 		infoWindow.style.left = x + "px";
+		window.clearTimeout(closeInfoWindow);
+		closeInfoWindow = window.setTimeout(() => {infoWindow.classList.remove("active")}, 2500);
 	}
-		
+	
 }).apply(ContextMenu);
