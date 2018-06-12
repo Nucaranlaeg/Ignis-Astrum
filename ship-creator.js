@@ -142,7 +142,7 @@ var Creator = {};
 	
 	function updateBase(target, baseValues) {
 		target.getElementsByClassName("image")[0].innerHTML = "";
-		target.getElementsByClassName("image")[0].append(base[baseValues.hullClass].cloneNode(true));
+		target.getElementsByClassName("image")[0].append(base[baseValues.level].cloneNode(true));
 		target.getElementsByClassName("power")[0].innerHTML = baseValues.power;
 		target.getElementsByClassName("max-hull")[0].innerHTML = baseValues.maxHull;
 		target.getElementsByClassName("shield")[0].innerHTML = baseValues.shield;
@@ -300,7 +300,6 @@ var Creator = {};
 	}
 	
 	this.saveShips = function(name) {
-		console.log(designs);
 		let player = name || document.getElementById("player-name").value;
 		localStorage[player] = "sds" + JSON.stringify(designs);
 	};

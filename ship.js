@@ -3,6 +3,7 @@
 var Ship = {};
 (function() {
 	let movingUnit = null, dragElement = null;
+	let traceCount = 0;
 	
 	this.dragBase = function (event, base) {
 		// For now, just pretend it's a ship.
@@ -27,11 +28,19 @@ var Ship = {};
 	function attemptMove(hex) {
 		let origin = movingUnit.parentNode;
 		let source = movingUnit.name ? movingUnit.name.split(".") : origin.id.split(".");
+		if (!hex) return;
 		let target = hex.id.split(".");
 		if (movingUnit.id.slice(0,4) === "ship") {
 			if (Utils.calculateDistance(source, target) <= 3) {
 				if (!movingUnit.name){
 					movingUnit.name = movingUnit.parentNode.id;
+					let sourceShip = movingUnit.cloneNode(true);
+					sourceShip.classList.add("trace");
+					sourceShip.name = sourceShip.id;
+					sourceShip.dataset.traceNumber = traceCount++;
+					sourceShip.removeAttribute("id");
+					sourceShip.classList.remove("moving");
+					movingUnit.parentNode.appendChild(sourceShip);
 					// Add some kind of movement trace.
 				}
 				Map.placeShip(movingUnit, true, hex);
@@ -53,6 +62,9 @@ var Ship = {};
 					movingUnit.name = origin.id;
 					let sourceBase = movingUnit.cloneNode(true);
 					sourceBase.classList.add("trace");
+					sourceBase.name = sourceBase.id;
+					sourceBase.dataset.traceNumber = traceCount++;
+					sourceBase.removeAttribute("id");
 					sourceBase.classList.remove("moving");
 					movingUnit.parentNode.appendChild(sourceBase);
 				}

@@ -38,6 +38,22 @@ var Wasm = {};
 		bases.push(newBase);
 		return newBase.id;
 	}
+	this.upgradeBase = function(id){
+		// This should look at local IPCs, not empire global IPCs.
+		let targetBase = this.getBase(id);
+		if (targetBase.level == BASE_TYPES - 1) return -1;
+		let upgradedBase = this.getBaseClass(targetBase.level + 1);
+		if (upgradedBase.cost > treasury) return -1;
+		treasury = Math.round(treasury - upgradedBase.cost);
+		targetBase.power = upgradedBase.power;
+		targetBase.currentHull += upgradedBase.maxHull - targetBase.maxHull;
+		targetBase.maxHull = upgradedBase.maxHull;
+		targetBase.shield = upgradedBase.shield;
+		targetBase.repair = upgradedBase.repair;
+		targetBase.level++;
+		this.saveBase(targetBase);
+		return targetBase;
+	}
 	this.addShip = function(classNumber){
 		let newShip = this.getShipClass(classNumber);
 		if (treasury < newShip.cost) return -1;
@@ -139,10 +155,20 @@ var Wasm = {};
 		if (!requestedBase) throw "Error: Base with ID " + id + " does not exist.";
 		return JSON.parse(JSON.stringify(requestedBase));
 	}
+	this.saveBase = function(base){
+		let requestedBaseId = bases.findIndex(b => b.id === base.id);
+		if (requestedBaseId === -1) throw "Error: Base with ID " + id + " does not exist.";
+		bases[requestedBaseId] = base;
+	}
 	this.getShip = function(id){
 		let requestedShip = ships.find(ship => ship.id === id);
 		if (!requestedShip) throw "Error: Ship with ID " + id + " does not exist.";
 		return JSON.parse(JSON.stringify(requestedShip));
+	}
+	this.saveShip = function(ship){
+		let requestedShipId = ships.findIndex(s => s.id === ship.id);
+		if (requestedShipId === -1) throw "Error: Ship with ID " + id + " does not exist.";
+		ships[requestedShipId] = ship;
 	}
 	this.getEmpireIncome = function() {
 		let sum = Object.keys(income).reduce((s, k) => {return s + income[k]}, 0);
@@ -158,10 +184,9 @@ var Wasm = {};
 	this.signalTurnEnd = function() {
 		window.setTimeout(() => {
 			// Combat
-			this.computeTerritoryOwnership();
 			treasury += this.getEmpireIncome().total;
-			Map.drawVision();
 			Timer.beginNewTurn();
+			this.computeTerritoryOwnership();
 		}, 0);
 	}
 	this.signalContinueTurn = function() {
@@ -200,7 +225,7 @@ var Wasm = {};
 	this.computeTerritoryOwnership = function() {
 		hexes.forEach(hex => {
 			let nearbyShips = ships.filter(ship => {
-				if ((ship.x == hex.x || (ship.x + 1 == hex.x && (ship.y % 2 === 1 || ship.y == hex.y)) || (ship.x - 1 == hex.x && (ship.y % 2 === 0 || ship.y == hex.y))) &&
+				if ((ship.x == hex.x || (ship.x + 1 == hex.x && (Math.abs(ship.y % 2) === 1 || ship.y == hex.y)) || (ship.x - 1 == hex.x && (Math.abs(ship.y % 2) === 0 || ship.y == hex.y))) &&
 				    (ship.y == hex.y || ship.y + 1 == hex.y || ship.y - 1 == hex.y)) return true;
 				return false;
 			});
@@ -225,11 +250,28 @@ var Wasm = {};
 				}
 			}
 		});
+		Map.drawVision();
 	}
 	this.getHexOwner = function(id) {
 		let requestedHex = hexes.find(hex => hex.id === id);
 		if (!requestedHex) throw "Error: Hex with ID " + id + " does not exist.";
 		return requestedHex.owner;
+	}
+	this.moveBase = function(id, y, x){
+		// Find out if there is an enemy unit here.
+		// Also do validation.
+		let targetBase = this.getBase(id);
+		targetBase.x = +x;
+		targetBase.y = +y;
+		this.saveBase(targetBase);
+	}
+	this.moveShip = function(id, y1, x1, y2 = null, x2 = null, y3 = null, x3 = null, y4 = null, x4 = null){
+		// Find out about enemy movements.
+		// Also do validation for each space.
+		let targetShip = this.getShip(id);
+		targetShip.x = +(x4 || x3 || x2 || x1);
+		targetShip.y = +(y4 || y3 || y2 || y1);
+		this.saveShip(targetShip);
 	}
 	this.loadPlayer = function(name, friendly) {
 		if (!localStorage[name]) name = "default";

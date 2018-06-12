@@ -81,14 +81,11 @@ var Map = {};
 	this.beginDrag = function(event) {
 		if (event.which !== 1) return;
 		let target = Utils.findItem(Utils.findHex(event.clientX, event.clientY), event.clientX, event.clientY);
-		window.foo = target;
 		ContextMenu.closeContextMenu();
 		if (target){
 			if (target.classList.contains("base")) {
 				let id = target.id.slice(4);
-				// Get base data from wasm.
-				//if (base.level === 0) {
-				if (true) {
+				if (Wasm.getBase(Map.getBaseDBId(target.id.slice(4))).level === 0) {
 					if (Ship.dragBase(event, target)) return;
 				}
 			}
@@ -219,9 +216,11 @@ var Map = {};
 	}
 	
 	this.getShipDBId = function(shipId) {
-		return ships.find(ship => {
+		let targetShip = ships.find(ship => {
 			return ship.id == shipId;
-		}).DBid;
+		});
+		if (!targetShip) throw "Error: Could not find ship with id " + shipId;
+		return targetShip.DBid;
 	}
 	
 	this.getBaseNode = function(type) {
@@ -234,8 +233,51 @@ var Map = {};
 		return ship[hullClass].cloneNode(true);
 	};
 	
-	this.clearTraces = function() {
-		[...map.getElementsByClassName("trace")].forEach(trace => trace.remove());
+	this.moveShips = function() {
+		let traces = [...map.getElementsByClassName("trace")];
+		[...map.getElementsByClassName("ship")].forEach(ship => {
+			// This should pass in zero to four pairs of coordinates, the closest to the ship first.
+			let shipTraces = traces.filter(trace => trace.name === ship.id)
+				.sort((a, b) => a.dataset.traceNumber - b.dataset.traceNumber)
+				.map(trace => {return trace.parentNode.id.split('.')});
+			let goal = ship.parentNode.id.split('.');
+			switch (shipTraces.length) {
+				case 0:
+					return;
+				case 1:
+					Wasm.moveShip(this.getShipDBId(ship.id.slice(4)),
+								  goal[0], goal[1]);
+					return;
+				case 2:
+					Wasm.moveShip(this.getShipDBId(ship.id.slice(4)),
+								  shipTraces[1][0], shipTraces[1][1],
+								  goal[0], goal[1]);
+					return;
+				case 3:
+					Wasm.moveShip(this.getShipDBId(ship.id.slice(4)),
+								  shipTraces[1][0], shipTraces[1][1],
+								  shipTraces[2][0], shipTraces[2][1],
+								  goal[0], goal[1]);
+					return;
+				case 4:
+					Wasm.moveShip(this.getShipDBId(ship.id.slice(4)),
+								  shipTraces[1][0], shipTraces[1][1],
+								  shipTraces[2][0], shipTraces[2][1],
+								  shipTraces[3][0], shipTraces[3][1],
+								  goal[0], goal[1]);
+					return;
+			}
+		});
+		[...map.getElementsByClassName("base")].forEach(base => {
+			let goal = base.parentNode.id.split('.');
+			if (traces.findIndex(trace => trace.name === base.id) !== -1) {
+				Wasm.moveBase(this.getBaseDBId(base.id.slice(4)), goal[0], goal[1]);
+				return;
+			}
+		});
+		
+		// Clean up the traces
+		traces.forEach(trace => trace.remove());
 		[...map.getElementsByClassName("ship")].forEach(ship => ship.name = "");
 		[...map.getElementsByClassName("base")].forEach(base => base.name = "");
 	};
@@ -292,7 +334,9 @@ var Map = {};
 	};
 	
 	this.deleteBase = function(id) {
+		let targetBase = bases.findIndex(b => b.id === id);
 		document.getElementById("base" + id).remove();
+		bases.splice(targetBase, 1);
 	};
 	
 	this.placeBase = function(base, allied, targetHex){
