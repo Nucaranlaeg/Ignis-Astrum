@@ -44,6 +44,6 @@ var Timer = {};
 		turnTime = 0;
 		timerCircle.classList.remove("turn-ended");
 		Empire.updateEmpireSidebar();
-		Map.clearTraces();
+		Map.moveShips();
 	}
 }).apply(Timer);

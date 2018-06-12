@@ -43,7 +43,10 @@ var Utils = {};
 	
 	// Returns the first element clicked on.
 	this.findItem = function(targetHex, x, y) {
-		return this.findItems(targetHex, x, y)[0];
+		let items = this.findItems(targetHex, x, y);
+		return items.filter(item => {
+			return item.id.slice(0,4) !== "base" || Wasm.getBase(Map.getBaseDBId(item.id.slice(4))).level !== 0 ? false : true;
+		})[0] || items[0];
 	};
 	
 	// Returns all elements clicked on.

@@ -61,13 +61,14 @@ var Empire = {};
 	};
 	
 	this.upgradeBase = function(id) {
-		let targetBase = Wasm.upgradeBase(id);
+		let baseId = Map.getBaseDBId(id);
+		let targetBase = Wasm.upgradeBase(baseId);
 		if (targetBase === -1) {
 			ContextMenu.loadInfoWindow("Not enough IPCs available to that base.");
+			return;
 		}
 		this.updateEmpireSidebar();
-		console.log(targetBase.y, targetBase.x);
-		Map.createBase(0, id, true, targetBase.y + "," + targetBase.x);
 		Map.deleteBase(id);
+		Map.createBase(targetBase.level, Map.getNewBaseId(baseId), true, targetBase.y + "." + targetBase.x);
 	};
 }).apply(Empire);

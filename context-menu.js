@@ -94,11 +94,9 @@ var ContextMenu = {};
 		let someEntry = false;
 		menuItems.forEach((item, index) => {
 			if (!item) return;
-			if (targetMenu[index]) {
-				if (loadContextMenuEntry[index](target)){
-					item.classList.add("active");
-					someEntry = true;
-				}
+			if (targetMenu[index] && loadContextMenuEntry[index](target)) {
+				item.classList.add("active");
+				someEntry = true;
 			} else {
 				item.classList.remove("active");
 			}
@@ -180,11 +178,11 @@ var ContextMenu = {};
 		let targetBase = Wasm.getBase(Map.getBaseDBId(id));
 		if (targetBase.level === BASE_TYPES - 1) return false;
 		let upgradedBase = Wasm.getBaseClass(targetBase.level + 1);
-		upgradedBase.currentHull -= targetBase.maxHull + targetBase.currentHull;
+		upgradedBase.currentHull -= targetBase.maxHull - targetBase.currentHull;
 		upgradedBase.id = id;
 		let node = Sidebar.createBaseNode(upgradedBase, "bcxm");
 		node.classList.add("friendly");
-		node.setAttribute("onclick", "Empire.upgradeBase(" + targetBase.id + ")");
+		node.setAttribute("onclick", "ContextMenu.closeContextMenu(); Empire.upgradeBase(" + id + ")");
 		upgradeMenu.innerHTML = "";
 		upgradeMenu.append(node);
 		return true;
