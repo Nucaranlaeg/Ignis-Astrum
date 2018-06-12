@@ -224,6 +224,17 @@ var Wasm = {};
 	}
 	this.computeTerritoryOwnership = function() {
 		hexes.forEach(hex => {
+			let nearbyBases = bases.filter(base => {
+				if ((base.x == hex.x || (base.x + 1 == hex.x && (Math.abs(base.y % 2) === 1 || base.y == hex.y)) || (base.x - 1 == hex.x && (Math.abs(base.y % 2) === 0 || base.y == hex.y))) &&
+				    (base.y == hex.y || base.y + 1 == hex.y || base.y - 1 == hex.y)) return true;
+				return false;
+			});
+			let presentFriendlyBase = nearbyBases.some(base => {
+				if (base.x == hex.x && base.y == hex.y && base.allied == true) return true;
+			});
+			let presentEnemyBase = nearbyBases.some(base => {
+				if (base.x == hex.x && base.y == hex.y && base.allied == false) return true;
+			});
 			let nearbyShips = ships.filter(ship => {
 				if ((ship.x == hex.x || (ship.x + 1 == hex.x && (Math.abs(ship.y % 2) === 1 || ship.y == hex.y)) || (ship.x - 1 == hex.x && (Math.abs(ship.y % 2) === 0 || ship.y == hex.y))) &&
 				    (ship.y == hex.y || ship.y + 1 == hex.y || ship.y - 1 == hex.y)) return true;
@@ -235,17 +246,19 @@ var Wasm = {};
 			let friendlyPresence = nearbyShips.reduce((count, ship) => {return ship.allied ? ++count : count}, 0) +
 								  presentShips.reduce((count, ship) => {return ship.allied ? ++count : count}, 0);
 			let enemyPresence = nearbyShips.length + presentShips.length - friendlyPresence;
-			if (hex.owner === 1 && (enemyPresence > friendlyPresence || friendlyPresence == 0)) {
+			if (friendlyPresence === 0) friendlyPresence = nearbyBases.some(base => base.allied) ? 1 : 0;
+			if (enemyPresence === 0) enemyPresence = nearbyBases.some(base => !base.allied) ? 1 : 0;
+			if (hex.owner === 1 && (enemyPresence > friendlyPresence || friendlyPresence == 0) && !presentFriendlyBase) {
 				hex.owner = 0;
 				income.territory--;
-			} else if (hex.owner === -1 && (friendlyPresence > enemyPresence || enemyPresence == 0)) {
+			} else if (hex.owner === -1 && (friendlyPresence > enemyPresence || enemyPresence == 0) && !presentEnemyBase) {
 				hex.owner = 0;
 			}
 			if (hex.owner === 0) {
-				if (friendlyPresence > enemyPresence * 2) {
+				if (friendlyPresence > enemyPresence * 2 || presentFriendlyBase) {
 					hex.owner = 1;
 					income.territory++;
-				} else if (enemyPresence > friendlyPresence * 2) {
+				} else if (enemyPresence > friendlyPresence * 2 || presentEnemyBase) {
 					hex.owner = -1;
 				}
 			}
@@ -257,21 +270,32 @@ var Wasm = {};
 		if (!requestedHex) throw "Error: Hex with ID " + id + " does not exist.";
 		return requestedHex.owner;
 	}
-	this.moveBase = function(id, y, x){
+	this.moveBase = function(id, y, x) {
 		// Find out if there is an enemy unit here.
 		// Also do validation.
 		let targetBase = this.getBase(id);
-		targetBase.x = +x;
-		targetBase.y = +y;
+		targetBase.moveGoal = {x: +x, y: +y};
 		this.saveBase(targetBase);
 	}
-	this.moveShip = function(id, y1, x1, y2 = null, x2 = null, y3 = null, x3 = null, y4 = null, x4 = null){
+	this.moveShip = function(id, y1, x1, y2 = null, x2 = null, y3 = null, x3 = null, y4 = null, x4 = null) {
 		// Find out about enemy movements.
 		// Also do validation for each space.
 		let targetShip = this.getShip(id);
-		targetShip.x = +(x4 || x3 || x2 || x1);
-		targetShip.y = +(y4 || y3 || y2 || y1);
+		if ((x4 !== null || y4 !== null) && !targetShip.abilities.some(a => a.name === this.getAbilityDetails(3).name)) {
+			throw "Error: Ship cannot move 4 spaces without " + this.getAbilityDetails(3).name;
+		}
+		targetShip.moveGoal = {x1: +x1, y1: +y1, x2: +x2, y2: +y2, x3: +x3, y3: +y3, x4: +x4, y4: +y4};
 		this.saveShip(targetShip);
+	}
+	this.calculateMoves = function() {
+		for (let movePulse = 1; movePulse <= 4; movePulse++){
+			for (let i = 0; i < ships.length; i++){
+				if (ships[i].moveGoal["x" + movePulse]) {
+					ships[i].x = ships[i].moveGoal["x" + movePulse];
+					ships[i].y = ships[i].moveGoal["y" + movePulse];
+				}
+			}
+		}
 	}
 	this.loadPlayer = function(name, friendly) {
 		if (!localStorage[name]) name = "default";
