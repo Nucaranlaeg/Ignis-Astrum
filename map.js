@@ -55,11 +55,11 @@ var Map = {};
 				newHex.id = hexRow.id + "." + (i - Math.floor(numcols / 2));
 				if (index === Math.floor(numrows / 2)) {
 					if (i === Math.floor(numcols / 2)) {
-						newHex.classList.add("blue");
+						newHex.classList.add("blue", "capital", "seen");
 						friendlyCapital = newHex;
 					} else if (i === Math.floor(numcols / 2) + 4) {
 						// Hex "0.4" is the enemy capital
-						newHex.classList.add("red");
+						newHex.classList.add("capital");
 						enemyCapital = newHex;
 					}
 				}
@@ -360,14 +360,12 @@ var Map = {};
 			return Wasm.getShip(ships[ship.id.slice(4)].DBid).allied;
 		});
 		// Get all the hexes with friendly ships or bases.
-		let occupiedHexes = alliedShips.map(ship => ship.parentNode);
-		// This commented out bit will work once base stats are implemented.
-		/*let occupiedHexes = [...[...map.getElementsByClassName("ship")].filter(ship => {
+		let occupiedHexes = [...[...map.getElementsByClassName("ship")].filter(ship => {
 			return Wasm.getShip(ships[ship.id.slice(4)].DBid).allied;
 		}).map(ship => ship.parentNode),
 			...[...map.getElementsByClassName("base")].filter(base => {
 			return Wasm.getBase(bases[base.id.slice(4)].DBid).allied;
-		}).map(base => base.parentNode)];*/
+		}).map(base => base.parentNode)];
 		// Add all hexes adjacent to scouts.
 		let scoutedHexes = [].concat(...(alliedShips.filter(ship => {
 			return Wasm.getShip(ships[ship.id.slice(4)].DBid).abilities.find(a => a === Utils.ABILITY.SCOUT) !== undefined;
