@@ -9,7 +9,7 @@ var Wasm = {};
 (function() {
 	let friendlyDesigns = [], enemyDesigns = [];
 	let ships = [], bases = [];
-	let hexes = [];
+	let hexes = [], grids = [];
 	let treasury = 12; // This is equivalent to two turns of capital income, with no hexes captured.
 	const SHIP_TYPES = 10, BASE_TYPES = 4, MAX_ABILITIES = 3;
 	let income = {capital: 6, territory: 1, majorPlanets: 0, minorPlanets: 0};
@@ -178,15 +178,86 @@ var Wasm = {};
 			majorPlanets: income.minorPlanets,
 			minorPlanets: income.majorPlanets};
 	}
+	this.processIncome = function() {
+		hexes.forEach(hex => {
+			hex.IPCs = hex.owner !== 0 ? 1 : 0;
+			hex.grids = [];
+		});
+		bases.forEach(base => base.grid = -1);
+		grids = [];
+		let gridCount = 0;
+		let friendlyHexes = hexes.filter(hex => hex.owner);
+		let enemyHexes = hexes.filter(hex => !hex.owner);
+		for (let i = 0; i < bases.length; i++) {
+			if (bases[i].grid == -1){
+				this.addBaseToGrid(bases[i], gridCount);
+				grids[gridCount] = {IPCs: 0, hexes: [], capitalDistance: 1000, gridNumber: gridCount};
+				let gridBases = bases.filter(base => base.grid === gridCount);
+				let possibleHexes = bases[i].allied ? friendlyHexes : enemyHexes;
+				gridBases.forEach(base => {
+					let odd = base.y % 2 === 0 ? -1 : 1;
+					grids[gridCount].hexes.push(this.getHex(base.y, base.x));
+					grids[gridCount].hexes.push(this.getHex(base.y, base.x - 1));
+					grids[gridCount].hexes.push(this.getHex(base.y, base.x + 1));
+					grids[gridCount].hexes.push(this.getHex(base.y - 1, base.x));
+					grids[gridCount].hexes.push(this.getHex(base.y - 1, base.x + odd));
+					grids[gridCount].hexes.push(this.getHex(base.y + 1, base.x));
+					grids[gridCount].hexes.push(this.getHex(base.y + 1, base.x + odd));
+					let capitalDistance = Math.max(Math.abs(base.x - (bases[i].allied ? 0 : 4)), Math.abs(base.y));
+					grids[gridCount].capitalDistance = capitalDistance < grids[gridCount].capitalDistance ? capitalDistance : grids[gridCount].capitalDistance;
+				});
+				// Removes duplicates.  This is quadratic time, so we may want to switch to a hash table if it's an issue.
+				grids[gridCount].hexes = grids[gridCount].hexes.filter((hex, index) => {
+					return grids[gridCount].hexes.findIndex(h => h.id === hex.id) === index;
+				});
+				gridCount++;
+			}
+		}
+		grids.sort((a, b) => a.capitalDistance - b.capitalDistance);
+		if (gridCount == 0 || grids[0].capitalDistance > 1){
+			grids[gridCount] = {IPCs: 0, hexes: [], capitalDistance: 0, gridNumber: gridCount};
+			grids[gridCount].hexes.push(this.getHex(0,0));
+		}
+		grids.forEach(grid => {
+			grid.hexes.forEach(hex => {
+				grid.IPCs += hex.IPCs;
+				hex.IPCs = 0;
+				hex.grids.push(grid.gridNumber);
+			});
+		});
+		grids.sort((a, b) => a.gridNumber - b.gridNumber);
+		console.log("Grids:", grids);
+		console.log("Bases:", bases);
+		console.log("Hexes:", hexes);
+	}
+	this.addBaseToGrid = function(sourceBase, grid) {
+		let x = sourceBase.x, y = sourceBase.y;
+		let nearbyBases = bases.filter(base => {
+			if (base.allied !== sourceBase.allied || base.grid !== -1) return false;
+			let diffx = x - base.x, diffy = Math.abs(y - base.y);
+			if ((diffy <= 2 && Math.abs(diffx) <= 1) || (diffx === 2 && diffy <= 1) || (diffx === 0 && diffy === 2)) return true;
+		});
+		if (nearbyBases.length === 0) return;
+		nearbyBases.forEach(base => base.grid = grid);
+		nearbyBases.forEach(base => this.addBaseToGrid(base, grid));
+	}
+	this.getHex = function(y, x){
+		return hexes.find(hex => +hex.x == x && +hex.y == y);
+	}
+	this.getHexIPCs = function(y, x){
+		return this.getHex(y, x).grids.reduce((sum, currentGrid) => sum + grids[currentGrid].IPCs, 0);
+	}
 	this.getEmpireTreasury = function() {
 		return treasury;
 	}
 	this.signalTurnEnd = function() {
 		window.setTimeout(() => {
 			// Combat
-			treasury += this.getEmpireIncome().total;
+			treasury += this.getEmpireIncome().total; // This line will need to go.
 			Timer.beginNewTurn();
+			this.calculateMoves();
 			this.computeTerritoryOwnership();
+			this.processIncome();
 		}, 0);
 	}
 	this.signalContinueTurn = function() {
@@ -288,14 +359,50 @@ var Wasm = {};
 		this.saveShip(targetShip);
 	}
 	this.calculateMoves = function() {
+		let friendlyShipLocations, enemyShipLocations;
+		let friendlyBaseLocations = bases.filter(b => b.allied).map(b => {return {x: b.x, y: b.y};});
+		let enemyBaseLocations = bases.filter(b => !b.allied).map(b => {return {x: b.x, y: b.y};});
 		for (let movePulse = 1; movePulse <= 4; movePulse++){
-			for (let i = 0; i < ships.length; i++){
-				if (ships[i].moveGoal["x" + movePulse]) {
-					ships[i].x = ships[i].moveGoal["x" + movePulse];
-					ships[i].y = ships[i].moveGoal["y" + movePulse];
+			ships.forEach(ship => {
+				if (ship.moveGoal && ship.moveGoal["x" + movePulse]) {
+					ship.x = ship.moveGoal["x" + movePulse];
+					ship.y = ship.moveGoal["y" + movePulse];
+				}
+			});
+			friendlyShipLocations = ships.filter(s => s.allied).map(s => {return {x: s.x, y: s.y};});
+			enemyShipLocations = ships.filter(s => s.allied).map(s => {return {x: s.x, y: s.y};});
+			ships.forEach(ship => {
+				if (ship.moveGoal) {
+					if (ship.allied) {
+						if ([...enemyBaseLocations, ...enemyShipLocations].some(loc => loc.x === ship.x && loc.y === ship.y)) {
+							delete ship.moveGoal;
+							ship.moves = movePulse;
+						}
+					} else {
+						if ([...friendlyBaseLocations, ...friendlyShipLocations].some(loc => loc.x === ship.x && loc.y === ship.y)) {
+							delete ship.moveGoal;
+							ship.moves = movePulse;
+						}
+					}
+				}
+			});
+		}
+		console.log("MOVE BASES");
+		bases.forEach(base => {
+			if (base.moveGoal) {
+				if (base.allied) {
+					if (![...enemyBaseLocations, ...enemyShipLocations].some(loc => loc.x === base.x && loc.y === base.y)) {
+						base.x = base.moveGoal.x;
+						base.y = base.moveGoal.y;
+					}
+				} else {
+					if (![...friendlyBaseLocations, ...friendlyShipLocations].some(loc => loc.x === base.x && loc.y === base.y)) {
+						base.x = base.moveGoal.x;
+						base.y = base.moveGoal.y;
+					}
 				}
 			}
-		}
+		});
 	}
 	this.loadPlayer = function(name, friendly) {
 		if (!localStorage[name]) name = "default";

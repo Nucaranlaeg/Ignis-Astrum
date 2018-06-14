@@ -2,7 +2,7 @@
 
 var ContextMenu = {};
 (function() {
-	let contextMenu, shipMenu, infoWindow, upgradeMenu;
+	let contextMenu, shipMenu, infoWindow, upgradeMenu, IPCs;
 	let menuItems = [];
 	let shipMenuClick = false;
 	let closeInfoWindow;
@@ -19,7 +19,7 @@ var ContextMenu = {};
 		hex: [false, false, true, false, false],
 		all: [true, true, true, true, true]
 	};
-	const loadContextMenuEntry = [() => {return true}, () => {return true}, () => {return true}, repairPossible, upgradePossible];
+	const loadContextMenuEntry = [() => {return true}, () => {return true}, getIPCs, repairPossible, upgradePossible];
 
 	function initializeContextMenu() {
 		contextMenu = document.getElementById("context-menu");
@@ -31,7 +31,8 @@ var ContextMenu = {};
 		shipMenu = document.getElementById("ship-menu");
 		shipMenu.oncontextmenu = () => {shipMenuClick = true;}
 		infoWindow = document.getElementById("info-window");
-		upgradeMenu = document.getElementById("context-upgrade-base")
+		upgradeMenu = document.getElementById("context-upgrade-base");
+		IPCs = document.getElementById("context-ipcs");
 	}
 
 	document.addEventListener("DOMContentLoaded", initializeContextMenu, {once: true});
@@ -67,6 +68,7 @@ var ContextMenu = {};
 		}
 		if (target === undefined) {
 			targetMenu = contextMenuMask.hex;
+			target = Utils.findHex(event.clientX, event.clientY);
 		} else {
 			let type = target.id.slice(0, 4);
 			switch (type) {
@@ -185,6 +187,12 @@ var ContextMenu = {};
 		node.setAttribute("onclick", "ContextMenu.closeContextMenu(); Empire.upgradeBase(" + id + ")");
 		upgradeMenu.innerHTML = "";
 		upgradeMenu.append(node);
+		return true;
+	}
+	
+	function getIPCs(target) {
+		let loc = target.classList.contains("hex") ? target.id : target.parentNode.id;
+		IPCs.innerHTML = Wasm.getHexIPCs(...loc.split('.'));
 		return true;
 	}
 	
