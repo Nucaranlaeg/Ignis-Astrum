@@ -15,8 +15,6 @@ var Empire = {};
 		sidebarParts.capital = document.getElementById("capital-income");
 		sidebarParts.total = document.getElementById("total-income");
 		sidebarParts.treasury = document.getElementById("empire-treasury");
-		
-		this.updateEmpireSidebar();
 	}
 
 	document.addEventListener("DOMContentLoaded", initializeEmpire.bind(this), {once: true});

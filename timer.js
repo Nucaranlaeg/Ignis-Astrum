@@ -43,7 +43,6 @@ var Timer = {};
 		timerUpdater = setInterval(updateTimer.bind(this), 250);
 		turnTime = 0;
 		timerCircle.classList.remove("turn-ended");
-		Empire.updateEmpireSidebar();
 		Map.moveShips();
 	}
 }).apply(Timer);
