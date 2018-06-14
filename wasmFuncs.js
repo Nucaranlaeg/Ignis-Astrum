@@ -10,9 +10,8 @@ var Wasm = {};
 	let friendlyDesigns = [], enemyDesigns = [];
 	let ships = [], bases = [];
 	let hexes = [], grids = [];
-	let treasury = 12; // This is equivalent to two turns of capital income, with no hexes captured.
 	const SHIP_TYPES = 10, BASE_TYPES = 4, MAX_ABILITIES = 3;
-	let income = {capital: 6, territory: 1, majorPlanets: 0, minorPlanets: 0};
+	let incomeValues = {capital: 6, territory: 1, majorPlanets: 4, minorPlanets: 2};
 	
 	this.getShipTypes = function() {return SHIP_TYPES;}
 	this.getBaseTypes = function() {return BASE_TYPES;}
@@ -22,15 +21,23 @@ var Wasm = {};
 					  y: context.split('.')[0],
 					  id: Math.floor(Math.random() * 1000000000),
 					  owner: 0};
-		if (newHex.x == 0 && newHex.y == 0) newHex.owner = 1;
-		if (newHex.x == 4 && newHex.y == 0) newHex.owner = -1;
+		if (newHex.x == 0 && newHex.y == 0){
+			newHex.capital = true;
+			newHex.owner = 1;
+		} else if (newHex.x == 4 && newHex.y == 0){
+			newHex.capital = true;
+			newHex.owner = -1;
+		} else {
+			newHex.capital = false;
+		}
 		hexes.push(newHex);
 		return newHex.id;
 	}
 	this.addBase = function(classNumber){
 		let newBase = this.getBaseClass(classNumber);
-		if (treasury < newBase.cost) return -1;
-		treasury = Math.round(treasury - newBase.cost);
+		let treasury = grids[this.getHex(0,0).grids[0]].IPCs;
+		if (newBase.cost > treasury) return -1;
+		grids[this.getHex(0,0).grids[0]].IPCs = Math.round(treasury - newBase.cost);
 		newBase.id = Math.floor(Math.random() * 1000000000);
 		newBase.x = 0;
 		newBase.y = 0;
@@ -43,8 +50,9 @@ var Wasm = {};
 		let targetBase = this.getBase(id);
 		if (targetBase.level == BASE_TYPES - 1) return -1;
 		let upgradedBase = this.getBaseClass(targetBase.level + 1);
+		let treasury = grids[targetBase.grid].IPCs;
 		if (upgradedBase.cost > treasury) return -1;
-		treasury = Math.round(treasury - upgradedBase.cost);
+		grids[targetBase.grid].IPCs = Math.round(treasury - upgradedBase.cost);
 		targetBase.power = upgradedBase.power;
 		targetBase.currentHull += upgradedBase.maxHull - targetBase.maxHull;
 		targetBase.maxHull = upgradedBase.maxHull;
@@ -56,8 +64,9 @@ var Wasm = {};
 	}
 	this.addShip = function(classNumber){
 		let newShip = this.getShipClass(classNumber);
-		if (treasury < newShip.cost) return -1;
-		treasury = Math.round(treasury - newShip.cost);
+		let treasury = grids[this.getHex(0,0).grids[0]].IPCs;
+		if (newShip.cost > treasury) return -1;
+		grids[this.getHex(0,0).grids[0]].IPCs = Math.round(treasury - newShip.cost);
 		newShip.id = Math.floor(Math.random() * 1000000000);
 		newShip.x = 0;
 		newShip.y = 0;
@@ -171,19 +180,24 @@ var Wasm = {};
 		ships[requestedShipId] = ship;
 	}
 	this.getEmpireIncome = function() {
-		let sum = Object.keys(income).reduce((s, k) => {return s + income[k]}, 0);
+		let sum = Object.keys(incomeValues).reduce((s, k) => {return s + incomeValues[k]}, 0);
 		return {total: sum,
-			capital: income.capital,
-			territory: income.territory,
-			majorPlanets: income.minorPlanets,
-			minorPlanets: income.majorPlanets};
+			capital: incomeValues.capital,
+			territory: incomeValues.territory,
+			majorPlanets: incomeValues.minorPlanets,
+			minorPlanets: incomeValues.majorPlanets};
 	}
 	this.processIncome = function() {
+		let treasury = grids.length > 0 ? grids[this.getHex(0,0).grids[0]].IPCs : 0;
 		hexes.forEach(hex => {
-			hex.IPCs = hex.owner !== 0 ? 1 : 0;
+			hex.IPCs = hex.owner !== 0 ? incomeValues.territory : 0;
+			// Increase the value of the capitals.
+			if (hex.capital) hex.IPCs = 7;
+			// TODO: Add planet values.
 			hex.grids = [];
 		});
 		bases.forEach(base => base.grid = -1);
+		this.deconstructGrids();
 		grids = [];
 		let gridCount = 0;
 		let friendlyHexes = hexes.filter(hex => hex.owner);
@@ -191,32 +205,39 @@ var Wasm = {};
 		for (let i = 0; i < bases.length; i++) {
 			if (bases[i].grid == -1){
 				this.addBaseToGrid(bases[i], gridCount);
-				grids[gridCount] = {IPCs: 0, hexes: [], capitalDistance: 1000, gridNumber: gridCount};
+				grids[gridCount] = {IPCs: 0, hexes: [], capitalDistance: 1000, gridNumber: gridCount, bases: []};
+				let thisGrid = grids[gridCount];
 				let gridBases = bases.filter(base => base.grid === gridCount);
 				let possibleHexes = bases[i].allied ? friendlyHexes : enemyHexes;
 				gridBases.forEach(base => {
+					thisGrid.bases.push(base.id);
+					thisGrid.IPCs += base.IPCs ? base.IPCs : 0;
 					let odd = base.y % 2 === 0 ? -1 : 1;
-					grids[gridCount].hexes.push(this.getHex(base.y, base.x));
-					grids[gridCount].hexes.push(this.getHex(base.y, base.x - 1));
-					grids[gridCount].hexes.push(this.getHex(base.y, base.x + 1));
-					grids[gridCount].hexes.push(this.getHex(base.y - 1, base.x));
-					grids[gridCount].hexes.push(this.getHex(base.y - 1, base.x + odd));
-					grids[gridCount].hexes.push(this.getHex(base.y + 1, base.x));
-					grids[gridCount].hexes.push(this.getHex(base.y + 1, base.x + odd));
+					thisGrid.hexes.push(this.getHex(base.y, base.x));
+					thisGrid.hexes.push(this.getHex(base.y, base.x - 1));
+					thisGrid.hexes.push(this.getHex(base.y, base.x + 1));
+					thisGrid.hexes.push(this.getHex(base.y - 1, base.x));
+					thisGrid.hexes.push(this.getHex(base.y - 1, base.x + odd));
+					thisGrid.hexes.push(this.getHex(base.y + 1, base.x));
+					thisGrid.hexes.push(this.getHex(base.y + 1, base.x + odd));
 					let capitalDistance = Math.max(Math.abs(base.x - (bases[i].allied ? 0 : 4)), Math.abs(base.y));
-					grids[gridCount].capitalDistance = capitalDistance < grids[gridCount].capitalDistance ? capitalDistance : grids[gridCount].capitalDistance;
+					thisGrid.capitalDistance = capitalDistance < thisGrid.capitalDistance ? capitalDistance : thisGrid.capitalDistance;
 				});
 				// Removes duplicates.  This is quadratic time, so we may want to switch to a hash table if it's an issue.
-				grids[gridCount].hexes = grids[gridCount].hexes.filter((hex, index) => {
-					return grids[gridCount].hexes.findIndex(h => h.id === hex.id) === index;
+				thisGrid.hexes = thisGrid.hexes.filter((hex, index) => {
+					return thisGrid.hexes.findIndex(h => h.id === hex.id) === index;
 				});
 				gridCount++;
 			}
 		}
 		grids.sort((a, b) => a.capitalDistance - b.capitalDistance);
+		let capitalGrid = 0;
 		if (gridCount == 0 || grids[0].capitalDistance > 1){
-			grids[gridCount] = {IPCs: 0, hexes: [], capitalDistance: 0, gridNumber: gridCount};
+			grids[gridCount] = {IPCs: treasury, hexes: [], capitalDistance: 0, gridNumber: gridCount};
 			grids[gridCount].hexes.push(this.getHex(0,0));
+			capitalGrid = gridCount;
+		} else {
+			grids[0].IPCs += treasury;
 		}
 		grids.forEach(grid => {
 			grid.hexes.forEach(hex => {
@@ -225,10 +246,9 @@ var Wasm = {};
 				hex.grids.push(grid.gridNumber);
 			});
 		});
+		treasury = grids[capitalGrid].IPCs;
 		grids.sort((a, b) => a.gridNumber - b.gridNumber);
-		console.log("Grids:", grids);
-		console.log("Bases:", bases);
-		console.log("Hexes:", hexes);
+		console.log(grids);
 	}
 	this.addBaseToGrid = function(sourceBase, grid) {
 		let x = sourceBase.x, y = sourceBase.y;
@@ -241,6 +261,15 @@ var Wasm = {};
 		nearbyBases.forEach(base => base.grid = grid);
 		nearbyBases.forEach(base => this.addBaseToGrid(base, grid));
 	}
+	this.deconstructGrids = function() {
+		grids.forEach(grid => {
+			if (grid.capitalDistance <= 1) return;
+			let each = Math.floor(grid.IPCs / grid.bases.length), remainder = grid.IPCs - (each * grid.bases.length);
+			grid.bases.forEach(baseId => {
+				bases.find(base => base.id === baseId).IPCs = each + (remainder-- > 0 ? 1 : 0);
+			});
+		});
+	}
 	this.getHex = function(y, x){
 		return hexes.find(hex => +hex.x == x && +hex.y == y);
 	}
@@ -248,17 +277,41 @@ var Wasm = {};
 		return this.getHex(y, x).grids.reduce((sum, currentGrid) => sum + grids[currentGrid].IPCs, 0);
 	}
 	this.getEmpireTreasury = function() {
-		return treasury;
+		return grids[this.getHex(0,0).grids[0]].IPCs;
 	}
 	this.signalTurnEnd = function() {
 		window.setTimeout(() => {
 			// Combat
-			treasury += this.getEmpireIncome().total; // This line will need to go.
 			Timer.beginNewTurn();
 			this.calculateMoves();
 			this.computeTerritoryOwnership();
 			this.processIncome();
+			Empire.updateEmpireSidebar();
 		}, 0);
+	}
+	this.gameLoaded = function() {
+		let newBase = this.getBaseClass(0);
+		newBase.id = Math.floor(Math.random() * 1000000000);
+		newBase.x = 0;
+		newBase.y = 0;
+		newBase.allied = true;
+		bases.push(newBase);
+		let baseId = newBase.id;
+		
+		newBase = this.getBaseClass(0);
+		let id = Map.getNewBaseId(baseId);
+		newBase.id = id.slice(4);
+		Map.createBase(0, id, true);
+		Sidebar.addBase(newBase);
+		
+		newBase = this.getBaseClass(0);
+		newBase.id = Math.floor(Math.random() * 1000000000);
+		newBase.x = 4;
+		newBase.y = 0;
+		newBase.allied = false;
+		bases.push(newBase);
+		
+		this.signalTurnEnd();
 	}
 	this.signalContinueTurn = function() {
 		return;
@@ -319,16 +372,19 @@ var Wasm = {};
 			let enemyPresence = nearbyShips.length + presentShips.length - friendlyPresence;
 			if (friendlyPresence === 0) friendlyPresence = nearbyBases.some(base => base.allied) ? 1 : 0;
 			if (enemyPresence === 0) enemyPresence = nearbyBases.some(base => !base.allied) ? 1 : 0;
+			if (hex.capital && 
+				((hex.owner === 1 && (presentFriendlyBase || presentShips.some(ship => ship.allied) || (nearbyShips.some(ship => ship.allied) && !presentShips.some(ship => !ship.allied))))
+				|| (hex.owner === -1 && (presentEnemyBase || presentShips.some(ship => !ship.allied) || (nearbyShips.some(ship => !ship.allied) && !presentShips.some(ship => ship.allied)))))){
+					return;
+			}
 			if (hex.owner === 1 && (enemyPresence > friendlyPresence || friendlyPresence == 0) && !presentFriendlyBase) {
 				hex.owner = 0;
-				income.territory--;
 			} else if (hex.owner === -1 && (friendlyPresence > enemyPresence || enemyPresence == 0) && !presentEnemyBase) {
 				hex.owner = 0;
 			}
 			if (hex.owner === 0) {
 				if (friendlyPresence > enemyPresence * 2 || presentFriendlyBase) {
 					hex.owner = 1;
-					income.territory++;
 				} else if (enemyPresence > friendlyPresence * 2 || presentEnemyBase) {
 					hex.owner = -1;
 				}
@@ -387,7 +443,6 @@ var Wasm = {};
 				}
 			});
 		}
-		console.log("MOVE BASES");
 		bases.forEach(base => {
 			if (base.moveGoal) {
 				if (base.allied) {

@@ -189,6 +189,7 @@ var Sidebar = {};
 		(loadPlayer.bind(Sidebar))(player1Name, true);
 		(loadPlayer.bind(Sidebar))(player2Name, false);
 		document.getElementById("load-player").remove();
+		Wasm.gameLoaded();
 	}
 	
 	// This function will likely have to be replaced with an AJAX call through Wasm.
