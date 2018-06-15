@@ -231,14 +231,6 @@ var Wasm = {};
 			}
 		}
 		grids.sort((a, b) => a.capitalDistance - b.capitalDistance);
-		let capitalGrid = 0;
-		if (gridCount == 0 || grids[0].capitalDistance > 1){
-			grids[gridCount] = {IPCs: treasury, hexes: [], capitalDistance: 0, gridNumber: gridCount};
-			grids[gridCount].hexes.push(this.getHex(0,0));
-			capitalGrid = gridCount;
-		} else {
-			grids[0].IPCs += treasury;
-		}
 		grids.forEach(grid => {
 			grid.hexes.forEach(hex => {
 				grid.IPCs += hex.IPCs;
@@ -246,7 +238,13 @@ var Wasm = {};
 				hex.grids.push(grid.gridNumber);
 			});
 		});
-		treasury = grids[capitalGrid].IPCs;
+		hexes.forEach(hex => {
+			if (hex.grids.length > 0 || hex.owner === 0) return;
+			grids[gridCount] = {IPCs: hex.IPCs, hexes: [hex], capitalDistance: Math.max(Math.abs(hex.x - (hex.owner ? 0 : 4)), Math.abs(hex.y)), gridNumber: gridCount, bases: []};
+			gridCount++;
+		});
+		grids[0].IPCs += treasury;
+		treasury = grids[0].IPCs;
 		grids.sort((a, b) => a.gridNumber - b.gridNumber);
 		console.log(grids);
 	}
