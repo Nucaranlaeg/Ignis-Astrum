@@ -236,6 +236,7 @@ var Map = {};
 	this.moveShips = function() {
 		let traces = [...map.getElementsByClassName("trace")];
 		[...map.getElementsByClassName("ship")].forEach(ship => {
+			if (ship.classList.contains("trace")) return;
 			// This should pass in zero to four pairs of coordinates, the closest to the ship first.
 			let shipTraces = traces.filter(trace => trace.name === ship.id)
 				.sort((a, b) => a.dataset.traceNumber - b.dataset.traceNumber)
@@ -356,6 +357,9 @@ var Map = {};
 	this.drawVision = function() {
 		// Unsee all hexes.
 		[...map.getElementsByClassName("seen")].forEach(hex => hex.classList.remove("seen"));
+		// Delete all enemy units.
+		[...map.getElementsByClassName("ship")].forEach(ship => {if (!ship.classList.contains("controlled")) ship.remove()});
+		[...map.getElementsByClassName("base")].forEach(base => {if (!base.classList.contains("controlled")) base.remove()});
 		let alliedShips = [...map.getElementsByClassName("ship")].filter(ship => {
 			return Wasm.getShip(ships[ship.id.slice(4)].DBid).allied;
 		});
@@ -383,6 +387,11 @@ var Map = {};
 			hex.classList.remove("red", "blue");
 			if (owner === 1) hex.classList.add("blue");
 			if (owner === -1) hex.classList.add("red");
+			let units = Wasm.viewHex(...hex.id.split('.'));
+			if (units){
+				units.ships.forEach(ship => this.createShip(ship.hull, this.getNewShipId(ship.id), false, hex.id));
+				units.bases.forEach(base => this.createBase(base.level, this.getNewBaseId(base.id), false, hex.id));
+			}
 		});
 	};
 	

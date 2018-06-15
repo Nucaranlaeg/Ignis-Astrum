@@ -69,7 +69,7 @@ body{
 	color: var(--capital) !important;
 }
 
-.hex.red:not(.seen) {
+.hex.red.seen {
 	color: var(--enemy);
 }
 
