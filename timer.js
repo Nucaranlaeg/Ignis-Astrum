@@ -44,5 +44,6 @@ var Timer = {};
 		turnTime = 0;
 		timerCircle.classList.remove("turn-ended");
 		Map.moveShips();
+		ContextMenu.closeContextMenu();
 	}
 }).apply(Timer);

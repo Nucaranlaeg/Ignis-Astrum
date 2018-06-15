@@ -10,6 +10,7 @@ var Wasm = {};
 	let friendlyDesigns = [], enemyDesigns = [];
 	let ships = [], bases = [];
 	let hexes = [], grids = [];
+	let income = 13;
 	const SHIP_TYPES = 10, BASE_TYPES = 4, MAX_ABILITIES = 3;
 	let incomeValues = {capital: 6, territory: 1, majorPlanets: 4, minorPlanets: 2};
 	
@@ -179,14 +180,6 @@ var Wasm = {};
 		if (requestedShipId === -1) throw "Error: Ship with ID " + id + " does not exist.";
 		ships[requestedShipId] = ship;
 	}
-	this.getEmpireIncome = function() {
-		let sum = Object.keys(incomeValues).reduce((s, k) => {return s + incomeValues[k]}, 0);
-		return {total: sum,
-			capital: incomeValues.capital,
-			territory: incomeValues.territory,
-			majorPlanets: incomeValues.minorPlanets,
-			minorPlanets: incomeValues.majorPlanets};
-	}
 	this.processIncome = function() {
 		let treasury = grids.length > 0 ? grids[this.getHex(0,0).grids[0]].IPCs : 0;
 		hexes.forEach(hex => {
@@ -244,8 +237,10 @@ var Wasm = {};
 		hexes.forEach(hex => {
 			if (hex.grids.length > 0 || hex.owner !== 1) return;
 			grids[gridCount] = {IPCs: hex.IPCs, hexes: [hex], capitalDistance: Math.max(Math.abs(hex.x), Math.abs(hex.y)), gridNumber: gridCount, bases: []};
+			hex.grids.push(gridCount);
 			gridCount++;
 		});
+		income = grids[0].IPCs;
 		grids[0].IPCs += treasury;
 		treasury = grids[0].IPCs;
 		grids.sort((a, b) => a.gridNumber - b.gridNumber);
@@ -269,6 +264,9 @@ var Wasm = {};
 				bases.find(base => base.id === baseId).IPCs = each + (remainder-- > 0 ? 1 : 0);
 			});
 		});
+	}
+	this.getCapitalIncome = function() {
+		return income;
 	}
 	this.getHex = function(y, x){
 		return hexes.find(hex => +hex.x == x && +hex.y == y);
@@ -327,7 +325,7 @@ var Wasm = {};
 	}
 	this.findVisibleHexes = function() {
 		let scoutOccupiedHexes = hexes.filter(hex => {
-			return ships.some(ship => ship.abilities.indexOf(SCOUT_SENSORS) !== -1 && ship.x == hex.x && ship.y == hex.y);
+			return ships.some(ship => ship.abilities.indexOf(this.ABILITY.SCOUT) !== -1 && ship.x == hex.x && ship.y == hex.y);
 		});
 		let occupiedHexes = hexes.filter(hex => {
 			return ships.some(ship => ship.allied && ship.x == hex.x && ship.y == hex.y) || bases.some(base => base.allied && base.x == hex.x && base.y == hex.y) || this.isAdjacent(scoutOccupiedHexes, +hex.x, +hex.y);
@@ -366,7 +364,12 @@ var Wasm = {};
 		];
 		return parts[index];
 	}
-	const SCOUT_SENSORS = 0, WARP_FIELDS = 1, BOOSTER_PACKS = 2, ENGINE_STABILIZERS = 3;
+	this.ABILITY = Object.freeze({
+		SCOUT: 0,
+		WARP_FIELDS: 1,
+		BOOSTER_PACKS: 2,
+		STABILIZERS: 3,
+	});
 	this.getAbilityDetails = function(index) {
 		let abilities = [
 			{cost: 3, name: "Scout Sensors", description: "Allows the ship to detect terrain and enemy units 2 hexes away.", base: false},
@@ -438,8 +441,8 @@ var Wasm = {};
 		// Find out about enemy movements.
 		// Also do validation for each space.
 		let targetShip = this.getShip(id);
-		if ((x4 !== null || y4 !== null) && !targetShip.abilities.some(a => a.name === this.getAbilityDetails(ENGINE_STABILIZERS).name)) {
-			throw "Error: Ship cannot move 4 spaces without " + this.getAbilityDetails(ENGINE_STABILIZERS).name;
+		if ((x4 !== null || y4 !== null) && !targetShip.abilities.some(a => a.name === this.getAbilityDetails(this.ABILITY.STABILIZERS).name)) {
+			throw "Error: Ship cannot move 4 spaces without " + this.getAbilityDetails(this.ABILITY.STABILIZERS).name;
 		}
 		targetShip.moveGoal = {x1: x1, y1: y1, x2: x2, y2: y2, x3: x3, y3: y3, x4: x4, y4: y4};
 		this.saveShip(targetShip);

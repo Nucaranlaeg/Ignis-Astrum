@@ -4,6 +4,7 @@ var Ship = {};
 (function() {
 	let movingUnit = null, dragElement = null;
 	let traceCount = 0;
+	let movingUnitTraces = null;
 	
 	this.dragBase = function (event, base) {
 		// For now, just pretend it's a ship.
@@ -41,7 +42,7 @@ var Ship = {};
 					sourceShip.removeAttribute("id");
 					sourceShip.classList.remove("moving");
 					movingUnit.parentNode.appendChild(sourceShip);
-					// Add some kind of movement trace.
+					// Add some kind of movement arrow.
 				}
 				Map.placeShip(movingUnit, true, hex);
 				Map.replaceShips(origin);
@@ -90,6 +91,19 @@ var Ship = {};
 		}
 		dragElement.style.top = event.clientY - (dragElement.width.baseVal.value / 2) + "px";
 		dragElement.style.left = event.clientX - (dragElement.width.baseVal.value / 2) + "px";
+	}
+	
+	// Add info message that holding down ctrl will allow moving into a hex that was previously entered.
+	// Add info message that holding down shift will restrict movement to 2 hexes.
+	function enterHex(hex, ctrl, shift) {
+		// If shift is held down, reduce the maximum number of hexes to 2.
+		// If the ship has fewer than the maximum number of traces...
+			// ...and the hex is not adjacent to the previous one, pick one that is adjacent to the previous trace and call EnterHex on it first, then on the current one, then return.
+			// ...and a hex with a trace is entered and ctrl is not held down, remove the most recent traces until that hex no longer has one.
+			// ...add a trace.
+		// If the hex is too distant, just return.
+		// If one of the traces is adjacent to three others, one can be removed and a trace added.
+		// Try removing the most recent trace and then calling the in-between hex.
 	}
 	
 	function escDrag(event) {
