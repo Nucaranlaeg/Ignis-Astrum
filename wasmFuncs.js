@@ -203,6 +203,7 @@ var Wasm = {};
 		let friendlyHexes = hexes.filter(hex => hex.owner);
 		let enemyHexes = hexes.filter(hex => !hex.owner);
 		for (let i = 0; i < bases.length; i++) {
+			if (!bases[i].allied) continue;
 			if (bases[i].grid == -1){
 				this.addBaseToGrid(bases[i], gridCount);
 				grids[gridCount] = {IPCs: 0, hexes: [], capitalDistance: 1000, gridNumber: gridCount, bases: []};
@@ -220,9 +221,11 @@ var Wasm = {};
 					thisGrid.hexes.push(this.getHex(base.y - 1, base.x + odd));
 					thisGrid.hexes.push(this.getHex(base.y + 1, base.x));
 					thisGrid.hexes.push(this.getHex(base.y + 1, base.x + odd));
-					let capitalDistance = Math.max(Math.abs(base.x - (bases[i].allied ? 0 : 4)), Math.abs(base.y));
+					let capitalDistance = Math.max(Math.abs(base.x), Math.abs(base.y));
 					thisGrid.capitalDistance = capitalDistance < thisGrid.capitalDistance ? capitalDistance : thisGrid.capitalDistance;
 				});
+				// Remove hexes that happen to be adjacent to a base but not allied.
+				thisGrid.hexes = thisGrid.hexes.filter(hex => hex.owner === 1);
 				// Removes duplicates.  This is quadratic time, so we may want to switch to a hash table if it's an issue.
 				thisGrid.hexes = thisGrid.hexes.filter((hex, index) => {
 					return thisGrid.hexes.findIndex(h => h.id === hex.id) === index;
@@ -239,14 +242,13 @@ var Wasm = {};
 			});
 		});
 		hexes.forEach(hex => {
-			if (hex.grids.length > 0 || hex.owner === 0) return;
-			grids[gridCount] = {IPCs: hex.IPCs, hexes: [hex], capitalDistance: Math.max(Math.abs(hex.x - (hex.owner ? 0 : 4)), Math.abs(hex.y)), gridNumber: gridCount, bases: []};
+			if (hex.grids.length > 0 || hex.owner !== 1) return;
+			grids[gridCount] = {IPCs: hex.IPCs, hexes: [hex], capitalDistance: Math.max(Math.abs(hex.x), Math.abs(hex.y)), gridNumber: gridCount, bases: []};
 			gridCount++;
 		});
 		grids[0].IPCs += treasury;
 		treasury = grids[0].IPCs;
 		grids.sort((a, b) => a.gridNumber - b.gridNumber);
-		console.log(grids);
 	}
 	this.addBaseToGrid = function(sourceBase, grid) {
 		let x = sourceBase.x, y = sourceBase.y;
@@ -282,6 +284,7 @@ var Wasm = {};
 			// Combat
 			Timer.beginNewTurn();
 			this.calculateMoves();
+			this.findVisibleHexes();
 			this.computeTerritoryOwnership();
 			this.processIncome();
 			Empire.updateEmpireSidebar();
@@ -314,6 +317,34 @@ var Wasm = {};
 	this.signalContinueTurn = function() {
 		return;
 	}
+	this.viewHex = function(y, x) {
+		if (this.getHex(y, x).visible){
+			let visibleShips = ships.filter(ship => !ship.allied && ship.y == y && ship.x == x);
+			let visibleBases = bases.filter(base => !base.allied && base.y == y && base.x == x);
+			return {ships: visibleShips.map(ship => {return {hull: ship.hullClass, id: ship.id}}),
+					bases: visibleBases.map(base => {return {level: base.level, id: base.id}})};
+		}
+	}
+	this.findVisibleHexes = function() {
+		let scoutOccupiedHexes = hexes.filter(hex => {
+			return ships.some(ship => ship.abilities.indexOf(SCOUT_SENSORS) !== -1 && ship.x == hex.x && ship.y == hex.y);
+		});
+		let occupiedHexes = hexes.filter(hex => {
+			return ships.some(ship => ship.allied && ship.x == hex.x && ship.y == hex.y) || bases.some(base => base.allied && base.x == hex.x && base.y == hex.y) || this.isAdjacent(scoutOccupiedHexes, +hex.x, +hex.y);
+		});
+		let visibleHexes = hexes.filter(hex => this.isAdjacent(occupiedHexes, +hex.x, +hex.y));
+		visibleHexes.forEach(hex => hex.visible = true);
+	}
+	this.isAdjacent = function(hexList, x, y) {
+		let offset = y % 2 === 0 ? -1 : 1;
+		return hexList.some(hex => (y == hex.y && x == hex.x) ||
+								   (y == hex.y && x + 1 == hex.x) ||
+								   (y == hex.y && x - 1 == hex.x) ||
+								   (y - 1 == hex.y && x == hex.x) ||
+								   (y + 1 == hex.y && x == hex.x) ||
+								   (y - 1 == hex.y && x + offset == hex.x) ||
+								   (y + 1 == hex.y && x + offset == hex.x));
+	}
 	this.getPartDetails = function(index) {
 		let parts = [
 			{cost: 1, power: 1},
@@ -335,6 +366,7 @@ var Wasm = {};
 		];
 		return parts[index];
 	}
+	const SCOUT_SENSORS = 0, WARP_FIELDS = 1, BOOSTER_PACKS = 2, ENGINE_STABILIZERS = 3;
 	this.getAbilityDetails = function(index) {
 		let abilities = [
 			{cost: 3, name: "Scout Sensors", description: "Allows the ship to detect terrain and enemy units 2 hexes away.", base: false},
@@ -406,10 +438,10 @@ var Wasm = {};
 		// Find out about enemy movements.
 		// Also do validation for each space.
 		let targetShip = this.getShip(id);
-		if ((x4 !== null || y4 !== null) && !targetShip.abilities.some(a => a.name === this.getAbilityDetails(3).name)) {
-			throw "Error: Ship cannot move 4 spaces without " + this.getAbilityDetails(3).name;
+		if ((x4 !== null || y4 !== null) && !targetShip.abilities.some(a => a.name === this.getAbilityDetails(ENGINE_STABILIZERS).name)) {
+			throw "Error: Ship cannot move 4 spaces without " + this.getAbilityDetails(ENGINE_STABILIZERS).name;
 		}
-		targetShip.moveGoal = {x1: +x1, y1: +y1, x2: +x2, y2: +y2, x3: +x3, y3: +y3, x4: +x4, y4: +y4};
+		targetShip.moveGoal = {x1: x1, y1: y1, x2: x2, y2: y2, x3: x3, y3: y3, x4: x4, y4: y4};
 		this.saveShip(targetShip);
 	}
 	this.calculateMoves = function() {
@@ -419,8 +451,8 @@ var Wasm = {};
 		for (let movePulse = 1; movePulse <= 4; movePulse++){
 			ships.forEach(ship => {
 				if (ship.moveGoal && ship.moveGoal["x" + movePulse]) {
-					ship.x = ship.moveGoal["x" + movePulse];
-					ship.y = ship.moveGoal["y" + movePulse];
+					ship.x = +ship.moveGoal["x" + movePulse];
+					ship.y = +ship.moveGoal["y" + movePulse];
 				}
 			});
 			friendlyShipLocations = ships.filter(s => s.allied).map(s => {return {x: s.x, y: s.y};});
