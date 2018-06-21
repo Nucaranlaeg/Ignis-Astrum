@@ -13,6 +13,7 @@ var Wasm = {};
 	let income = 13;
 	const SHIP_TYPES = 10, BASE_TYPES = 4, MAX_ABILITIES = 3;
 	let incomeValues = {capital: 6, territory: 1, majorPlanets: 4, minorPlanets: 2};
+	let seed = 0;
 	
 	this.getShipTypes = function() {return SHIP_TYPES;}
 	this.getBaseTypes = function() {return BASE_TYPES;}
@@ -43,6 +44,7 @@ var Wasm = {};
 		newBase.x = 0;
 		newBase.y = 0;
 		newBase.allied = true;
+		newBase.currentHull = newBase.maxHull;
 		bases.push(newBase);
 		return newBase.id;
 	}
@@ -295,6 +297,7 @@ var Wasm = {};
 		newBase.y = 0;
 		newBase.allied = true;
 		bases.push(newBase);
+		newBase.currentHull = newBase.maxHull;
 		let baseId = newBase.id;
 		
 		newBase = this.getBaseClass(0);
@@ -370,12 +373,17 @@ var Wasm = {};
 		BOOSTER_PACKS: 2,
 		STABILIZERS: 3,
 	});
+	this.AVAILABLE = Object.freeze({
+		SHIP_EXCLUSIVE: 0,
+		BASE_EXCLUSIVE: 1,
+		UNRESTRICTED: 2,
+	});
 	this.getAbilityDetails = function(index) {
 		let abilities = [
-			{cost: 3, name: "Scout Sensors", description: "Allows the ship to detect terrain and enemy units 2 hexes away.", base: false},
-			{cost: 3, name: "Efficient Warp Fields", description: "Allows the ship to enter combat if intercepted.", base: false},
-			{cost: 3, name: "Booster Packs", description: "Allows the ship to move 3 hexes and engage enemy units.", base: false},
-			{cost: 3, name: "Engine Stabilizers", description: "Allows the ship to move 4 hexes in a single turn.", base: false},
+			{cost: 3, name: "Scout Sensors", description: "Allows the ship to detect terrain and enemy units 2 hexes away.", available: this.AVAILABLE.SHIP_EXCLUSIVE},
+			{cost: 3, name: "Efficient Warp Fields", description: "Allows the ship to enter combat if intercepted.", available: this.AVAILABLE.SHIP_EXCLUSIVE},
+			{cost: 3, name: "Booster Packs", description: "Allows the ship to move 3 hexes and engage enemy units.", available: this.AVAILABLE.SHIP_EXCLUSIVE},
+			{cost: 3, name: "Engine Stabilizers", description: "Allows the ship to move 4 hexes in a single turn.", available: this.AVAILABLE.SHIP_EXCLUSIVE},
 		];
 		return abilities[index];
 	}
@@ -559,5 +567,17 @@ var Wasm = {};
 		baseCalc.id = id;
 		baseCalc.level = index - SHIP_TYPES;
 		return baseCalc;
+	}
+	this.getDataToSend = function() {
+		let shipsToSend = ships.filter(s => s.allied);
+		let basesToSend = bases.filter(b => b.allied);
+		seed = Math.random();
+		return {ships: shipsToSend,
+			bases: basesToSend,
+			seed: seed};
+	}
+	function random() {
+		var x = Math.sin(seed++) * 10000;
+		return x - Math.floor(x);
 	}
 }).apply(Wasm);
