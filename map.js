@@ -368,7 +368,7 @@ var Map = {};
 			return Wasm.getShip(ships[ship.id.slice(4)].DBid).allied;
 		}).map(ship => ship.parentNode),
 			...[...map.getElementsByClassName("base")].filter(base => {
-			return Wasm.getBase(bases[base.id.slice(4)].DBid).allied;
+			return Wasm.getBase(bases.find(b => b.id = base.id.slice(4)).DBid).allied;
 		}).map(base => base.parentNode)];
 		// Add all hexes adjacent to scouts.
 		let scoutedHexes = [].concat(...(alliedShips.filter(ship => {
