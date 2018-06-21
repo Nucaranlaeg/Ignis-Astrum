@@ -180,7 +180,6 @@ var ContextMenu = {};
 		let targetBase = Wasm.getBase(Map.getBaseDBId(id));
 		if (targetBase.level === BASE_TYPES - 1) return false;
 		let upgradedBase = Wasm.getBaseClass(targetBase.level + 1);
-		console.log(upgradedBase.currentHull, targetBase.maxHull,  targetBase.currentHull);
 		upgradedBase.currentHull = upgradedBase.maxHull - targetBase.maxHull + targetBase.currentHull;
 		upgradedBase.id = id;
 		let node = Sidebar.createBaseNode(upgradedBase, "bcxm");
