@@ -220,18 +220,18 @@ var Creator = {};
 			designs[active].abilities.forEach(c => {
 				abilityList[c].classList.remove("active");
 			});
-			abilityList.forEach(c => {
-				c.classList.remove("unavailable");
-			});
 		}
-		if (active === hangerNumber) {
+		abilityList.forEach(c => {
+			c.classList.remove("unavailable");
+		});
+		if (active === hangerNumber || hangerNumber === null) {
 			active = null;
 			return;
 		}
 		active = hangerNumber;
 		if (active >= SHIP_TYPES) {
 			abilityList.forEach((c, index) => {
-				if (!Wasm.getAbilityDetails(index).base) {
+				if (Wasm.getAbilityDetails(index).available === Wasm.AVAILABLE.SHIP_EXCLUSIVE) {
 					c.classList.add("unavailable");
 				}
 				for (let i = SHIP_TYPES; i < active; i++){
@@ -312,6 +312,6 @@ var Creator = {};
 		[...document.getElementsByClassName("active")].forEach(node => {
 			node.classList.remove("active");
 		});
-		active = null;
+		activate(null);
 	};
 }).apply(Creator);
