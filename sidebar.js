@@ -6,6 +6,7 @@ var Sidebar = {};
 	let detail;
 	let shipList = [];
 	let baseList = [];
+	this.loadedState = 0;
 	let selectedHex;
 	const SHIP_TYPES = Wasm.getShipTypes(), BASE_TYPES = Wasm.getBaseTypes();
 
@@ -24,6 +25,18 @@ var Sidebar = {};
 			abilities[i].removeChild(abilities[i].firstChild);
 			abilities[i].removeChild(abilities[i].lastChild);
 		}
+		
+		let loadouts = Wasm.getFleetConstructions();
+		let list = document.getElementById("loadout-select");
+		let template = document.createElement("div");
+		template.classList.add("loadout-select");
+		for (let i = 0; i < loadouts.length; i++) {
+			let newItem = template.cloneNode(true);
+			newItem.innerHTML = loadouts[i];
+			newItem.setAttribute("onclick", "Sidebar.loadPlayer('" + loadouts[i] + "'," + i + ")");
+			list.append(newItem);
+		}
+		this.toggle("loadout-select");
 	}
 
 	document.addEventListener("DOMContentLoaded", initializeSidebar.bind(this), {once: true});
@@ -182,21 +195,26 @@ var Sidebar = {};
 		console.log("readPriority: value", value);
 	}
 	
-	this.loadPlayers = function() {
-		let player1Name = document.getElementById("player1-name").value;
-		let player2Name = document.getElementById("player2-name").value;
-		if (!player1Name || !player2Name) return;
-		(loadPlayer.bind(Sidebar))(player1Name, true);
-		(loadPlayer.bind(Sidebar))(player2Name, false);
-		document.getElementById("load-player").remove();
+	this.beginGame = function() {
+		[...document.getElementsByClassName("hide-when-loaded")].forEach(e => e.remove());
+		this.loadedState = 2;
 		Wasm.gameLoaded();
+		Timer.startGame();
 	}
 	
 	// This function will likely have to be replaced with an AJAX call through Wasm.
 	// I'm not sure what it will look like, though, so it's sitting here for now.
-	function loadPlayer(name, friendly) {
-		let designs = Wasm.loadPlayer(name, friendly);
-		if (!friendly) return;
+	this.loadPlayer = function(name, index) {
+		if (this.loadedState == 2) return;
+		this.loadedState = 1;
+		let designs = Wasm.loadPlayer(name);
+		[...document.getElementsByClassName("loadout-select")].forEach((loadout, i) => {
+			if (index == i){
+				loadout.classList.add("selected");
+			} else {
+				loadout.classList.remove("selected");
+			}
+		});
 		let friendlySection = document.getElementById("friendly-ships-available");
 		friendlySection.innerHTML = "";
 		for (let i = 0; i < SHIP_TYPES; i++) {
@@ -206,7 +224,7 @@ var Sidebar = {};
 			friendlySection.append(newShip);
 		}
 		for (let i = SHIP_TYPES; i < SHIP_TYPES + BASE_TYPES; i++) {
-			designs[i].id = "";
+			designs[i].id = i - SHIP_TYPES;
 			let newBase = this.createBaseNode(designs[i], "friendly-base");
 			if (i == SHIP_TYPES){
 				newBase.setAttribute("onclick", "Empire.buyBase()");
@@ -215,5 +233,7 @@ var Sidebar = {};
 			}
 			friendlySection.append(newBase);
 		}
+		document.getElementById("ships-available").style.maxHeight = "0px";
+		this.toggle("ships-available");
 	};
 }).apply(Sidebar);

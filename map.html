@@ -11,6 +11,7 @@
 		<script src="empire.js"></script>
 		<script src="map.js"></script>
 		<script src="timer.js"></script>
+		<script src="connection.js"></script>
 		<link rel="stylesheet" type="text/css" href="variables.css">
 		<link rel="stylesheet" type="text/css" href="map.css">
 		<link rel="stylesheet" type="text/css" href="sidebar.css">
@@ -41,10 +42,10 @@
 		</div>
 		<div id="map" onmousedown="Map.beginDrag(event)" onclick="Map.selectHex(event)"></div>
 		<div class="sidebar">
-			<div class="accordion-bar" onclick="Sidebar.toggle('ship-info')">SHIPS VISIBLE</div>
-			<div id="ship-info" class="accordion">
-				<div class="friendly ship-list" id="friendly-ships-seen"></div>
-				<div class="enemy ship-list" id="enemy-ships-seen"></div>
+			<div class="hide-when-loaded">
+				<div class="accordion-bar" onclick="Sidebar.toggle('loadout-select')">FLEETS DESIGNED</div>
+				<div id="loadout-select" class="accordion">
+				</div>
 			</div>
 			<div class="accordion-bar" onclick="Sidebar.toggle('ships-available')">SHIPS AVAILABLE</div>
 			<div id="ships-available" class="accordion">
@@ -76,6 +77,9 @@
 					Total Territory:<span id="territory-owned" class="income"></span><br>
 				</div>
 			</div>
+			<div class="hide-when-loaded">
+				<button id="begin-game" onclick="Sidebar.beginGame()">Begin game!</button>
+			</div>
 		</div>
 		<div id="ship-menu" class="floating-menu" onclick="ContextMenu.preventClose(event)"></div>
 		<div id="context-menu" class="floating-menu" onclick="ContextMenu.preventClose(event)">
@@ -96,12 +100,5 @@
 			</div>
 		</div>
 		<div id="info-window" class="floating-menu" onclick="ContextMenu.preventClose(event)"></div>
-		<div id="load-player" class="floating-menu active centred">
-			Player on the Blue side:<br>
-			<input id="player1-name" placeholder="Please input a name" /><br><br>
-			Player on the Red side:<br>
-			<input id="player2-name" placeholder="Please input a name" /><br><br>
-			<button onclick="Sidebar.loadPlayers()">Begin Game</button>
-		</div>
 	</body>
 </html>

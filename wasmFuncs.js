@@ -500,18 +500,17 @@ var Wasm = {};
 			}
 		});
 	}
-	this.loadPlayer = function(name, friendly) {
+	this.loadPlayer = function(name) {
 		if (!localStorage[name]) name = "default";
 		let designs = JSON.parse(localStorage[name].slice(3));
 		designs = designs.map((unit, index) => {
 			return index < SHIP_TYPES ? calculateShip(unit, unit.id) : calculateBase(unit, unit.id, index, designs);
 		});
-		if (friendly) {
-			friendlyDesigns = designs;
-		} else {
-			enemyDesigns = designs;
-		}
+		friendlyDesigns = designs;
 		return designs;
+	}
+	this.getFleetConstructions = function() {
+		return Object.keys(localStorage).filter(name => name != "default").sort();
 	}
 	function calculateShip(design, id) {
 		let shipCalc = Wasm.getHullClass(design.hullClass);
@@ -566,6 +565,7 @@ var Wasm = {};
 		baseCalc.cost = Math.floor(Math.pow(baseCalc.cost, 1.1));
 		baseCalc.id = id;
 		baseCalc.level = index - SHIP_TYPES;
+		baseCalc.currentHull = baseCalc.maxHull;
 		return baseCalc;
 	}
 	this.getDataToSend = function() {

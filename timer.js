@@ -11,8 +11,6 @@ var Timer = {};
 	function initializeTimer() {
 		timerCircle = document.getElementById("timer-circle");
 		timerCircle.setAttribute('stroke-dasharray', "0, " + circumference);
-		
-		timerUpdater = setInterval(updateTimer.bind(this), 250);
 	}
 	
 	function updateTimer() {
@@ -45,5 +43,9 @@ var Timer = {};
 		timerCircle.classList.remove("turn-ended");
 		Map.moveShips();
 		ContextMenu.closeContextMenu();
+	}
+	
+	this.startGame = function() {
+		timerUpdater = setInterval(updateTimer.bind(this), 250);
 	}
 }).apply(Timer);

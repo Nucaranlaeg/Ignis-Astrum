@@ -21,6 +21,17 @@
 	max-height: 0px;
 }
 
+.loadout-select {
+	text-align: center;
+	border-top: 2px solid var(--menu-background);
+	background: var(--light-border);
+	font-style: italic;
+}
+
+.loadout-select.selected {
+	font-weight: bold;
+}
+
 .friendly {
 	background-color: var(--friendly);
 }
@@ -140,4 +151,13 @@
 
 .partial-hull .solidus {
 	width: 5px;
+}
+
+#begin-game {
+    margin: 10px 30%;
+    width: 40%;
+    align-self: center;
+    font-size: large;
+    border: 2px outset;
+    padding-bottom: 3px;
 }

@@ -118,9 +118,11 @@ var Creator = {};
 		}
 		
 		this.saveShips("default");
-		Object.keys(localStorage).forEach(key => {
+		Object.keys(localStorage).sort().forEach(key => {
 			if (localStorage[key].slice(0,3) !== "sds") return;
 			players.innerHTML += "<button onclick='Creator.loadShips(\"" + key + "\")'>Load " + key + "</button>";
+			if (key != "default") players.innerHTML += "<button onclick='Creator.deleteFleet(\"" + key + "\")'>Delete " + key + "</button>";
+			players.innerHTML += "<br>";
 		});
 	}
 	
@@ -313,5 +315,10 @@ var Creator = {};
 			node.classList.remove("active");
 		});
 		activate(null);
+	};
+	
+	this.deleteFleet = function(name) {
+		if (!localStorage[name]) return;
+		localStorage.removeItem(name);
 	};
 }).apply(Creator);

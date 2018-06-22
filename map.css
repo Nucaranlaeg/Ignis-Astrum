@@ -90,6 +90,14 @@ body{
 	stroke-width: 2;
 }
 
+.base.level-0 {
+	top: 126.5px;
+}
+
+.base.level-3 {
+	top: 130.5px;
+}
+
 .base.trace {
 	fill: transparent;
 	stroke-width: 4;
