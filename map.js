@@ -330,6 +330,8 @@ var Map = {};
 		}
 		let newBase = this.getBaseNode(level);
 		newBase.id = id;
+		if (level == 0) newBase.classList.add("level-0");
+		if (level == 3) newBase.classList.add("level-3");
 		if (allied) newBase.classList.add("controlled");
 		this.placeBase(newBase, allied, targetHex);
 	};
@@ -368,7 +370,7 @@ var Map = {};
 			return Wasm.getShip(ships[ship.id.slice(4)].DBid).allied;
 		}).map(ship => ship.parentNode),
 			...[...map.getElementsByClassName("base")].filter(base => {
-			return Wasm.getBase(bases.find(b => b.id = base.id.slice(4)).DBid).allied;
+			return Wasm.getBase(bases.find(b => b.id == base.id.slice(4)).DBid).allied;
 		}).map(base => base.parentNode)];
 		// Add all hexes adjacent to scouts.
 		let scoutedHexes = [].concat(...(alliedShips.filter(ship => {

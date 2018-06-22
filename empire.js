@@ -25,6 +25,7 @@ var Empire = {};
 	};
 	
 	this.buyShip = function(type) {
+		if (Sidebar.loadedState != 2) return;
 		let shipId = Wasm.addShip(type);
 		if (shipId === -1) {
 			ContextMenu.loadInfoWindow("Not enough IPCs in the capital.");
@@ -39,6 +40,7 @@ var Empire = {};
 	};
 	
 	this.buyBase = function() {
+		if (Sidebar.loadedState != 2) return;
 		let baseId = Wasm.addBase(0);
 		if (baseId === -1) {
 			ContextMenu.loadInfoWindow("Not enough IPCs in the capital.");

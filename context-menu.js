@@ -3,7 +3,7 @@
 var ContextMenu = {};
 (function() {
 	let contextMenu, shipMenu, infoWindow, upgradeMenu, IPCs;
-	let menuItems = [];
+	let menuItems = [], supplyGrid;
 	let shipMenuClick = false;
 	let closeInfoWindow;
 	const BASE_TYPES = Wasm.getBaseTypes();
@@ -25,7 +25,7 @@ var ContextMenu = {};
 		contextMenu = document.getElementById("context-menu");
 		menuItems[0] = document.getElementById("context-target-info");
 		menuItems[1] = document.getElementById("context-target-priority");
-		menuItems[2] = document.getElementById("context-supply-grid");
+		menuItems[2] = supplyGrid = document.getElementById("context-supply-grid");
 		menuItems[3] = document.getElementById("context-repair");
 		menuItems[4] = document.getElementById("context-upgrade");
 		shipMenu = document.getElementById("ship-menu");
@@ -111,12 +111,15 @@ var ContextMenu = {};
 	
 	function loadShipMenu(units, x, y) {
 		shipMenu.innerHTML = "";
+		getIPCs(units[0].parentNode);
+		shipMenu.append(supplyGrid.cloneNode(true));
 		units.forEach(unit => {
 			let node;
 			let type = unit.id.slice(0, 4), id = unit.id.slice(4);
 			switch (type) {
 				case "ship":
 					let ship = Wasm.getShip(Map.getShipDBId(id));
+					ship.id = id;
 					node = Sidebar.createShipNode(ship, "scxm");
 					if (ship.allied) {
 						node.classList.add("friendly");
@@ -127,6 +130,7 @@ var ContextMenu = {};
 					break;
 				case "base":
 					let base = Wasm.getBase(Map.getBaseDBId(id));
+					base.id = id;
 					node = Sidebar.createBaseNode(base, "bcxm");
 					if (base.allied) {
 						node.classList.add("friendly");
@@ -169,6 +173,14 @@ var ContextMenu = {};
 				let targetBase = Wasm.getBase(Map.getBaseDBId(id));
 				if (targetBase.currentHull === targetBase.maxHull) return false;
 				break;
+			case "scxm":
+				let targetCShip = Wasm.getShip(Map.getBaseDBId(id));
+				if (targetCShip.currentHull === targetCShip.maxHull) return false;
+				break;
+			case "bcxm":
+				let targetCBase = Wasm.getBase(Map.getBaseDBId(id));
+				if (targetCBase.currentHull === targetCBase.maxHull) return false;
+				break;
 			default:
 				return false;
 		}
@@ -176,13 +188,15 @@ var ContextMenu = {};
 	}
 	
 	function upgradePossible(target) {
-		let id = target.id.slice(4);
+		if ([...document.getElementsByClassName("trace")].some(trace => trace.name == target.id)) return;
+		let type = target.id.slice(0, 4), id = target.id.slice(4);
 		let targetBase = Wasm.getBase(Map.getBaseDBId(id));
 		if (targetBase.level === BASE_TYPES - 1) return false;
 		let upgradedBase = Wasm.getBaseClass(targetBase.level + 1);
 		upgradedBase.currentHull = upgradedBase.maxHull - targetBase.maxHull + targetBase.currentHull;
 		upgradedBase.id = id;
 		let node = Sidebar.createBaseNode(upgradedBase, "bcxm");
+		node.getElementsByClassName("cost")[0].innerHTML = "";
 		node.classList.add("friendly");
 		node.setAttribute("onclick", "ContextMenu.closeContextMenu(); Empire.upgradeBase(" + id + "); Sidebar.updateSelectedHex('" + target.parentNode.id + "')");
 		upgradeMenu.innerHTML = "";
