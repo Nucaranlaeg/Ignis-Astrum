@@ -372,6 +372,11 @@ var Wasm = {};
 		WARP_FIELDS: 1,
 		BOOSTER_PACKS: 2,
 		STABILIZERS: 3,
+		BASE_0: 4,
+		BASE_1: 5,
+		BASE_2: 6,
+		BASE_3: 7,
+		ANY: 8,
 	});
 	this.AVAILABLE = Object.freeze({
 		SHIP_EXCLUSIVE: 0,
@@ -384,6 +389,11 @@ var Wasm = {};
 			{cost: 3, name: "Efficient Warp Fields", description: "Allows the ship to enter combat if intercepted.", available: this.AVAILABLE.SHIP_EXCLUSIVE},
 			{cost: 3, name: "Booster Packs", description: "Allows the ship to move 3 hexes and engage enemy units.", available: this.AVAILABLE.SHIP_EXCLUSIVE},
 			{cost: 3, name: "Engine Stabilizers", description: "Allows the ship to move 4 hexes in a single turn.", available: this.AVAILABLE.SHIP_EXCLUSIVE},
+			{cost: 1, name: "Base Ability Placeholder", description: "Placeholder.", available: this.AVAILABLE.BASE_EXCLUSIVE},
+			{cost: 2, name: "Base Ability Placeholder", description: "Placeholder.", available: this.AVAILABLE.BASE_EXCLUSIVE},
+			{cost: 3, name: "Base Ability Placeholder", description: "Placeholder.", available: this.AVAILABLE.BASE_EXCLUSIVE},
+			{cost: 4, name: "Base Ability Placeholder", description: "Placeholder.", available: this.AVAILABLE.BASE_EXCLUSIVE},
+			{cost: 3, name: "Ship/Base Ability", description: "Placeholder.", available: this.AVAILABLE.UNRESTRICTED},
 		];
 		return abilities[index];
 	}
