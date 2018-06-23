@@ -214,6 +214,7 @@ var Creator = {};
 	}
 	
 	function activate(hangerNumber) {
+		// making a change
 		if (active !== null) {
 			hanger[active].classList.remove("active");
 			designs[active].parts.forEach(p => {
