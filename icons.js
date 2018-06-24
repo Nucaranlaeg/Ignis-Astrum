@@ -54,12 +54,12 @@ document.getElementById("templates").innerHTML += `<svg xmlns="http://www.w3.org
 </svg>`;
 
 // Bases
-document.getElementById("templates").innerHTML += `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 115.565" width="40px" id="base0-template" class="base">
+document.getElementById("templates").innerHTML += `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 115.565" width="40px" id="ship10-template" class="ship">
 	<path
 	   d="m 61.937095,62.654185 c 8.85908,15.31383 22.90558,21.29743 28.39113,27.12893 5.48556,5.8315 8.73922,7.864196 8.67071,7.982596 -0.0685,0.1184 -3.45914,-1.677496 -11.26221,-3.502896 -7.80308,-1.8255 -20.01856,-10.9743 -37.73673,-10.9743 -17.718157,10e-5 -29.933643,9.1488 -37.736715,10.9743 -7.8030668,1.8254 -11.1937198,3.621296 -11.2622198,3.502896 -0.06849,-0.1184 3.1851601,-2.151096 8.670715,-7.982596 5.4855538,-5.8315 19.5321548,-11.815 28.3912368,-27.12893 8.859083,-15.3139 7.027964,-30.44618 9.345483,-38.10312 2.31752,-7.65694 2.45451,-11.4854 2.59151,-11.48541 0.137,0 0.27399,3.82847 2.59151,11.48542 2.31751,7.65693 0.4865,22.78915 9.34558,38.10311 z"
 	   id="bse-0" />
 </svg>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 115.565" width="40px" id="base1-template" class="base">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 115.565" width="40px" id="ship11-template" class="ship">
 	<g
 	   id="bse-1"
 	   transform="matrix(0.86470886,0,0,0.86470978,-129.57104,-804.13322)">
@@ -69,7 +69,7 @@ document.getElementById("templates").innerHTML += `<svg xmlns="http://www.w3.org
 	  <circle r="45" fill="transparent" stroke-width="5px" cx="209" cy="1000"></circle>
 	</g>
 </svg>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 115.565" width="40px" id="base2-template" class="base">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 115.565" width="40px" id="ship12-template" class="ship">
 	<g
 	   id="bse-2"
 	   transform="matrix(0.86470972,0,0,0.86470972,-199.32436,-804.13318)">
@@ -80,7 +80,7 @@ document.getElementById("templates").innerHTML += `<svg xmlns="http://www.w3.org
 	  <circle fill="transparent" stroke-width="5px" cy="1000" cx="288" r="33"></circle>
 	</g>
 </svg>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 115.565" width="40px" id="base3-template" class="base">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 115.565" width="40px" id="ship13-template" class="ship">
 	<g
 	   id="bse-3"
 	   transform="matrix(0.86470978,0,0,0.86470978,-299.05429,-794.54931)">

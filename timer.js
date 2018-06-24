@@ -27,6 +27,7 @@ var Timer = {};
 	document.addEventListener("DOMContentLoaded", initializeTimer.bind(this), {once: true});
 	
 	this.signalTurnEnd = function() {
+		if (Sidebar.loadedState != 2) return;
 		if (timerCircle.classList.contains("turn-ended")) {
 			Wasm.signalContinueTurn();
 			timerCircle.classList.remove("turn-ended");
