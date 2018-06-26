@@ -370,9 +370,9 @@ var Wasm = {};
 				|| (hex.owner === -1 && (presentEnemyBase || presentShips.some(ship => !ship.allied) || (nearbyShips.some(ship => !ship.allied) && !presentShips.some(ship => ship.allied)))))){
 					return;
 			}
-			if (hex.owner === 1 && (enemyPresence > friendlyPresence || friendlyPresence == 0) && !presentFriendlyBase) {
+			if (hex.owner === 1 && (enemyPresence > friendlyPresence || (friendlyPresence == 0 && !hex.capital)) && !presentFriendlyBase) {
 				hex.owner = 0;
-			} else if (hex.owner === -1 && (friendlyPresence > enemyPresence || enemyPresence == 0) && !presentEnemyBase) {
+			} else if (hex.owner === -1 && (friendlyPresence > enemyPresence || (enemyPresence == 0 && !hex.capital)) && !presentEnemyBase) {
 				hex.owner = 0;
 			}
 			if (hex.owner === 0) {
@@ -394,14 +394,12 @@ var Wasm = {};
 		// Find out about enemy movements.
 		// Also do validation for each space.
 		let targetShip = this.getShip(id);
-		if ((x4 !== null || y4 !== null) && !targetShip.abilities.some(a => a.name === this.getAbilityDetails(this.ABILITY.STABILIZERS).name)) {
-			throw "Error: Ship cannot move 4 spaces without " + this.getAbilityDetails(this.ABILITY.STABILIZERS).name;
-		}
-		for (let i = 0; i <= targetShip.range; i++){
+		if (!targetShip.moveGoal) targetShip.moveGoal = [];
+		for (let i = 0; i < targetShip.range; i++){
 			if (moveGoal[i] === undefined) break;
-			targetShip.moveGoal["x" + (i + 1)] = moveGoal[i];
-			if (moveGoal[i + 1] === undefined) throw "Ship attempted to move with an odd number of coordinates.";
-			targetShip.moveGoal["x" + (i + 2)] = moveGoal[i + 1];
+			targetShip.moveGoal["y" + (2 * i + 1)] = moveGoal[2 * i];
+			if (moveGoal[i] === undefined) throw "Ship attempted to move with an odd number of coordinates.";
+			targetShip.moveGoal["x" + (2 * i + 1)] = moveGoal[2 * i + 1];
 		}
 		this.saveShip(targetShip);
 	}

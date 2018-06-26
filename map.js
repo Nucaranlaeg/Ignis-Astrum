@@ -247,6 +247,10 @@ var Map = {};
 	};
 	
 	this.placeShip = function(movingShip, allied, targetHex) {
+		if (Wasm.getShip(this.getShipDBId(movingShip.id.slice(4))).centralDisplay) {
+			this.placeBase(movingShip, targetHex);
+			return;
+		}
 		movingShip.classList.remove([...movingShip.classList].find(c => {
 			return c.slice(0, 14) === "ship-position-";
 		}));
@@ -278,6 +282,7 @@ var Map = {};
 	};
 	
 	this.placeBase = function(base, targetHex){
+		base.classList.add("base");
 		targetHex.append(base);
 	};
 	
