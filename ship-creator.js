@@ -2,10 +2,15 @@
 
 var Creator = {};
 (function() {
-	let ship = [], designs = [], base = [];
-	let shipDetails, partDetails, abilityDetails, shipList, baseList, hulls, parts, abilities, hanger = [], partList = [], abilityList = [], abilityIcons = [];
-	let players;
+	// Internal to JS
+	let ship = [], designs = [], base = []; 
 	let active = null;
+	
+	// DOM Elements
+	let players, shipDetails, partDetails, abilityDetails, shipList, baseList, hulls, parts, abilities;
+	let hanger = [], hullList = [], partList = [], abilityList = [], abilityIcons = [];
+	
+	// Constants
 	const SHIP_TYPES = Wasm.getShipTypes(), BASE_TYPES = Wasm.getBaseTypes(), MAX_ABILITIES = Wasm.getMaxAbilities();
 	
 	function initializeCreator() {
@@ -56,13 +61,14 @@ var Creator = {};
 			shipClass.cost = Math.floor(Math.pow(shipClass.cost, 1.1));
 			updateShip(newShipDetail, shipClass);
 			newShipDetail.onclick = () => {changeShipHull(s.dataset.hullClass)};
+			hullList.push(newShipDetail);
 			hulls.append(newShipDetail);
 		});
 		
 		// Populate the player's ship list
 		for (let i = 0; i < SHIP_TYPES; i++){
 			let newShipDetail = shipDetails.cloneNode(true);
-			designs[i] = {hullClass: 0, parts: [], abilities: []};
+			designs[i] = {hullClass: 0, parts: [], abilities: [], isBase: false};
 			newShipDetail.onclick = () => {activate(i)};
 			shipList.append(newShipDetail);
 			hanger[i] = newShipDetail;
@@ -76,7 +82,7 @@ var Creator = {};
 			let hangerNumber = +b.dataset.hullClass + SHIP_TYPES;
 			baseClass.cost = Math.floor(Math.pow(baseClass.cost, 1.1));
 			newBaseDetail.onclick = () => {activate(hangerNumber)};
-			designs[hangerNumber] = {hullClass: +b.dataset.hullClass, parts: [], abilities: []};
+			designs[hangerNumber] = {hullClass: +b.dataset.hullClass, parts: [], abilities: [], isBase: true};
 			hanger[hangerNumber] = newBaseDetail;
 			updateBase(newBaseDetail, baseClass);
 			baseList.append(newBaseDetail);
@@ -214,44 +220,60 @@ var Creator = {};
 	}
 	
 	function activate(hangerNumber) {
-		// making a change
+		// Remove all "Active" indicators
 		if (active !== null) {
-			hanger[active].classList.remove("active");
-			designs[active].parts.forEach(p => {
-				partList[p].classList.remove("active");
-			});
-			designs[active].abilities.forEach(c => {
-				abilityList[c].classList.remove("active");
-			});
+			hanger[active].classList.remove("active");						// on Ship or Base
+			hullList.forEach(i => i.classList.remove("active"));			// on Available Hulls
+			hullList.forEach(i => i.classList.remove("unavailable"));		// on Available Hulls
+			partList.forEach(i => i.classList.remove("active"));			// on Available Parts
+			partList.forEach(i => i.classList.remove("unavailable"));		// on Available Parts
+			abilityList.forEach(i => i.classList.remove("active"));			// on Available Abili
+			abilityList.forEach(i => i.classList.remove("unavailable"));	// on Available Abilities
 		}
-		abilityList.forEach(c => {
-			c.classList.remove("unavailable");
-		});
+
+		// Check if we are just deactivating the current selection
 		if (active === hangerNumber || hangerNumber === null) {
 			active = null;
 			return;
-		}
-		active = hangerNumber;
-		if (active >= SHIP_TYPES) {
-			abilityList.forEach((c, index) => {
-				if (Wasm.getAbilityDetails(index).available === Wasm.AVAILABLE.SHIP_EXCLUSIVE) {
-					c.classList.add("unavailable");
+			
+		} else {	// Proceed to set which components are available or selected	
+			active = hangerNumber;
+			hanger[active].classList.add("active");
+		
+					// Hulls
+			if (designs[active].isBase)
+				hullList.forEach(i => i.classList.add("unavailable"));
+			else
+				hullList[designs[active].hullClass].classList.add("active");
+			
+					// Parts
+			partList.forEach(i => {
+				if  ((!designs[active].isBase && i.available === Wasm.AVAILABLE.BASE_EXCLUSIVE) ||
+					(designs[active].isBase && i.available === Wasm.AVAILABLE.SHIP_EXCLUSIVE)) {
+						i.classList.add("unavailable");
 				}
-				for (let i = SHIP_TYPES; i < active; i++){
-					if (designs[i].abilities.findIndex(a => a === index) !== -1) c.classList.add("unavailable");
+			} );			
+			designs[active].parts.forEach( i => partList[i].classList.add("active") );
+			
+					// Abilities
+			abilityList.forEach((i, index) => {
+				let abilityAvailable = Wasm.getAbilityDetails(index).available;
+				if  ((!designs[active].isBase && abilityAvailable === Wasm.AVAILABLE.BASE_EXCLUSIVE) ||
+					(designs[active].isBase && abilityAvailable === Wasm.AVAILABLE.SHIP_EXCLUSIVE)) {
+						i.classList.add("unavailable");
 				}
-			});
+			} );			
+			designs[active].abilities.forEach( i => abilityList[i].classList.add("active") );
 		}
-		hanger[hangerNumber].classList.add("active");
-		designs[active].parts.forEach(p => {
-			partList[p].classList.add("active");
-		});
-		designs[active].abilities.forEach(c => {
-			abilityList[c].classList.add("active");
-		});
 	}
 	
 	function changeShipHull(hull) {
+		if (active == null) 
+			return;
+		
+		
+		hullList[designs[active].hullClass].classList.remove("active");
+		hullList[hull].classList.add("active");
 		designs[active].hullClass = hull;
 		calculateShip(active);
 	}
