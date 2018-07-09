@@ -62,7 +62,7 @@ svg.base {
 	stroke: black;
 }
 
-#abilities .unavailable {
+.unavailable {
 	pointer-events: none;
-	background: #f8f8f8;
+	background: #f0f0f0;
 }
