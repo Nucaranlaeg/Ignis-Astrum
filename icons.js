@@ -51,6 +51,21 @@ document.getElementById("templates").innerHTML += `<svg xmlns="http://www.w3.org
 	<ellipse cx="50" cy="50" rx="10" ry="40" stroke="#0000007f" stroke-width="2px" fill="transparent" />
 	<ellipse cx="70" cy="50" rx="10" ry="40" stroke="#0000007f" stroke-width="2px" fill="transparent" />
 	<polygon points="35,35 85,50 35,65 35,55 25,60 25,40 35,45 35,35" />
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" width="40px" id="ability4-template" class="ability">
+	<circle cx="50" cy="50" r="45" fill="transparent" stroke="#000000" stroke-width="4px" />
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" width="40px" id="ability5-template" class="ability">
+	<circle cx="50" cy="50" r="45" fill="transparent" stroke="#000000" stroke-width="4px" />
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" width="40px" id="ability6-template" class="ability">
+	<circle cx="50" cy="50" r="45" fill="transparent" stroke="#000000" stroke-width="4px" />
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" width="40px" id="ability7-template" class="ability">
+	<circle cx="50" cy="50" r="45" fill="transparent" stroke="#000000" stroke-width="4px" />
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" width="40px" id="ability8-template" class="ability">
+	<circle cx="50" cy="50" r="45" fill="transparent" stroke="#000000" stroke-width="4px" />
 </svg>`;
 
 // Bases

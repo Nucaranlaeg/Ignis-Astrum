@@ -81,37 +81,37 @@ var Wasm = {};
 		let instance;
 		switch (parseInt(classNumber)) {
 			case 0:
-				instance = {power: 3, maxHull: 3, shield: 0, repair: 1, cost: 3};
+				instance = {power: 3, maxHull: 3, shield: 0, repair: 1, cost: 3, isBase: false};
 				break;
 			case 1:
-				instance = {power: 5, maxHull: 5, shield: 0, repair: 1, cost: 5};
+				instance = {power: 5, maxHull: 5, shield: 0, repair: 1, cost: 5, isBase: false};
 				break;
 			case 2:
-				instance = {power: 8, maxHull: 8, shield: 1, repair: 1, cost: 10};
+				instance = {power: 8, maxHull: 8, shield: 1, repair: 1, cost: 10, isBase: false};
 				break;
 			case 3:
-				instance = {power: 10, maxHull: 10, shield: 1, repair: 1, cost: 13};
+				instance = {power: 10, maxHull: 10, shield: 1, repair: 1, cost: 13, isBase: false};
 				break;
 			case 4:
-				instance = {power: 15, maxHull: 15, shield: 2, repair: 1, cost: 18};
+				instance = {power: 15, maxHull: 15, shield: 2, repair: 1, cost: 18, isBase: false};
 				break;
 			case 5:
-				instance = {power: 3, maxHull: 2, shield: 1, repair: 0, cost: 3};
+				instance = {power: 3, maxHull: 2, shield: 1, repair: 0, cost: 3, isBase: false};
 				break;
 			case 6:
-				instance = {power: 5, maxHull: 4, shield: 1, repair: 0, cost: 5};
+				instance = {power: 5, maxHull: 4, shield: 1, repair: 0, cost: 5, isBase: false};
 				break;
 			case 7:
-				instance = {power: 8, maxHull: 6, shield: 2, repair: 0, cost: 10};
+				instance = {power: 8, maxHull: 6, shield: 2, repair: 0, cost: 10, isBase: false};
 				break;
 			case 8:
-				instance = {power: 10, maxHull: 8, shield: 2, repair: 0, cost: 13};
+				instance = {power: 10, maxHull: 8, shield: 2, repair: 0, cost: 13, isBase: false};
 				break;
 			case 9:
-				instance = {power: 15, maxHull: 12, shield: 3, repair: 0, cost: 18};
+				instance = {power: 15, maxHull: 12, shield: 3, repair: 0, cost: 18, isBase: false};
 				break;
 			default:
-				instance = {power: 0, maxHull: 0, shield: 0, repair: 0, cost: 0};
+				instance = {power: 0, maxHull: 0, shield: 0, repair: 0, cost: 0, isBase: false};
 		}
 		instance.currentHull = instance.maxHull;
 		instance.shipClass = classNumber;
@@ -348,22 +348,22 @@ var Wasm = {};
 	}
 	this.getPartDetails = function(index) {
 		let parts = [
-			{cost: 1, power: 1},
-			{cost: 2, power: 2},
-			{cost: 3, power: 4},
-			{cost: 5, power: 8},
-			{cost: 1, maxHull: 1},
-			{cost: 2, maxHull: 3},
-			{cost: 4, maxHull: 7},
-			{cost: 8, maxHull: 15},
-			{cost: 2, shield: 1},
-			{cost: 3.5, shield: 2},
-			{cost: 5, shield: 3},
-			{cost: 6, shield: 4},
-			{cost: 3, repair: 2},
-			{cost: 5, repair: 4},
-			{cost: 7, repair: 7},
-			{cost: 9, repair: 10},
+			{cost: 1, power: 1, available: this.AVAILABLE.UNRESTRICTED},
+			{cost: 2, power: 2, available: this.AVAILABLE.UNRESTRICTED},
+			{cost: 3, power: 4, available: this.AVAILABLE.UNRESTRICTED},
+			{cost: 5, power: 8, available: this.AVAILABLE.UNRESTRICTED},
+			{cost: 1, maxHull: 1, available: this.AVAILABLE.UNRESTRICTED},
+			{cost: 2, maxHull: 3, available: this.AVAILABLE.UNRESTRICTED},
+			{cost: 4, maxHull: 7, available: this.AVAILABLE.UNRESTRICTED},
+			{cost: 8, maxHull: 15, available: this.AVAILABLE.UNRESTRICTED},
+			{cost: 2, shield: 1, available: this.AVAILABLE.UNRESTRICTED},
+			{cost: 3.5, shield: 2, available: this.AVAILABLE.UNRESTRICTED},
+			{cost: 5, shield: 3, available: this.AVAILABLE.UNRESTRICTED},
+			{cost: 6, shield: 4, available: this.AVAILABLE.UNRESTRICTED},
+			{cost: 3, repair: 2, available: this.AVAILABLE.UNRESTRICTED},
+			{cost: 5, repair: 4, available: this.AVAILABLE.UNRESTRICTED},
+			{cost: 7, repair: 7, available: this.AVAILABLE.UNRESTRICTED},
+			{cost: 9, repair: 10, available: this.AVAILABLE.UNRESTRICTED},
 		];
 		return parts[index];
 	}
@@ -372,6 +372,11 @@ var Wasm = {};
 		WARP_FIELDS: 1,
 		BOOSTER_PACKS: 2,
 		STABILIZERS: 3,
+		BASE_0: 4,
+		BASE_1: 5,
+		BASE_2: 6,
+		BASE_3: 7,
+		ANY: 8,
 	});
 	this.AVAILABLE = Object.freeze({
 		SHIP_EXCLUSIVE: 0,
@@ -384,6 +389,11 @@ var Wasm = {};
 			{cost: 3, name: "Efficient Warp Fields", description: "Allows the ship to enter combat if intercepted.", available: this.AVAILABLE.SHIP_EXCLUSIVE},
 			{cost: 3, name: "Booster Packs", description: "Allows the ship to move 3 hexes and engage enemy units.", available: this.AVAILABLE.SHIP_EXCLUSIVE},
 			{cost: 3, name: "Engine Stabilizers", description: "Allows the ship to move 4 hexes in a single turn.", available: this.AVAILABLE.SHIP_EXCLUSIVE},
+			{cost: 1, name: "Base Ability Placeholder", description: "Placeholder.", available: this.AVAILABLE.BASE_EXCLUSIVE},
+			{cost: 2, name: "Base Ability Placeholder", description: "Placeholder.", available: this.AVAILABLE.BASE_EXCLUSIVE},
+			{cost: 3, name: "Base Ability Placeholder", description: "Placeholder.", available: this.AVAILABLE.BASE_EXCLUSIVE},
+			{cost: 4, name: "Base Ability Placeholder", description: "Placeholder.", available: this.AVAILABLE.BASE_EXCLUSIVE},
+			{cost: 3, name: "Ship/Base Ability", description: "Placeholder.", available: this.AVAILABLE.UNRESTRICTED},
 		];
 		return abilities[index];
 	}
