@@ -81,12 +81,29 @@ body{
 	text-shadow: 0 0 10px;
 }
 
+.ship {
+	fill: var(--default-unit);
+	stroke: var(--default-unit);
+	position: absolute;
+	stroke-width: 2;
+	height: 20px;
+	width: 20px;
+}
+
+.ship.trace {
+	fill: transparent;
+	stroke-width: 4;
+	visibility: visible;
+}
+
 .base {
 	fill: var(--default-unit);
 	stroke: var(--default-unit);
 	position: absolute;
 	top: 129px;
 	left: 62.5px;
+	height: 40px;
+	width: 40px;
 	stroke-width: 2;
 }
 
@@ -99,21 +116,6 @@ body{
 }
 
 .base.trace {
-	fill: transparent;
-	stroke-width: 4;
-	visibility: visible;
-}
-
-.ship {
-	fill: var(--default-unit);
-	stroke: var(--default-unit);
-	position: absolute;
-	stroke-width: 2;
-	height: 20px;
-	width: 20px;
-}
-
-.ship.trace {
 	fill: transparent;
 	stroke-width: 4;
 	visibility: visible;

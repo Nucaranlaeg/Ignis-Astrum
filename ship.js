@@ -6,11 +6,6 @@ var Ship = {};
 	let traceCount = 0;
 	let movingUnitTraces = null;
 	
-	this.dragBase = function (event, base) {
-		// For now, just pretend it's a ship.
-		return this.dragShip(event, base);
-	};
-	
 	this.dragShip = function (event, ship) {
 		if (!ship.classList.contains("controlled")) return false;
 		map.addEventListener("mousemove", continueDrag);
@@ -31,46 +26,32 @@ var Ship = {};
 		let source = movingUnit.name ? movingUnit.name.split(".") : origin.id.split(".");
 		if (!hex) return;
 		let target = hex.id.split(".");
-		if (movingUnit.id.slice(0,4) === "ship") {
-			if (Utils.calculateDistance(source, target) <= 3) {
-				if (!movingUnit.name){
-					movingUnit.name = movingUnit.parentNode.id;
-					let sourceShip = movingUnit.cloneNode(true);
-					sourceShip.classList.add("trace");
-					sourceShip.name = sourceShip.id;
-					sourceShip.dataset.traceNumber = traceCount++;
-					sourceShip.removeAttribute("id");
-					sourceShip.classList.remove("moving");
-					movingUnit.parentNode.appendChild(sourceShip);
-					// Add some kind of movement arrow.
-				}
-				Map.placeShip(movingUnit, true, hex);
-				Map.replaceShips(origin);
-			}
-		} else {
-			// It's a base.
+		let movingUnitDetails = Wasm.getShip(Map.getShipDBId(movingUnit.id.slice(4)));
+		if (Utils.calculateDistance(source, target) <= movingUnitDetails.range) {
 			// Test if there's an enemy unit in the hex - bases can't be a part of offensive operations.
+			// Don't prevent this movement; it's valid if the enemy moves out.
 			if ([...hex.childNodes].some(unit => {
 				if (unit.nodeName === "#text") return false; // Ignore text nodes.
 				// Need to also test for enemy-controlled planets.
 				return !unit.classList.contains("controlled") && (unit.classList.contains("base") || unit.classList.contains("ship"));
 			})) {
-				ContextMenu.loadInfoWindow("Bases cannot participate in offensive operations.");
-				return;
+				// Add setting to suppress this message.
+				ContextMenu.loadInfoWindow("Note that Bases cannot participate in offensive operations.");
 			}
-			if (Utils.calculateDistance(source, target) <= 1) {
-				if (!movingUnit.name){
-					movingUnit.name = origin.id;
-					let sourceBase = movingUnit.cloneNode(true);
-					sourceBase.classList.add("trace");
-					sourceBase.name = sourceBase.id;
-					sourceBase.dataset.traceNumber = traceCount++;
-					sourceBase.removeAttribute("id");
-					sourceBase.classList.remove("moving");
-					movingUnit.parentNode.appendChild(sourceBase);
-				}
-				hex.appendChild(movingUnit);
+			
+			if (!movingUnit.name){
+				movingUnit.name = movingUnit.parentNode.id;
+				let sourceShip = movingUnit.cloneNode(true);
+				sourceShip.classList.add("trace");
+				sourceShip.name = sourceShip.id;
+				sourceShip.dataset.traceNumber = traceCount++;
+				sourceShip.removeAttribute("id");
+				sourceShip.classList.remove("moving");
+				movingUnit.parentNode.appendChild(sourceShip);
+				// Add some kind of movement arrow.
 			}
+			movingUnitDetails.centralDisplay ? Map.placeBase(movingUnit, hex) : Map.placeShip(movingUnit, true, hex);
+			Map.replaceShips(origin);
 		}
 		// Attempt to move to said hex.
 		// Update to and from hexes.
