@@ -9,7 +9,7 @@ var Map = {};
 	// Lists of pairs of ids.  First is the map id, second is the database id.
 	// An element is removed from this list if it is not displayed.
 	let ships = [], hexes = [];
-	// Count of each element so we can always assign new IDs.
+	// Count of ships so we can always assign new IDs.
 	let shipCount = 0;
 	// DOM elements we don't want to keep searching for.
 	let map, row, hex, friendlyCapital, enemyCapital, ship = [];
@@ -157,7 +157,7 @@ var Map = {};
 	}
 	
 	function createHex(id) {
-		if (id.substring(0,1) == ".") return;
+		if (id.substring(0,1) === ".") return;
 		hexes.push({id: id, DBid: Wasm.addHex(id)});
 	}
 
@@ -267,14 +267,14 @@ var Map = {};
 		} else if (!allied && enemyShipCount < 10 && friendlyShipCount === 0) {
 			movingShip.classList.add("ship-position-" + enemyShipCount - 5);
 		} else {
-			// Place the ship in the hex.
-			movingShip.classList.add("ship-position-" + friendlyShipCount);
-			// Replace ships by class.
-			throw "NotImplementedError: Cannot place ships by class.";
+			// There are too many ships; we'll have to put it in a fleet.
+			throw "NotImplementedError: Cannot stack ships.";
 		}
 		targetHex.append(movingShip);
 	};
 	
+	// This function removes a ship from the map.
+	// If it's an enemy ship, it may not have been destroyed; it may simply be out of vision.
 	this.deleteShip = function(id) {
 		let targetShip = ships.findIndex(b => b.id === id);
 		document.getElementById("ship" + id).remove();
@@ -310,7 +310,7 @@ var Map = {};
 		}).map(ship => ship.parentNode);
 		// Add all hexes adjacent to scouts.
 		let scoutedHexes = [].concat(...(alliedShips.filter(ship => {
-			return Wasm.getShip(ships[ship.id.slice(4)].DBid).abilities.find(a => a === Utils.ABILITY.SCOUT) !== undefined;
+			return Wasm.getShip(ships[ship.id.slice(4)].DBid).abilities.find(a => a === Wasm.ABILITY.SCOUT) !== undefined;
 		}).map(ship => {
 			return getAdjacentHexes(ship.parentNode);
 		})));
@@ -333,7 +333,6 @@ var Map = {};
 	};
 	
 	function getAdjacentHexes(centreHex) {
-		// This should be moved to Utils
 		let y = +centreHex.id.split('.')[0], x = +centreHex.id.split('.')[1];
 		let odd = y % 2 === 0 ? -1 : 1;
 		return [

@@ -92,7 +92,7 @@ var Creator = {};
 		
 		// Populate the available parts list
 		let nextPart;
-		for (let i = 0; nextPart = Wasm.getPartDetails(i); i++) {
+		for (let i = 0; nextPart = Wasm.getPartDetails(i); i++) { // Assignment here is intentional.
 			let newPart = partDetails.cloneNode(true);
 			// This is to ensure that each part gets a reference to the correct part number.
 			let k = i.valueOf();

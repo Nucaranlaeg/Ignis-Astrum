@@ -6,7 +6,6 @@ var ContextMenu = {};
 	let menuItems = [], supplyGrid;
 	let shipMenuClick = false;
 	let closeInfoWindow;
-	const BASE_TYPES = Wasm.getBaseTypes();
 	const contextMenuMask = {
 		friendlyShip: [true, false, true, true, false],
 		friendlyShipMenu: [true, false, false, true, false],
@@ -38,7 +37,7 @@ var ContextMenu = {};
 	document.addEventListener("DOMContentLoaded", initializeContextMenu, {once: true});
 
 	function loadContextMenu(event) {
-		let targetMenu = null;
+		let targetMenu;
 		let target;
 		if (shipMenuClick) {
 			shipMenuClick = false;
@@ -116,7 +115,7 @@ var ContextMenu = {};
 		shipMenu.append(supplyGrid.cloneNode(true));
 		units.forEach(unit => {
 			let node;
-			let type = unit.id.slice(0, 4), id = unit.id.slice(4);
+			let id = unit.id.slice(4);
 			let ship = Wasm.getShip(Map.getShipDBId(id));
 			ship.id = id;
 			node = Sidebar.createShipNode(ship, ship.isBase ? "bxcm" : "scxm");
@@ -149,19 +148,20 @@ var ContextMenu = {};
 	};
 	
 	function repairPossible(target) {
-		let type = target.id.slice(0, 4), id = target.id.slice(4);
+        let type = target.id.slice(0, 4), id = target.id.slice(4);
+	    let targetShip;
 		switch (type) {
 			case "ship":
-				let targetShip = Wasm.getShip(Map.getShipDBId(id));
+				targetShip = Wasm.getShip(Map.getShipDBId(id));
 				if (targetShip.currentHull === targetShip.maxHull) return false;
 				break;
 			case "scxm":
-				let targetCShip = Wasm.getShip(Map.getShipDBId(id));
-				if (targetCShip.currentHull === targetCShip.maxHull) return false;
+				targetShip = Wasm.getShip(Map.getShipDBId(id));
+				if (targetShip.currentHull === targetShip.maxHull) return false;
 				break;
 			case "bcxm":
-				let targetCBase = Wasm.getShip(Map.getShipDBId(id));
-				if (targetCBase.currentHull === targetCBase.maxHull) return false;
+				targetShip = Wasm.getShip(Map.getShipDBId(id));
+				if (targetShip.currentHull === targetShip.maxHull) return false;
 				break;
 			default:
 				return false;
@@ -171,7 +171,7 @@ var ContextMenu = {};
 	
 	function upgradePossible(target) {
 		if ([...document.getElementsByClassName("trace")].some(trace => trace.name == target.id)) return;
-		let type = target.id.slice(0, 4), id = target.id.slice(4);
+		let id = target.id.slice(4);
 		let targetBase = Wasm.getShip(Map.getShipDBId(id));
 		if (!targetBase.upgradeable) return false;
 		let upgradedBase = Wasm.getShipClass(targetBase.upgradeTo);

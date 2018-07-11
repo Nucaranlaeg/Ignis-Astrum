@@ -10,17 +10,17 @@ var Timer = {};
 	
 	function initializeTimer() {
 		timerCircle = document.getElementById("timer-circle");
-		timerCircle.setAttribute('stroke-dasharray', "0, " + circumference);
+		timerCircle.setAttribute("stroke-dasharray", "0, " + circumference);
 	}
 	
 	function updateTimer() {
 		if (turnTime >= maxTurnTime) {
 			this.signalTurnEnd();
-			timerUpdater.clearInterval;
+		    clearInterval(timerUpdater);
 			turnTime = 0;
 			return;
 		}
-		timerCircle.setAttribute('stroke-dasharray', Math.floor(turnTime * circumference / maxTurnTime) + ", " + circumference);
+		timerCircle.setAttribute("stroke-dasharray", Math.floor(turnTime * circumference / maxTurnTime) + ", " + circumference);
 		turnTime += 0.25;
 	}
 	

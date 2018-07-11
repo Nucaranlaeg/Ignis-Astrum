@@ -157,7 +157,7 @@ var Sidebar = {};
 	// This function will likely have to be replaced with an AJAX call through Wasm.
 	// I'm not sure what it will look like, though, so it's sitting here for now.
 	this.loadPlayer = function(name, index) {
-		if (this.loadedState == 2) return;
+		if (this.loadedState === 2) return;
 		this.loadedState = 1;
 		let designs = Wasm.loadPlayer(name);
 		[...document.getElementsByClassName("loadout-select")].forEach((loadout, i) => {
