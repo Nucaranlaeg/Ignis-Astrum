@@ -462,7 +462,7 @@ var Wasm = {};
 		if (!localStorage[name]) name = "default";
 		let designs = JSON.parse(localStorage[name].slice(3));
 		designs = designs.map((unit, index) => {
-			return calculateShip(unit, unit.id, index, designs);
+			return this.calculateShip(index, designs);
 		});
 		friendlyDesigns = designs;
 		return designs;
@@ -470,7 +470,8 @@ var Wasm = {};
 	this.getFleetConstructions = function() {
 		return Object.keys(localStorage).filter(name => name != "default").sort();
 	}
-	function calculateShip(design, id, index, designs) {
+	this.calculateShip = function(index, designs) {
+		let design = designs[index];
 		let shipCalc = Wasm.getHullClass(design.hullClass);
 		// Add values for bases of level higher than 1.
 		for (var i = SHIP_TYPES; i < index; i++) {
@@ -504,7 +505,7 @@ var Wasm = {};
 		
 		// Calculate the total cost of the ship.
 		shipCalc.cost = Math.floor(Math.pow(shipCalc.cost, 1.1));
-		shipCalc.id = id;
+		shipCalc.id = design.id;
 		return shipCalc;
 	}
 	this.getDataToSend = function() {

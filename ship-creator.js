@@ -3,7 +3,7 @@
 var Creator = {};
 (function() {
 	// Internal to JS
-	let ship = [], designs = [], base = []; 
+	let ship = [], designs = []; 
 	let active = null;
 	
 	// DOM Elements
@@ -15,7 +15,7 @@ var Creator = {};
 	
 	function initializeCreator() {
 		// Load references to DOM elements from the HTML.
-		for (let i = 0; true; i++) {
+		for (let i = 0; i < SHIP_TYPES; i++) {
 			let s = document.getElementById("ship" + i + "-template");
 			if (!s) break;
 			ship[i] = s;
@@ -31,15 +31,6 @@ var Creator = {};
 			abilityIcons[i].removeAttribute("id");
 			abilityIcons[i].removeChild(abilityIcons[i].firstChild);
 			abilityIcons[i].removeChild(abilityIcons[i].lastChild);
-		}
-		for (let i = 0; true; i++) {
-			let b = document.getElementById("base" + i + "-template");
-			if (!b) break;
-			base[i] = b;
-			base[i].removeAttribute("id");
-			base[i].removeChild(base[i].firstChild);
-			base[i].removeChild(base[i].lastChild);
-			base[i].dataset.hullClass = i;
 		}
 		players = document.getElementById("players");
 		shipDetails = document.getElementById("ship-detail-template");
@@ -65,6 +56,17 @@ var Creator = {};
 			hulls.append(newShipDetail);
 		});
 		
+		// Add bases to the ship list late; they shouldn't be selectable as options for hulls.
+		for (let i = SHIP_TYPES; i < SHIP_TYPES + BASE_TYPES; i++) {
+			let b = document.getElementById("ship" + i + "-template");
+			if (!b) break;
+			ship[i] = b;
+			ship[i].removeAttribute("id");
+			ship[i].removeChild(ship[i].firstChild);
+			ship[i].removeChild(ship[i].lastChild);
+			ship[i].dataset.hullClass = i;
+		}
+		
 		// Populate the player's ship list
 		for (let i = 0; i < SHIP_TYPES; i++){
 			let newShipDetail = shipDetails.cloneNode(true);
@@ -72,21 +74,21 @@ var Creator = {};
 			newShipDetail.onclick = () => {activate(i)};
 			shipList.append(newShipDetail);
 			hanger[i] = newShipDetail;
-			calculateShip(i);
 		}
 		
-		// Populate the base list
-		base.forEach(b => {
-			let newBaseDetail = shipDetails.cloneNode(true);
-			let baseClass = Wasm.getBaseHullClass(b.dataset.hullClass);
-			let hangerNumber = +b.dataset.hullClass + SHIP_TYPES;
-			baseClass.cost = Math.floor(Math.pow(baseClass.cost, 1.1));
-			newBaseDetail.onclick = () => {activate(hangerNumber)};
-			designs[hangerNumber] = {hullClass: +b.dataset.hullClass, parts: [], abilities: [], isBase: true};
-			hanger[hangerNumber] = newBaseDetail;
-			updateBase(newBaseDetail, baseClass);
-			baseList.append(newBaseDetail);
-		});
+		// Populate the player's base list
+		for (let i = SHIP_TYPES; i < SHIP_TYPES + BASE_TYPES; i++){
+			let newShipDetail = shipDetails.cloneNode(true);
+			designs[i] = {hullClass: i, parts: [], abilities: [], isBase: true};
+			newShipDetail.onclick = () => {activate(i)};
+			baseList.append(newShipDetail);
+			hanger[i] = newShipDetail;
+		}
+		
+		// Calculate the lists' values
+		for (let i = 0; i < SHIP_TYPES + BASE_TYPES; i++){
+			calculateShip(i);
+		}
 		
 		// Populate the available parts list
 		let nextPart;
@@ -144,79 +146,15 @@ var Creator = {};
 		target.getElementsByClassName("cost")[0].innerHTML = shipValues.cost ? shipValues.cost : "";
 		target.getElementsByClassName("ability-bar")[0].innerHTML = "";
 		shipValues.abilities.forEach(a => {
-			target.getElementsByClassName("ability-bar")[0].append(abilityIcons[a.index].cloneNode(true));
+			target.getElementsByClassName("ability-bar")[0].append(abilityIcons[a].cloneNode(true));
 		});
-	}
-	
-	function updateBase(target, baseValues) {
-		target.getElementsByClassName("image")[0].innerHTML = "";
-		target.getElementsByClassName("image")[0].append(base[baseValues.level].cloneNode(true));
-		target.getElementsByClassName("power")[0].innerHTML = baseValues.power;
-		target.getElementsByClassName("max-hull")[0].innerHTML = baseValues.maxHull;
-		target.getElementsByClassName("shield")[0].innerHTML = baseValues.shield;
-		target.getElementsByClassName("repair")[0].innerHTML = baseValues.repair;
-		target.getElementsByClassName("cost")[0].innerHTML = baseValues.cost ? baseValues.cost : "";
-		target.getElementsByClassName("ability-bar")[0].innerHTML = "";
-		baseValues.abilities.forEach(a => {
-			target.getElementsByClassName("ability-bar")[0].append(abilityIcons[a.index].cloneNode(true));
-		});
-	}
-	
-	function calculateBase(designNumber) {
-		let baseCalc = Wasm.getBaseHullClass(designs[designNumber].hullClass);
-		for (var i = SHIP_TYPES; i <= designNumber; i++) {
-			designs[i].parts.forEach(p => {
-				let partVals = Wasm.getPartDetails(p);
-				baseCalc.power += partVals.power ? partVals.power : 0;
-				baseCalc.maxHull += partVals.maxHull ? partVals.maxHull : 0;
-				baseCalc.shield += partVals.shield ? partVals.shield : 0;
-				baseCalc.repair += partVals.repair ? partVals.repair : 0;
-				if (i === designNumber) baseCalc.cost += partVals.cost;
-			});
-		}
-		baseCalc.abilities = [];
-		for (var i = SHIP_TYPES; i <= designNumber; i++) {
-			designs[i].abilities.forEach(c => {
-				let abilityVals = Wasm.getAbilityDetails(c);
-				baseCalc.abilities.push({index: c, description: abilityVals.description});
-				baseCalc.power += abilityVals.power ? abilityVals.power : 0;
-				baseCalc.maxHull += abilityVals.maxHull ? abilityVals.maxHull : 0;
-				baseCalc.shield += abilityVals.shield ? abilityVals.shield : 0;
-				baseCalc.repair += abilityVals.repair ? abilityVals.repair : 0;
-				if (i === designNumber) baseCalc.cost += abilityVals.cost;
-			});
-		}
-		
-		// Calculate the total cost of the base.
-		baseCalc.cost = Math.floor(Math.pow(baseCalc.cost, 1.1));
-		updateBase(hanger[designNumber], baseCalc);
-		if (designNumber < SHIP_TYPES + BASE_TYPES - 1) calculateBase(designNumber + 1);
 	}
 	
 	function calculateShip(designNumber) {
-		let shipCalc = Wasm.getHullClass(designs[designNumber].hullClass);
-		designs[designNumber].parts.forEach(p => {
-			let partVals = Wasm.getPartDetails(p);
-			shipCalc.power += partVals.power ? partVals.power : 0;
-			shipCalc.maxHull += partVals.maxHull ? partVals.maxHull : 0;
-			shipCalc.shield += partVals.shield ? partVals.shield : 0;
-			shipCalc.repair += partVals.repair ? partVals.repair : 0;
-			shipCalc.cost += partVals.cost;
-		});
-		shipCalc.abilities = [];
-		designs[designNumber].abilities.forEach(c => {
-			let abilityVals = Wasm.getAbilityDetails(c);
-			shipCalc.abilities.push({index: c, description: abilityVals.description});
-			shipCalc.power += abilityVals.power ? abilityVals.power : 0;
-			shipCalc.maxHull += abilityVals.maxHull ? abilityVals.maxHull : 0;
-			shipCalc.shield += abilityVals.shield ? abilityVals.shield : 0;
-			shipCalc.repair += abilityVals.repair ? abilityVals.repair : 0;
-			shipCalc.cost += abilityVals.cost;
-		});
-		
-		// Calculate the total cost of the ship.
-		shipCalc.cost = Math.floor(Math.pow(shipCalc.cost, 1.1));
-		updateShip(hanger[designNumber], shipCalc);
+		updateShip(hanger[designNumber], Wasm.calculateShip(designNumber, designs));
+		// Calculate base upgrade values at the same time.
+		if (designNumber >= SHIP_TYPES && designNumber < SHIP_TYPES + BASE_TYPES - 1)
+			calculateShip(designNumber + 1);
 	}
 	
 	function activate(hangerNumber) {
@@ -271,7 +209,6 @@ var Creator = {};
 		if (active == null) 
 			return;
 		
-		
 		hullList[designs[active].hullClass].classList.remove("active");
 		hullList[hull].classList.add("active");
 		designs[active].hullClass = hull;
@@ -288,7 +225,7 @@ var Creator = {};
 			designs[active].parts.splice(index, 1);
 			partList[partNumber].classList.remove("active");
 		}
-		active < SHIP_TYPES ? calculateShip(active) : calculateBase(active);
+		calculateShip(active);
 	}
 	
 	function selectAbility(abilityNumber) {
@@ -313,7 +250,7 @@ var Creator = {};
 			designs[active].abilities.splice(index, 1);
 			abilityList[abilityNumber].classList.remove("active");
 		}
-		active < SHIP_TYPES ? calculateShip(active) : calculateBase(active);
+		calculateShip(active);
 	}
 	
 	function expandAbility(ability) {
@@ -332,8 +269,7 @@ var Creator = {};
 	this.loadShips = function(name) {
 		if (!localStorage[name]) name = "default";
 		designs = JSON.parse(localStorage[name].slice(3));
-		for (let i = 0; i < 10; i++) calculateShip(i);
-		for (let i = 10; i < 13; i++) calculateBase(i);
+		for (let i = 0; i < SHIP_TYPES + BASE_TYPES; i++) calculateShip(i);
 		[...document.getElementsByClassName("active")].forEach(node => {
 			node.classList.remove("active");
 		});
