@@ -29,10 +29,10 @@ var Timer = {};
 	this.signalTurnEnd = function() {
 		if (Sidebar.loadedState != 2) return;
 		if (timerCircle.classList.contains("turn-ended")) {
-			Wasm.signalContinueTurn();
+			connection.sendEndTurnSignal();
 			timerCircle.classList.remove("turn-ended");
 		} else {
-			Wasm.signalTurnEnd();
+			connection.sendEndTurnSignal();
 			timerCircle.classList.add("turn-ended");
 		}
 	}
@@ -48,5 +48,10 @@ var Timer = {};
 	
 	this.startGame = function() {
 		timerUpdater = setInterval(updateTimer.bind(this), 250);
+	}
+	
+	// 
+	this.isTurnEnded = function() {
+		return turnTime >= maxTurnTime;
 	}
 }).apply(Timer);

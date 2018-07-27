@@ -165,7 +165,7 @@ var Creator = {};
 			hullList.forEach(i => i.classList.remove("unavailable"));		// on Available Hulls
 			partList.forEach(i => i.classList.remove("active"));			// on Available Parts
 			partList.forEach(i => i.classList.remove("unavailable"));		// on Available Parts
-			abilityList.forEach(i => i.classList.remove("active"));			// on Available Abili
+			abilityList.forEach(i => i.classList.remove("active"));			// on Available Abilities
 			abilityList.forEach(i => i.classList.remove("unavailable"));	// on Available Abilities
 		}
 
@@ -179,10 +179,11 @@ var Creator = {};
 			hanger[active].classList.add("active");
 		
 					// Hulls
-			if (designs[active].isBase)
+			if (designs[active].isBase) {
 				hullList.forEach(i => i.classList.add("unavailable"));
-			else
+			} else {
 				hullList[designs[active].hullClass].classList.add("active");
+			}
 			
 					// Parts
 			partList.forEach(i => {

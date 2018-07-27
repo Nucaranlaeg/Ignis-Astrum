@@ -11,9 +11,10 @@ var Wasm = {};
 	let ships = [], bases = [];
 	let hexes = [], grids = [];
 	let income = 13;
-	const SHIP_TYPES = 10, BASE_TYPES = 4, MAX_ABILITIES = 3;
+	// MAX_SEED is the largest prime such that multiplying two seeds together will still be storable in a JS Number.
+	const SHIP_TYPES = 10, BASE_TYPES = 4, MAX_ABILITIES = 3, MAX_SEED = 2147483629;
 	let incomeValues = {capital: 6, territory: 1, majorPlanets: 4, minorPlanets: 2};
-	let seed = 0;
+	let seed = Math.random();
 	
 	this.getShipTypes = function() {return SHIP_TYPES;}
 	this.getBaseTypes = function() {return BASE_TYPES;}
@@ -243,7 +244,7 @@ var Wasm = {};
 	this.getEmpireTreasury = function() {
 		return grids[this.getHex(0,0).grids[0]].IPCs;
 	}
-	this.signalTurnEnd = function() {
+	this.startNewTurn = function() {
 		window.setTimeout(() => {
 			// Combat
 			Timer.beginNewTurn();
@@ -267,10 +268,7 @@ var Wasm = {};
 		Map.createShip(10, id, true);
 		Sidebar.addShip(newBase);
 		
-		this.signalTurnEnd();
-	}
-	this.signalContinueTurn = function() {
-		return;
+		this.startNewTurn();
 	}
 	this.viewHex = function(y, x) {
 		if (this.getHex(y, x).visible){
@@ -508,8 +506,28 @@ var Wasm = {};
 		shipCalc.id = design.id;
 		return shipCalc;
 	}
+	this.parseIncomingData = function(data) {
+		ships = ships.filter(s => s.allied);
+		enemyShips = data.ships.map(s => {
+			let ship = this.getShipClass(s.hullClass + SHIP_TYPES + BASE_TYPES);
+			ship.currentHull -= s.damage;
+			ship.moveGoal = s.moveGoal;
+			return ship;
+		});
+		ships.concat(enemyShips);
+		seed = (seed * data.seed) % MAX_SEED;
+	}
 	this.getDataToSend = function() {
-		let shipsToSend = ships.filter(s => s.allied);
+		// Formats the information that the opponent doesn't have for sending to the other player's game:
+		// Friendly ship locations and movement.
+		// Also includes a seed so that both rngs are on the same seed.
+		let shipsToSend = ships.filter(s => s.allied).map(s => {
+			return {
+				hullClass: s.hullClass,
+				damage: s.maxHull - s.currentHull,
+				moveGoal: s.moveGoal
+			};
+		});
 		seed = Math.random();
 		return {ships: shipsToSend,
 			seed: seed};
