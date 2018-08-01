@@ -8,10 +8,10 @@
 var Wasm = {};
 (function() {
 	let friendlyDesigns = [], enemyDesigns = [];
-	let ships = [], bases = [];
+	let ships = [];
 	let hexes = [], grids = [];
 	let income = 13;
-	const SHIP_TYPES = 10, BASE_TYPES = 4, MAX_ABILITIES = 3;
+	const SHIP_TYPES = 10, BASE_TYPES = 4, MAX_ABILITIES = 3, SHIPS_IN_COMBAT = 5;
 	let incomeValues = {capital: 6, territory: 1, majorPlanets: 4, minorPlanets: 2};
 	let seed = 0;
 	
@@ -243,11 +243,75 @@ var Wasm = {};
 	this.getEmpireTreasury = function() {
 		return grids[this.getHex(0,0).grids[0]].IPCs;
 	}
+	this.calculateCombat = function() {
+		// This list will be the same regardless of the initial order of the ships.
+		let hexList = ships.map(s => {return {x: s.x, y:s.y, allied: s.allied}})
+			// Sort the ships' locations by x, then y, then whether they're allied
+			.sort((a, b) => a.x - b.x === 0 ? a.y - b.y === 0 ? a.allied ? 1 : -1 : a.y - b.y : a.x - b.x)
+			// Keep one representative of each group.
+			.filter((s, index, array) => index === 0 ? true : ((s.x !== array[index - 1].x) || (s.y !== array[index - 1].y) || s.allied !== array[index - 1].allied))
+			// Remove those hexes without both allied and enemy units.
+			.filter((s, index, array) => s.allied ? array[index + 1] !== undefined ? (s.x === array[index + 1].x) && (s.y === array[index + 1].y) : false
+												  : index > 0 ? (s.x === array[index - 1].x) && (s.y === array[index - 1].y) : false)
+			// Keep only one representative of each hex.
+			.filter(s => s.allied);
+		hexList.forEach(this.battle);
+	}
+	this.battle = function(hex) {
+		let shipsInHex = ships.filter(s => s.x === hex.x && s.y === hex.y);
+		let friendlyBattleLine = this.getBattleLine(shipsInHex.filter(s => s.allied));
+		let enemyBattleLine = this.getBattleLine(shipsInHex.filter(s => !s.allied));
+	}
+	// This function must return the same list regardless of the order of the ships passed in.
+	this.getBattleLine = function(shipList) {
+		let battleLine = [];
+		let basesInHex = shipList.filter(s => s.isBase);
+		let shipsInHex = shipList.filter(s => !s.isBase);
+		if (shipList.length <= SHIPS_IN_COMBAT || (shipList.length === SHIPS_IN_COMBAT + 1 && basesInHex.length !== 0)) return shipList;
+		
+		// Select ships for battle line.
+		if (shipsInHex.length > SHIPS_IN_COMBAT) {
+			// TODO: Implement ship target priority and select (up to) two highest priority ships
+			while (battleLine.length < SHIPS_IN_COMBAT){
+				let currentShipList = shipsInHex;
+				// Current algorithm: Use the ship with the highest power.
+				// If two or more are tied, use the ship with the higher current hull + (shield * 1.01).
+				// If two or more are still tied, use the ship with the higher max hull.
+				let best = currentShipList.map(b => b.power).sort((a, b) => b - a)[0];
+				currentShipList = currentShipList.filter(b => b.power === best);
+				best = currentShipList.map(b => b.currentHull + b.shield * 1.01).sort((a, b) => b - a)[0];
+				currentShipList = currentShipList.filter(b => b.currentHull + b.shield * 1.01 === best);
+				best = currentShipList.map(b => b.maxHull).sort((a, b) => b - a)[0];
+				currentShipList = currentShipList.filter(b => b.maxHull === best);
+				// Pick the lower id if two ships are otherwise identical.
+				currentShipList = currentShipList.sort((a, b) => a.id - b.id);
+				battleLine.push(currentShipList[0]);
+				// Don't pick the same ship twice.
+				shipsInHex = shipsInHex.filter(s => s.id !== currentShipList[0].id);
+			}
+		} else {
+			battleLine = shipsInHex;
+		}
+		
+		// Select base.  At this point, there is no possibility of multiple bases being in the battle line.
+		if (basesInHex.length > 0) {
+			// Current algorithm: Use the base with the highest current hull.
+			// If two or more are tied, use the one with the higher max hull.
+			let best = basesInHex.map(b => b.currentHull).sort((a, b) => b - a)[0];
+			basesInHex = basesInHex.filter(b => b.currentHull === best);
+			best = basesInHex.map(b => b.maxHull).sort((a, b) => b - a)[0];
+			basesInHex = basesInHex.filter(b => b.maxHull === best);
+			// Pick the lower id if two bases are otherwise identical.
+			basesInHex = basesInHex.sort((a, b) => a.id - b.id)
+			battleLine.push(basesInHex[0]);
+		}
+		return battleLine;
+	}
 	this.signalTurnEnd = function() {
 		window.setTimeout(() => {
-			// Combat
 			Timer.beginNewTurn();
 			this.calculateMoves();
+			this.calculateCombat();
 			this.findVisibleHexes();
 			this.computeTerritoryOwnership();
 			this.processIncome();
@@ -442,21 +506,6 @@ var Wasm = {};
 				}
 			});
 		}
-		bases.forEach(base => {
-			if (base.moveGoal) {
-				if (base.allied) {
-					if (![...enemyBaseLocations, ...enemyShipLocations].some(loc => loc.x === base.x && loc.y === base.y)) {
-						base.x = base.moveGoal.x;
-						base.y = base.moveGoal.y;
-					}
-				} else {
-					if (![...friendlyBaseLocations, ...friendlyShipLocations].some(loc => loc.x === base.x && loc.y === base.y)) {
-						base.x = base.moveGoal.x;
-						base.y = base.moveGoal.y;
-					}
-				}
-			}
-		});
 	}
 	this.loadPlayer = function(name) {
 		if (!localStorage[name]) name = "default";
