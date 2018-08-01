@@ -49,13 +49,42 @@ body{
 }
 
 .ability {
-	transition: max-height 0.25s;
-	overflow: hidden;
+	margin-bottom: 4.5px;
+	position: relative;
+}
+
+.ability.open {
+	border-color: var(--dark-border);
+}
+
+.ability.active {
+	margin-bottom: 3.5px;
 }
 
 .description {
     padding: 0 10px 5px;
-    display: inline-block;
+	position: absolute;
+	background: white;
+	top: 28px;
+	left: 13%;
+	opacity: 0;
+	transition: opacity 0.5s;
+	border: 1px solid var(--medium-border);
+	border-top: none;
+	width: 87.5%;
+	z-index: var(--ability-description-z);
+	pointer-events: none;
+}
+
+.ability.active .description {
+	border-width: 2px;
+	margin-left: -1px;
+	width: calc(87.5% + 2px);
+}
+
+.ability.open .description {
+	opacity: 1;
+	border-color: var(--dark-border);
 }
 
 svg.base {
