@@ -14,6 +14,9 @@ var Wasm = {};
 	const SHIP_TYPES = 10, BASE_TYPES = 4, MAX_ABILITIES = 3, SHIPS_IN_COMBAT = 5;
 	let incomeValues = {capital: 6, territory: 1, majorPlanets: 4, minorPlanets: 2};
 	let seed = 0;
+	// A value which lets the game decide who to apply rolls to first.
+	// TODO: Ensure that this is negotiated upon connection
+	let playerOne = true;
 	
 	this.getShipTypes = function() {return SHIP_TYPES;}
 	this.getBaseTypes = function() {return BASE_TYPES;}
@@ -65,6 +68,11 @@ var Wasm = {};
 		newShip.currentHull = newShip.maxHull;
 		ships.push(newShip);
 		return newShip.id;
+	}
+	this.destroyShip = function(id) {
+		destroyed = ships.findIndex(s => s.id === id);
+		if (destroyed === -1) throw "Destroyed ship not found.";
+		ships.splice(destroyed, 1);
 	}
 	this.getHullClass = function(classNumber) {
 		let instance;
@@ -133,7 +141,7 @@ var Wasm = {};
 		if (classNumber < SHIP_TYPES + BASE_TYPES){
 			return JSON.parse(JSON.stringify(friendlyDesigns[classNumber]));
 		} else {
-			return JSON.parse(JSON.stringify(enemyDesigns[classNumber - SHIP_TYPES]));
+			return JSON.parse(JSON.stringify(enemyDesigns[classNumber - SHIP_TYPES - BASE_TYPES]));
 		}
 	}
 	this.getShip = function(id){
@@ -261,6 +269,29 @@ var Wasm = {};
 		let shipsInHex = ships.filter(s => s.x === hex.x && s.y === hex.y);
 		let friendlyBattleLine = this.getBattleLine(shipsInHex.filter(s => s.allied));
 		let enemyBattleLine = this.getBattleLine(shipsInHex.filter(s => !s.allied));
+		
+		let friendlyPower = friendlyBattleLine.reduce((s, val) => {return s.power + val}, 0);
+		let enemyPower = enemyBattleLine.reduce((s, val) => {return s.power + val}, 0);
+		// Apply combat abilities
+		
+		// Ships deal damage somewhere between 30% of their power and 70% of their power.
+		if (playerOne) {
+			friendlyPower = friendlyPower * (0.3 + this.random() * 0.2 + this.random() * 0.2);
+			enemyPower = enemyPower * (0.3 + this.random() * 0.2 + this.random() * 0.2);
+		} else {
+			enemyPower = enemyPower * (0.3 + this.random() * 0.2 + this.random() * 0.2);
+			friendlyPower = friendlyPower * (0.3 + this.random() * 0.2 + this.random() * 0.2);
+		}
+		friendlyPower = friendlyPower < friendlyBattleLine.length ? friendlyBattleLine.length : Math.floor(friendlyPower);
+		enemyPower = enemyPower < enemyBattleLine.length ? enemyBattleLine.length : Math.floor(enemyPower);
+		
+		if (playerOne) {
+			this.dealDamage(friendlyPower, enemyBattleLine);
+			this.dealDamage(enemyPower, friendlyBattleLine);
+		} else {
+			this.dealDamage(enemyPower, friendlyBattleLine);
+			this.dealDamage(friendlyPower, enemyBattleLine);
+		}
 	}
 	// This function must return the same list regardless of the order of the ships passed in.
 	this.getBattleLine = function(shipList) {
@@ -306,6 +337,24 @@ var Wasm = {};
 			battleLine.push(basesInHex[0]);
 		}
 		return battleLine;
+	}
+	this.dealDamage(damage, battleLine) {
+		while (damage > 0 && battleLine.length > 0){
+			let damagedShip = Math.floor(this.random() * battleLine.length);
+			if (battleLine[damagedShip].shield > 0){
+				battleLine[damagedShip].shield--;
+			} else {
+				battleLine[damagedShip].currentHull--;
+				if (battleLine[damagedShip].currentHull === 0){
+					this.destroyShip(battleLine[damagedShip].id);
+					battleLine.splice(damagedShip, 1);
+				}
+			}
+		}
+		// Replenish damaged shields.
+		battleLine.forEach(s => {
+			s.shield = this.getShipClass(s.shipClass + (!s.allied ? SHIP_TYPES + BASE_TYPES : 0)).shield;
+		});
 	}
 	this.signalTurnEnd = function() {
 		window.setTimeout(() => {
