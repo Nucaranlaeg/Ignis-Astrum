@@ -193,7 +193,7 @@ var Map = {};
 	
 	this.moveShips = function() {
 		let traces = [...map.getElementsByClassName("trace")];
-		[...map.getElementsByClassName("ship")].forEach(ship => {
+		[...map.getElementsByClassName("ship"), ...map.getElementsByClassName("base")].forEach(ship => {
 			if (ship.classList.contains("trace")) return;
 			// This should pass in zero to four pairs of coordinates, the closest to the ship first.
 			let shipTraces = traces.filter(trace => trace.name === ship.id)
@@ -230,7 +230,7 @@ var Map = {};
 		
 		// Clean up the traces
 		traces.forEach(trace => trace.remove());
-		[...map.getElementsByClassName("ship")].forEach(ship => ship.name = "");
+		[...map.getElementsByClassName("ship"), ...map.getElementsByClassName("base")].forEach(ship => ship.name = "");
 	};
 	
 	this.createShip = function(hullClass, id, allied, location) {
@@ -300,12 +300,12 @@ var Map = {};
 		// Unsee all hexes.
 		[...map.getElementsByClassName("seen")].forEach(hex => hex.classList.remove("seen"));
 		// Delete all enemy units.
-		[...map.getElementsByClassName("ship")].forEach(ship => {if (!ship.classList.contains("controlled")) ship.remove()});
-		let alliedShips = [...map.getElementsByClassName("ship")].filter(ship => {
+		[...map.getElementsByClassName("ship"), ...map.getElementsByClassName("base")].forEach(ship => {if (!ship.classList.contains("controlled")) ship.remove()});
+		let alliedShips = [...map.getElementsByClassName("ship"), ...map.getElementsByClassName("base")].filter(ship => {
 			return Wasm.getShip(ships[ship.id.slice(4)].DBid).allied;
 		});
 		// Get all the hexes with friendly units.
-		let occupiedHexes = [...map.getElementsByClassName("ship")].filter(ship => {
+		let occupiedHexes = [...map.getElementsByClassName("ship"), ...map.getElementsByClassName("base")].filter(ship => {
 			return Wasm.getShip(ships[ship.id.slice(4)].DBid).allied;
 		}).map(ship => ship.parentNode);
 		// Add all hexes adjacent to scouts.

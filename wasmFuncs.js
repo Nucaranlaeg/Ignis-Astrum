@@ -163,7 +163,8 @@ var Wasm = {};
 			// TODO: Add planet values.
 			hex.grids = [];
 		});
-		let bases = ships.filter(ship => ship.isBase).forEach(base => base.grid = -1) || [];
+		let bases = ships.filter(ship => ship.isBase) || [];
+		bases.forEach(base => base.grid = -1);
 		this.deconstructGrids();
 		grids = [];
 		let gridCount = 0;
@@ -180,6 +181,7 @@ var Wasm = {};
 				gridBases.forEach(base => {
 					thisGrid.bases.push(base.id);
 					thisGrid.IPCs += base.IPCs ? base.IPCs : 0;
+					base.IPCs = 0;
 					let odd = base.y % 2 === 0 ? -1 : 1;
 					thisGrid.hexes.push(this.getHex(base.y, base.x));
 					thisGrid.hexes.push(this.getHex(base.y, base.x - 1));
@@ -214,9 +216,9 @@ var Wasm = {};
 			hex.grids.push(gridCount);
 			gridCount++;
 		});
+		grids.sort((a, b) => a.capitalDistance - b.capitalDistance);
 		income = grids[0].IPCs;
 		grids[0].IPCs += treasury;
-		treasury = grids[0].IPCs;
 		grids.sort((a, b) => a.gridNumber - b.gridNumber);
 	}
 	this.addBaseToGrid = function(sourceBase, grid) {
@@ -338,7 +340,7 @@ var Wasm = {};
 		}
 		return battleLine;
 	}
-	this.dealDamage(damage, battleLine) {
+	this.dealDamage = function(damage, battleLine) {
 		while (damage > 0 && battleLine.length > 0){
 			let damagedShip = Math.floor(this.random() * battleLine.length);
 			if (battleLine[damagedShip].shield > 0){
@@ -555,6 +557,22 @@ var Wasm = {};
 				}
 			});
 		}
+		ships.forEach(base => {
+			if (!base.isBase) return;
+			if (base.moveGoal) {
+				if (base.allied) {
+					if (![...enemyBaseLocations, ...enemyShipLocations].some(loc => loc.x === base.x && loc.y === base.y)) {
+						base.x = base.moveGoal.x;
+						base.y = base.moveGoal.y;
+					}
+				} else {
+					if (![...friendlyBaseLocations, ...friendlyShipLocations].some(loc => loc.x === base.x && loc.y === base.y)) {
+						base.x = base.moveGoal.x;
+						base.y = base.moveGoal.y;
+					}
+				}
+			}
+		});
 	}
 	this.loadPlayer = function(name) {
 		if (!localStorage[name]) name = "default";
