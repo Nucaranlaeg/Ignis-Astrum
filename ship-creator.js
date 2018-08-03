@@ -255,11 +255,11 @@ var Creator = {};
 	}
 	
 	function expandAbility(ability) {
-		ability.style.height = ability.scrollHeight + "px";
+		ability.classList.add("open");
 	}
 	
 	function collapseAbility(ability) {
-		ability.style.height = "30px";
+		ability.classList.remove("open");
 	}
 	
 	this.saveShips = function(name) {

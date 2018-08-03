@@ -22,6 +22,8 @@
 	--menu-border: #999999;
 	--menu-background: #aaaaaa;
 	--light-border: #aaaaaaaa;
+	--medium-border: #777777aa;
+	--dark-border: #333333;
 	
 	--timer-colour: #6fdb6f;
 	--turn-end-timer-colour: #6f6fdb;
@@ -35,4 +37,5 @@
 	--timer-z: 10;
 	--home-z: 10;
 	--context-z: 20;
+	--ability-description-z: 10;
 }
