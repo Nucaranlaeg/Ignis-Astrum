@@ -8,9 +8,19 @@ var Connection = {};
 	let localEndTurn = false, remoteEndTurn = false, sentTurn = false;
 	// Arbitrary channel id.
 	let channelId = 1472;
+	// Connection data.
+	let connectionData;
 	
 	function initializeConnection() {
-		localConnection = new RTCPeerConnection({"iceServers":[]});
+		let configuration = {
+			iceServers: [{urls: "stun:stun1.l.google.com:19302" }]
+		};
+		localConnection = new RTCPeerConnection(configuration);
+		localConnection.createOffer().then((data) => {
+			localConnection.setLocalDescription(data);
+			connectionData = window.prompt("Please input the other player's connectionData.\nYour connectionData:\n\n" + data.sdp.replace(/\n/g, "\\n"))
+			localConnection.setRemoteDescription(connectionData);
+		});
 		channel = localConnection.createDataChannel('sendDataChannel', {negotiated: true, id: channelId});
 	}
 	
