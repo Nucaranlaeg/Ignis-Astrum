@@ -45,7 +45,7 @@ var Utils = {};
 	this.findItem = function(targetHex, x, y) {
 		let items = this.findItems(targetHex, x, y);
 		return items.filter(item => {
-			return item.id.slice(0,4) !== "base" || Wasm.getBase(Map.getBaseDBId(item.id.slice(4))).level !== 0 ? false : true;
+			return Wasm.getShip(Map.getShipDBId(item.id.slice(4))).range != 0;
 		})[0] || items[0];
 	};
 	
@@ -69,11 +69,4 @@ var Utils = {};
 			return Math.max(Math.abs(dx), Math.abs(dy));
 		}
 	};
-	
-	this.ABILITY = Object.freeze({
-		SCOUT: 0,
-		WARP_FIELDS: 1,
-		BOOSTER_PACKS: 2,
-		STABILIZERS: 3,
-	});
 }).apply(Utils);

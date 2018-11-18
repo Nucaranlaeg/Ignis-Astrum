@@ -8,26 +8,17 @@ var Map = {};
 	let initialCoords = {};
 	// Lists of pairs of ids.  First is the map id, second is the database id.
 	// An element is removed from this list if it is not displayed.
-	let bases = [], ships = [], hexes = [];
-	// Count of each element so we can always assign new IDs.
-	let baseCount = 0, shipCount = 0;
+	let ships = [], hexes = [];
+	// Count of ships so we can always assign new IDs.
+	let shipCount = 0;
 	// DOM elements we don't want to keep searching for.
-	let map, row, hex, friendlyCapital, enemyCapital, base = [], ship = [];
-	const BASE_TYPES = Wasm.getBaseTypes();
+	let map, row, hex, friendlyCapital, enemyCapital, ship = [];
 
 	function initializeMap() {
 		// Load references to DOM elements from the HTML.
 		map = document.getElementById("map");
 		row = document.getElementById("row-template");
 		hex = document.getElementById("hex-template");
-		for (let i = 0; true; i++) {
-			let b = document.getElementById("base" + i + "-template");
-			if (!b) break;
-			base[i] = b;
-			base[i].removeAttribute("id");
-			base[i].removeChild(base[i].firstChild);
-			base[i].removeChild(base[i].lastChild);
-		}
 		for (let i = 0; true; i++) {
 			let s = document.getElementById("ship" + i + "-template");
 			if (!s) break;
@@ -83,15 +74,7 @@ var Map = {};
 		let target = Utils.findItem(Utils.findHex(event.clientX, event.clientY), event.clientX, event.clientY);
 		ContextMenu.closeContextMenu();
 		if (target){
-			if (target.classList.contains("base")) {
-				let id = target.id.slice(4);
-				if (Wasm.getBase(Map.getBaseDBId(target.id.slice(4))).level === 0) {
-					if (Ship.dragBase(event, target)) return;
-				}
-			}
-			if (target.classList.contains("ship")) {
-				if (Ship.dragShip(event, target)) return;
-			}
+			if (Ship.dragShip(event, target)) return;
 		}
 		window.addEventListener("mouseup", endDrag, {capture: true, once: true});
 		map.addEventListener("mousemove", continueDrag);
@@ -174,7 +157,7 @@ var Map = {};
 	}
 	
 	function createHex(id) {
-		if (id.substring(0,1) == ".") return;
+		if (id.substring(0,1) === ".") return;
 		hexes.push({id: id, DBid: Wasm.addHex(id)});
 	}
 
@@ -182,27 +165,7 @@ var Map = {};
 		map.scrollTop = friendlyCapital.offsetTop + (friendlyCapital.clientHeight / 2) - (map.clientHeight / 2);
 		map.scrollLeft = friendlyCapital.offsetLeft + (friendlyCapital.clientWidth / 2) - (map.clientWidth / 2);
 	};
-
-	this.getNewBaseId = function(baseId) {
-		let index = bases.findIndex(base => {
-			return base.DBid == baseId;
-		});
-		if (index === -1){
-			bases.push({id: baseCount, DBid: baseId});
-		} else {
-			bases[index].id = baseCount;
-		}
-		return "base" + baseCount++;
-	}
 	
-	this.getBaseDBId = function(baseId) {
-		let targetBase = bases.find(base => {
-			return base.id == baseId;
-		});
-		if (!targetBase) throw "Error: Could not find base with id " + baseId;
-		return targetBase.DBid;
-	}
-
 	this.getNewShipId = function(shipId) {
 		let index = ships.findIndex(ship => {
 			return ship.DBid == shipId;
@@ -219,14 +182,9 @@ var Map = {};
 		let targetShip = ships.find(ship => {
 			return ship.id == shipId;
 		});
-		if (!targetShip) throw "Error: Could not find ship with id " + shipId;
+		if (!targetShip) throw "Error: Could not find unit with id " + shipId;
 		return targetShip.DBid;
 	}
-	
-	this.getBaseNode = function(type) {
-		if (!base[type]) throw "Error: Base of level " + type + " does not exist";
-		return base[type].cloneNode(true);
-	};
 	
 	this.getShipNode = function(hullClass) {
 		if (!ship[hullClass]) throw "Error: Ship of class " + hullClass + " does not exist";
@@ -235,7 +193,7 @@ var Map = {};
 	
 	this.moveShips = function() {
 		let traces = [...map.getElementsByClassName("trace")];
-		[...map.getElementsByClassName("ship")].forEach(ship => {
+		[...map.getElementsByClassName("ship"), ...map.getElementsByClassName("base")].forEach(ship => {
 			if (ship.classList.contains("trace")) return;
 			// This should pass in zero to four pairs of coordinates, the closest to the ship first.
 			let shipTraces = traces.filter(trace => trace.name === ship.id)
@@ -269,18 +227,10 @@ var Map = {};
 					return;
 			}
 		});
-		[...map.getElementsByClassName("base")].forEach(base => {
-			let goal = base.parentNode.id.split('.');
-			if (traces.findIndex(trace => trace.name === base.id) !== -1) {
-				Wasm.moveBase(this.getBaseDBId(base.id.slice(4)), goal[0], goal[1]);
-				return;
-			}
-		});
 		
 		// Clean up the traces
 		traces.forEach(trace => trace.remove());
-		[...map.getElementsByClassName("ship")].forEach(ship => ship.name = "");
-		[...map.getElementsByClassName("base")].forEach(base => base.name = "");
+		[...map.getElementsByClassName("ship"), ...map.getElementsByClassName("base")].forEach(ship => ship.name = "");
 	};
 	
 	this.createShip = function(hullClass, id, allied, location) {
@@ -297,6 +247,10 @@ var Map = {};
 	};
 	
 	this.placeShip = function(movingShip, allied, targetHex) {
+		if (Wasm.getShip(this.getShipDBId(movingShip.id.slice(4))).centralDisplay) {
+			this.placeBase(movingShip, targetHex);
+			return;
+		}
 		movingShip.classList.remove([...movingShip.classList].find(c => {
 			return c.slice(0, 14) === "ship-position-";
 		}));
@@ -313,36 +267,22 @@ var Map = {};
 		} else if (!allied && enemyShipCount < 10 && friendlyShipCount === 0) {
 			movingShip.classList.add("ship-position-" + enemyShipCount - 5);
 		} else {
-			// Place the ship in the hex.
-			movingShip.classList.add("ship-position-" + friendlyShipCount);
-			// Replace ships by class.
-			throw "NotImplementedError: Cannot place ships by class.";
+			// There are too many ships; we'll have to put it in a fleet.
+			throw "NotImplementedError: Cannot stack ships.";
 		}
 		targetHex.append(movingShip);
 	};
 	
-	this.createBase = function(level, id, allied, location) {
-		let targetHex;
-		if (!location) {
-			targetHex = friendlyCapital;
-		} else {
-			targetHex = document.getElementById(location);
-		}
-		let newBase = this.getBaseNode(level);
-		newBase.id = id;
-		if (level == 0) newBase.classList.add("level-0");
-		if (level == 3) newBase.classList.add("level-3");
-		if (allied) newBase.classList.add("controlled");
-		this.placeBase(newBase, allied, targetHex);
+	// This function removes a ship from the map.
+	// If it's an enemy ship, it may not have been destroyed; it may simply be out of vision.
+	this.deleteShip = function(id) {
+		let targetShip = ships.findIndex(b => b.id === id);
+		document.getElementById("ship" + id).remove();
+		ships.splice(targetShip, 1);
 	};
 	
-	this.deleteBase = function(id) {
-		let targetBase = bases.findIndex(b => b.id === id);
-		document.getElementById("base" + id).remove();
-		bases.splice(targetBase, 1);
-	};
-	
-	this.placeBase = function(base, allied, targetHex){
+	this.placeBase = function(base, targetHex){
+		base.classList.add("base");
 		targetHex.append(base);
 	};
 	
@@ -360,21 +300,17 @@ var Map = {};
 		// Unsee all hexes.
 		[...map.getElementsByClassName("seen")].forEach(hex => hex.classList.remove("seen"));
 		// Delete all enemy units.
-		[...map.getElementsByClassName("ship")].forEach(ship => {if (!ship.classList.contains("controlled")) ship.remove()});
-		[...map.getElementsByClassName("base")].forEach(base => {if (!base.classList.contains("controlled")) base.remove()});
-		let alliedShips = [...map.getElementsByClassName("ship")].filter(ship => {
+		[...map.getElementsByClassName("ship"), ...map.getElementsByClassName("base")].forEach(ship => {if (!ship.classList.contains("controlled")) ship.remove()});
+		let alliedShips = [...map.getElementsByClassName("ship"), ...map.getElementsByClassName("base")].filter(ship => {
 			return Wasm.getShip(ships[ship.id.slice(4)].DBid).allied;
 		});
-		// Get all the hexes with friendly ships or bases.
-		let occupiedHexes = [...[...map.getElementsByClassName("ship")].filter(ship => {
+		// Get all the hexes with friendly units.
+		let occupiedHexes = [...map.getElementsByClassName("ship"), ...map.getElementsByClassName("base")].filter(ship => {
 			return Wasm.getShip(ships[ship.id.slice(4)].DBid).allied;
-		}).map(ship => ship.parentNode),
-			...[...map.getElementsByClassName("base")].filter(base => {
-			return Wasm.getBase(bases.find(b => b.id == base.id.slice(4)).DBid).allied;
-		}).map(base => base.parentNode)];
+		}).map(ship => ship.parentNode);
 		// Add all hexes adjacent to scouts.
 		let scoutedHexes = [].concat(...(alliedShips.filter(ship => {
-			return Wasm.getShip(ships[ship.id.slice(4)].DBid).abilities.find(a => a === Utils.ABILITY.SCOUT) !== undefined;
+			return Wasm.getShip(ships[ship.id.slice(4)].DBid).abilities.find(a => a === Wasm.ABILITY.SCOUT) !== undefined;
 		}).map(ship => {
 			return getAdjacentHexes(ship.parentNode);
 		})));
@@ -391,8 +327,7 @@ var Map = {};
 			if (owner === -1) hex.classList.add("red");
 			let units = Wasm.viewHex(...hex.id.split('.'));
 			if (units){
-				units.ships.forEach(ship => this.createShip(ship.hull, this.getNewShipId(ship.id), false, hex.id));
-				units.bases.forEach(base => this.createBase(base.level, this.getNewBaseId(base.id), false, hex.id));
+				units.forEach(ship => this.createShip(ship.hull, this.getNewShipId(ship.id), false, hex.id));
 			}
 		});
 	};

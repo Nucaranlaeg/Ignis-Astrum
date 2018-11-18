@@ -6,7 +6,6 @@ var ContextMenu = {};
 	let menuItems = [], supplyGrid;
 	let shipMenuClick = false;
 	let closeInfoWindow;
-	const BASE_TYPES = Wasm.getBaseTypes();
 	const contextMenuMask = {
 		friendlyShip: [true, false, true, true, false],
 		friendlyShipMenu: [true, false, false, true, false],
@@ -38,7 +37,7 @@ var ContextMenu = {};
 	document.addEventListener("DOMContentLoaded", initializeContextMenu, {once: true});
 
 	function loadContextMenu(event) {
-		let targetMenu = null;
+		let targetMenu;
 		let target;
 		if (shipMenuClick) {
 			shipMenuClick = false;
@@ -72,10 +71,11 @@ var ContextMenu = {};
 		} else {
 			let type = target.id.slice(0, 4);
 			switch (type) {
-				case "base":
-					targetMenu = contextMenuMask.friendlyBase;
-					break;
 				case "ship":
+					if (target.classList.contains("base")){
+						targetMenu = contextMenuMask.friendlyBase;
+						break;
+					}
 					targetMenu = contextMenuMask.friendlyShip;
 					break;
 				case "flet":
@@ -115,31 +115,16 @@ var ContextMenu = {};
 		shipMenu.append(supplyGrid.cloneNode(true));
 		units.forEach(unit => {
 			let node;
-			let type = unit.id.slice(0, 4), id = unit.id.slice(4);
-			switch (type) {
-				case "ship":
-					let ship = Wasm.getShip(Map.getShipDBId(id));
-					ship.id = id;
-					node = Sidebar.createShipNode(ship, "scxm");
-					if (ship.allied) {
-						node.classList.add("friendly");
-					} else {
-						node.classList.add("enemy");
-					}
-					shipMenu.append(node);
-					break;
-				case "base":
-					let base = Wasm.getBase(Map.getBaseDBId(id));
-					base.id = id;
-					node = Sidebar.createBaseNode(base, "bcxm");
-					if (base.allied) {
-						node.classList.add("friendly");
-					} else {
-						node.classList.add("enemy");
-					}
-					shipMenu.append(node);
-					break;
+			let id = unit.id.slice(4);
+			let ship = Wasm.getShip(Map.getShipDBId(id));
+			ship.id = id;
+			node = Sidebar.createShipNode(ship, ship.isBase ? "bxcm" : "scxm");
+			if (ship.allied) {
+				node.classList.add("friendly");
+			} else {
+				node.classList.add("enemy");
 			}
+			shipMenu.append(node);
 		});
 		shipMenu.classList.add("active");
 		shipMenu.style.top = y + "px";
@@ -163,23 +148,20 @@ var ContextMenu = {};
 	};
 	
 	function repairPossible(target) {
-		let type = target.id.slice(0, 4), id = target.id.slice(4);
+        let type = target.id.slice(0, 4), id = target.id.slice(4);
+	    let targetShip;
 		switch (type) {
 			case "ship":
-				let targetShip = Wasm.getShip(Map.getShipDBId(id));
+				targetShip = Wasm.getShip(Map.getShipDBId(id));
 				if (targetShip.currentHull === targetShip.maxHull) return false;
 				break;
-			case "base":
-				let targetBase = Wasm.getBase(Map.getBaseDBId(id));
-				if (targetBase.currentHull === targetBase.maxHull) return false;
-				break;
 			case "scxm":
-				let targetCShip = Wasm.getShip(Map.getBaseDBId(id));
-				if (targetCShip.currentHull === targetCShip.maxHull) return false;
+				targetShip = Wasm.getShip(Map.getShipDBId(id));
+				if (targetShip.currentHull === targetShip.maxHull) return false;
 				break;
 			case "bcxm":
-				let targetCBase = Wasm.getBase(Map.getBaseDBId(id));
-				if (targetCBase.currentHull === targetCBase.maxHull) return false;
+				targetShip = Wasm.getShip(Map.getShipDBId(id));
+				if (targetShip.currentHull === targetShip.maxHull) return false;
 				break;
 			default:
 				return false;
@@ -189,13 +171,13 @@ var ContextMenu = {};
 	
 	function upgradePossible(target) {
 		if ([...document.getElementsByClassName("trace")].some(trace => trace.name == target.id)) return;
-		let type = target.id.slice(0, 4), id = target.id.slice(4);
-		let targetBase = Wasm.getBase(Map.getBaseDBId(id));
-		if (targetBase.level === BASE_TYPES - 1) return false;
-		let upgradedBase = Wasm.getBaseClass(targetBase.level + 1);
+		let id = target.id.slice(4);
+		let targetBase = Wasm.getShip(Map.getShipDBId(id));
+		if (!targetBase.upgradeable) return false;
+		let upgradedBase = Wasm.getShipClass(targetBase.upgradeTo);
 		upgradedBase.currentHull = upgradedBase.maxHull - targetBase.maxHull + targetBase.currentHull;
 		upgradedBase.id = id;
-		let node = Sidebar.createBaseNode(upgradedBase, "bcxm");
+		let node = Sidebar.createShipNode(upgradedBase, "bupm");
 		node.getElementsByClassName("cost")[0].innerHTML = "";
 		node.classList.add("friendly");
 		node.setAttribute("onclick", "ContextMenu.closeContextMenu(); Empire.upgradeBase(" + id + "); Sidebar.updateSelectedHex('" + target.parentNode.id + "')");
