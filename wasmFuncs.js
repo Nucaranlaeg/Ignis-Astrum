@@ -11,9 +11,9 @@ var Wasm = {};
 	let ships = [];
 	let hexes = [], grids = [];
 	let income = 13;
-	const SHIP_TYPES = 10, BASE_TYPES = 4, MAX_ABILITIES = 3, SHIPS_IN_COMBAT = 5;
+	const SHIP_TYPES = 10, BASE_TYPES = 4, MAX_ABILITIES = 3;
 	let incomeValues = {capital: 6, territory: 1, majorPlanets: 4, minorPlanets: 2};
-	let seed = 0;
+	let seed = Math.random();
 	// A value which lets the game decide who to apply rolls to first.
 	// TODO: Ensure that this is negotiated upon connection
 	let playerOne = true;
@@ -253,7 +253,7 @@ var Wasm = {};
 	this.getEmpireTreasury = function() {
 		return grids[this.getHex(0,0).grids[0]].IPCs;
 	}
-	this.calculateCombat = function() {
+	this.startNewTurn = function() {
 		// This list will be the same regardless of the initial order of the ships.
 		let hexList = ships.map(s => {return {x: s.x, y:s.y, allied: s.allied}})
 			// Sort the ships' locations by x, then y, then whether they're allied
@@ -358,7 +358,7 @@ var Wasm = {};
 			s.shield = this.getShipClass(s.shipClass + (!s.allied ? SHIP_TYPES + BASE_TYPES : 0)).shield;
 		});
 	}
-	this.signalTurnEnd = function() {
+	this.signalTrunEnd = function() {
 		window.setTimeout(() => {
 			Timer.beginNewTurn();
 			this.calculateMoves();
@@ -382,10 +382,7 @@ var Wasm = {};
 		Map.createShip(10, id, true);
 		Sidebar.addShip(newBase);
 		
-		this.signalTurnEnd();
-	}
-	this.signalContinueTurn = function() {
-		return;
+		this.startNewTurn();
 	}
 	this.viewHex = function(y, x) {
 		if (this.getHex(y, x).visible){
@@ -624,8 +621,28 @@ var Wasm = {};
 		shipCalc.id = design.id;
 		return shipCalc;
 	}
+	this.parseIncomingData = function(data) {
+		ships = ships.filter(s => s.allied);
+		enemyShips = data.ships.map(s => {
+			let ship = this.getShipClass(s.hullClass + SHIP_TYPES + BASE_TYPES);
+			ship.currentHull -= s.damage;
+			ship.moveGoal = s.moveGoal;
+			return ship;
+		});
+		ships.concat(enemyShips);
+		seed = (seed * data.seed) % MAX_SEED;
+	}
 	this.getDataToSend = function() {
-		let shipsToSend = ships.filter(s => s.allied);
+		// Formats the information that the opponent doesn't have for sending to the other player's game:
+		// Friendly ship locations and movement.
+		// Also includes a seed so that both rngs are on the same seed.
+		let shipsToSend = ships.filter(s => s.allied).map(s => {
+			return {
+				hullClass: s.hullClass,
+				damage: s.maxHull - s.currentHull,
+				moveGoal: s.moveGoal
+			};
+		});
 		seed = Math.random();
 		return {ships: shipsToSend,
 			seed: seed};
