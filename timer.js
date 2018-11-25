@@ -29,10 +29,10 @@ var Timer = {};
 	this.signalTurnEnd = function() {
 		if (Sidebar.loadedState != 2) return;
 		if (timerCircle.classList.contains("turn-ended")) {
-			connection.sendEndTurnSignal();
+			Connection.sendEndTurnSignal(false);
 			timerCircle.classList.remove("turn-ended");
 		} else {
-			connection.sendEndTurnSignal();
+			Connection.sendEndTurnSignal(true);
 			timerCircle.classList.add("turn-ended");
 		}
 	}

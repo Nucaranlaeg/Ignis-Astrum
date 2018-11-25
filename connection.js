@@ -16,15 +16,30 @@ var Connection = {};
 			iceServers: [{urls: "stun:stun1.l.google.com:19302" }]
 		};
 		localConnection = new RTCPeerConnection(configuration);
+		localConnection.onicecandidate = onIce;
 		localConnection.createOffer().then((data) => {
+			console.log(data);
 			localConnection.setLocalDescription(data);
-			connectionData = window.prompt("Please input the other player's connectionData.\nYour connectionData:\n\n" + data.sdp.replace(/\n/g, "\\n"))
-			localConnection.setRemoteDescription(connectionData);
 		});
 		channel = localConnection.createDataChannel('sendDataChannel', {negotiated: true, id: channelId});
+		console.log(channel);
+		channel.onopen = (...e) => console.log("OPEN!", e);
+		channel.onmessage = recieveData;
 	}
 	
 	document.addEventListener("DOMContentLoaded", initializeConnection.bind(this), {once: true});
+	
+	// Completes the DP connection.
+	function onIce(data) {
+		if (!data.candidate){
+			console.log(data, localConnection);
+			let sdp = localConnection.localDescription.sdp;
+			let connectionData = window.prompt("Please input the other player's connectionData.\nYour connectionData:\n\n" + sdp.replace(/\n/g, "\\n").replace("actpass", "active"));
+			connectionData = connectionData.split("\\n").map(s => s.trim()).join('\n');
+			console.log(connectionData);
+			localConnection.setRemoteDescription(new RTCSessionDescription({type: "answer", sdp: connectionData}));
+		}
+	}
 	
 	// Use this to notify the remote game that the local game is ready to end the turn.
 	this.sendEndTurnSignal = function(isEndTurn) {

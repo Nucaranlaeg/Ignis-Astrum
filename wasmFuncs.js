@@ -58,6 +58,7 @@ var Wasm = {};
 	}
 	this.addShip = function(classNumber){
 		let newShip = this.getShipClass(classNumber);
+		console.log(this.getHex(0,0));
 		let treasury = grids[this.getHex(0,0).grids[0]].IPCs;
 		if (newShip.cost > treasury) return -1;
 		grids[this.getHex(0,0).grids[0]].IPCs = Math.round(treasury - newShip.cost);
@@ -253,7 +254,7 @@ var Wasm = {};
 	this.getEmpireTreasury = function() {
 		return grids[this.getHex(0,0).grids[0]].IPCs;
 	}
-	this.startNewTurn = function() {
+	this.calculateCombat = function() {
 		// This list will be the same regardless of the initial order of the ships.
 		let hexList = ships.map(s => {return {x: s.x, y:s.y, allied: s.allied}})
 			// Sort the ships' locations by x, then y, then whether they're allied
@@ -358,7 +359,7 @@ var Wasm = {};
 			s.shield = this.getShipClass(s.shipClass + (!s.allied ? SHIP_TYPES + BASE_TYPES : 0)).shield;
 		});
 	}
-	this.signalTrunEnd = function() {
+	this.computeEndTurn = function() {
 		window.setTimeout(() => {
 			Timer.beginNewTurn();
 			this.calculateMoves();
@@ -382,7 +383,7 @@ var Wasm = {};
 		Map.createShip(10, id, true);
 		Sidebar.addShip(newBase);
 		
-		this.startNewTurn();
+		this.computeEndTurn();
 	}
 	this.viewHex = function(y, x) {
 		if (this.getHex(y, x).visible){
